@@ -33,11 +33,13 @@ class KywardDatabase {
     try {
       const users = this.getUsers();
       if (users[userData.email]) {
-        return { success: false, error: 'User already exists' };
+        return { success: false, message: 'An account with this email already exists.' };
       }
+      // Hash the password before storing
+      const passwordHash = hashPassword(userData.password);
       const newUser = {
         email: userData.email,
-        passwordHash: userData.passwordHash,
+        passwordHash: passwordHash,
         subscriptionLevel: 'free',
         assessments: [],
         createdAt: new Date().toISOString(),
@@ -49,7 +51,7 @@ class KywardDatabase {
       localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
       return { success: true, user: this.sanitizeUser(newUser) };
     } catch (error) {
-      return { success: false, error: 'Failed to create user' };
+      return { success: false, message: 'Failed to create account. Please try again.' };
     }
   }
 
@@ -100,6 +102,49 @@ class KywardDatabase {
     const sessions = this.getSessions();
     delete sessions[sessionToken];
     localStorage.setItem(this.SESSIONS_KEY, JSON.stringify(sessions));
+  }
+
+  login(email, password) {
+    try {
+      const user = this.getUserWithPassword(email);
+      if (!user) {
+        return { success: false, message: 'User not found. Please sign up first.' };
+      }
+      const hashedPassword = hashPassword(password);
+      if (user.passwordHash !== hashedPassword) {
+        return { success: false, message: 'Incorrect password. Please try again.' };
+      }
+      const token = this.createSession(email);
+      return { success: true, user: this.sanitizeUser(user), token };
+    } catch (error) {
+      return { success: false, message: 'Login failed. Please try again.' };
+    }
+  }
+
+  // Check if user exists (for password reset)
+  userExists(email) {
+    const users = this.getUsers();
+    return !!users[email];
+  }
+
+  // Reset password
+  resetPassword(email, newPassword) {
+    try {
+      const users = this.getUsers();
+      if (!users[email]) {
+        return { success: false, message: 'User not found.' };
+      }
+      users[email].passwordHash = hashPassword(newPassword);
+      localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
+      return { success: true, message: 'Password reset successfully.' };
+    } catch (error) {
+      return { success: false, message: 'Failed to reset password.' };
+    }
+  }
+
+  // Get user usage status (for Dashboard)
+  getUserUsageStatus(email) {
+    return this.canTakeAssessment(email);
   }
 
   canTakeAssessment(email) {

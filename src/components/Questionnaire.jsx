@@ -239,70 +239,164 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
 
   const currentQ = questions[currentQuestion];
   const progress = ((currentQuestion + 1) / questions.length) * 100;
-  const isAnswered = currentQ.type === 'checkbox' ? 
-    (answers[currentQ.id] && answers[currentQ.id].length > 0) : 
+  const progressPercent = Math.round(progress);
+  const isAnswered = currentQ.type === 'checkbox' ?
+    (answers[currentQ.id] && answers[currentQ.id].length > 0) :
     !!answers[currentQ.id];
+
+  // Check if option is selected
+  const isOptionSelected = (optionValue) => {
+    if (currentQ.type === 'checkbox') {
+      return (answers[currentQ.id] || []).includes(optionValue);
+    }
+    return answers[currentQ.id] === optionValue;
+  };
 
   return (
     <div style={styles.dashContainer}>
       <div style={styles.questionnaireContainer}>
-        {error && <div style={{color: '#ff4444', marginBottom: '20px', textAlign: 'center'}}>{error}</div>}
-        
-        <div style={styles.progressBar}>
-          <div style={{...styles.progressFill, width: `${progress}%`}} />
-        </div>
-        
-        <div style={styles.questionCard}>
-          <h2 style={styles.questionTitle}>{currentQ.question}</h2>
-          <div style={styles.optionsContainer}>
-            {currentQ.options.map(option => (
-              <div key={option.value} style={styles.optionItem}>
-                <label style={styles.optionLabel}>
-                  <input
-                    type={currentQ.type}
-                    name={currentQ.id}
-                    value={option.value}
-                    checked={currentQ.type === 'checkbox' ? 
-                      (answers[currentQ.id] || []).includes(option.value) :
-                      answers[currentQ.id] === option.value
-                    }
-                    onChange={(e) => handleAnswerChange(currentQ.id, option.value, currentQ.type === 'checkbox')}
-                    style={styles.optionInput}
-                  />
-                  <span style={styles.optionText}>{option.label}</span>
-                </label>
-              </div>
+        {error && <div style={styles.errorBox}>{error}</div>}
+
+        {/* Enhanced Progress Section */}
+        <div style={styles.progressSection}>
+          <div style={styles.progressHeader}>
+            <span style={styles.progressLabel}>Question {currentQuestion + 1} of {questions.length}</span>
+            <span style={styles.progressPercentage}>{progressPercent}% Complete</span>
+          </div>
+          <div style={styles.progressBar}>
+            <div style={{...styles.progressFill, width: `${progress}%`}} />
+          </div>
+          {/* Progress dots */}
+          <div style={styles.progressSteps}>
+            {questions.map((_, idx) => (
+              <div
+                key={idx}
+                style={{
+                  ...styles.progressDot,
+                  ...(idx < currentQuestion ? styles.progressDotCompleted : {}),
+                  ...(idx === currentQuestion ? styles.progressDotActive : {})
+                }}
+              />
             ))}
+          </div>
+        </div>
+
+        {/* Question Card with Glow */}
+        <div style={styles.questionCard}>
+          <div style={styles.questionCardGlow} />
+
+          {/* Question Number Badge */}
+          <div style={styles.questionNumber}>
+            {currentQ.type === 'checkbox' ? '☑ Select all that apply' : `Question ${currentQuestion + 1}`}
+          </div>
+
+          <h2 style={styles.questionTitle}>{currentQ.question}</h2>
+
+          <div style={styles.optionsContainer}>
+            {currentQ.options.map(option => {
+              const selected = isOptionSelected(option.value);
+              return (
+                <div
+                  key={option.value}
+                  className={`option-item ${selected ? 'selected' : ''}`}
+                  style={{
+                    ...styles.optionItem,
+                    ...(selected ? styles.optionItemSelected : {})
+                  }}
+                  onClick={() => handleAnswerChange(currentQ.id, option.value, currentQ.type === 'checkbox')}
+                >
+                  {/* Glow bar on left */}
+                  <div style={{
+                    ...styles.optionGlow,
+                    ...(selected ? styles.optionGlowActive : {})
+                  }} />
+
+                  <label style={styles.optionLabel} onClick={(e) => e.stopPropagation()}>
+                    {/* Hidden input */}
+                    <input
+                      type={currentQ.type}
+                      name={currentQ.id}
+                      value={option.value}
+                      checked={selected}
+                      onChange={() => handleAnswerChange(currentQ.id, option.value, currentQ.type === 'checkbox')}
+                      style={styles.optionInput}
+                    />
+
+                    {/* Custom Radio/Checkbox */}
+                    {currentQ.type === 'radio' ? (
+                      <div style={{
+                        ...styles.optionRadio,
+                        ...(selected ? styles.optionRadioSelected : {})
+                      }}>
+                        <div style={{
+                          ...styles.optionRadioInner,
+                          ...(selected ? styles.optionRadioInnerSelected : {})
+                        }} />
+                      </div>
+                    ) : (
+                      <div style={{
+                        ...styles.optionCheckbox,
+                        ...(selected ? styles.optionCheckboxSelected : {})
+                      }}>
+                        <span style={{
+                          ...styles.optionCheckmark,
+                          ...(selected ? styles.optionCheckmarkSelected : {})
+                        }}>✓</span>
+                      </div>
+                    )}
+
+                    <span style={{
+                      ...styles.optionText,
+                      ...(selected ? styles.optionTextSelected : {})
+                    }}>
+                      {option.label}
+                    </span>
+                  </label>
+                </div>
+              );
+            })}
           </div>
 
           <div style={styles.questionButtons}>
             {currentQuestion > 0 && (
-              <button onClick={() => setCurrentQuestion(currentQuestion - 1)} style={styles.prevButton}>
+              <button
+                className="prev-button"
+                onClick={() => setCurrentQuestion(currentQuestion - 1)}
+                style={styles.prevButton}
+              >
                 ← Previous
               </button>
             )}
             <div style={{flex: 1}} />
             {currentQuestion < questions.length - 1 ? (
-              <button 
-                onClick={() => isAnswered && setCurrentQuestion(currentQuestion + 1)} 
-                style={{...styles.nextButton, ...(isAnswered ? {} : {opacity: 0.5, cursor: 'not-allowed'})}}
+              <button
+                onClick={() => isAnswered && setCurrentQuestion(currentQuestion + 1)}
+                style={{
+                  ...styles.nextButton,
+                  ...(isAnswered ? {} : styles.nextButtonDisabled)
+                }}
                 disabled={!isAnswered}
               >
                 Next →
               </button>
             ) : (
-              <button 
-                onClick={handleSubmit} 
-                style={{...styles.submitButton, ...(loading ? {opacity: 0.6} : {})}}
+              <button
+                onClick={handleSubmit}
+                style={{...styles.submitButton, ...(loading || !isAnswered ? {opacity: 0.6} : {})}}
                 disabled={loading || !isAnswered}
               >
-                {loading ? 'Calculating...' : 'Get My Score'}
+                {loading ? 'Calculating...' : 'Get My Score ✓'}
               </button>
             )}
           </div>
         </div>
-        <button onClick={onCancel} style={{...styles.logoutBtn, marginTop: '20px', width: '100%'}}>
-           Cancel Assessment
+
+        <button
+          className="cancel-button"
+          onClick={onCancel}
+          style={styles.cancelButton}
+        >
+          Cancel Assessment
         </button>
       </div>
     </div>
