@@ -1,0 +1,21 @@
+{
+  "name": "kyward-backend",
+  "version": "1.0.0",
+  "description": "Kyward Bitcoin Security API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "bitcoinjs-lib": "^6.1.5",
+    "bip32": "^4.0.0",
+    "tiny-secp256k1": "^2.2.3",
+    "bs58check": "^3.0.1",
+    "nodemailer": "^6.9.7",
+    "uuid": "^9.0.0"
+  }
+}

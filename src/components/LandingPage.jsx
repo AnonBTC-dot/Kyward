@@ -81,7 +81,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
             <div style={styles.mockupContent}>
               <div style={styles.mockupTitle}>Your Security Score</div>
               <div style={styles.mockupScoreContainer}>
-                <svg width="x" height="120" viewBox="0 0 120 120">
+                <svg width="120" height="120" viewBox="0 0 120 120">
                   <circle cx="60" cy="60" r="54" fill="none" stroke="#2A2A2A" strokeWidth="8"/>
                   <circle 
                     cx="60" cy="60" r="54" 
@@ -294,7 +294,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
         <div style={styles.pricingSectionGlow} />
         <div style={styles.sectionContent}>
           <h2 style={styles.sectionTitle}>Simple, Honest Pricing</h2>
-          <p style={styles.sectionSubtitle}>No hidden fees. No surprises. Just honest pricing for honest security.</p>
+          <p style={styles.sectionSubtitle}>No hidden fees. No subscriptions. Pay once, own forever.</p>
           <div style={styles.pricingGrid}>
             {/* Free Plan */}
             <div className="pricing-card" style={styles.pricingCard}>
@@ -303,58 +303,103 @@ const LandingPage = ({ onLogin, onSignup }) => {
                 <div className="floating-element-slow" style={{...styles.pricingFloatingElement, width: '50px', height: '35px', top: '20px', right: '30px', '--rotate': '8deg'}} />
                 <div className="floating-element" style={{...styles.pricingFloatingElement, width: '35px', height: '35px', bottom: '10px', left: '25px', borderRadius: '50%'}} />
                 <div style={styles.pricingBadge}>FREE FOREVER</div>
-                <h3 style={styles.pricingTitle}>Free Plan</h3>
-                <div style={styles.pricingPrice}>$0<span style={styles.pricingPeriod}>/forever</span></div>
+                <h3 style={styles.pricingTitle}>Starter</h3>
+                <div style={styles.pricingPrice}>$0<span style={styles.pricingPeriod}></span></div>
               </div>
               <div style={styles.pricingCardBody}>
                 <ul style={styles.pricingFeatures}>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    1 assessment per month
+                    Full security questionnaire
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Basic security score
+                    Security score (0-100)
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Simple recommendations
+                    3 basic security tips
+                  </li>
+                  <li style={styles.pricingFeature}>
+                    <span style={{...styles.pricingFeatureIcon, backgroundColor: 'rgba(107,114,128,0.15)', color: '#6b7280'}}>-</span>
+                    <span style={{color: '#6b7280'}}>Full action plan locked</span>
                   </li>
                 </ul>
                 <button onClick={onSignup} style={styles.pricingButton}>Start Free</button>
               </div>
             </div>
 
-            {/* Premium Plan */}
+            {/* Complete Plan - $10 */}
             <div className="pricing-card-featured" style={{...styles.pricingCard, ...styles.pricingCardFeatured}}>
               <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBgFeatured}}>
                 <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowFeatured}} />
                 <div className="floating-element" style={{...styles.pricingFloatingElement, width: '55px', height: '40px', top: '15px', right: '25px', '--rotate': '-10deg'}} />
                 <div className="floating-element-slow" style={{...styles.pricingFloatingElement, width: '40px', height: '40px', bottom: '15px', left: '20px', borderRadius: '50%'}} />
-                <div style={{...styles.pricingBadge, ...styles.pricingBadgeFeatured}}>MOST POPULAR</div>
-                <h3 style={styles.pricingTitle}>Premium</h3>
-                <div style={{...styles.pricingPrice, ...styles.pricingPriceFeatured}}>$4.99<span style={styles.pricingPeriod}>/month</span></div>
+                <div style={{...styles.pricingBadge, ...styles.pricingBadgeFeatured}}>BEST VALUE</div>
+                <h3 style={styles.pricingTitle}>Complete</h3>
+                <div style={{...styles.pricingPrice, ...styles.pricingPriceFeatured}}>$10<span style={styles.pricingPeriod}> one-time</span></div>
               </div>
               <div style={styles.pricingCardBody}>
                 <ul style={styles.pricingFeatures}>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Unlimited assessments
+                    Everything in Starter
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Advanced security analysis
+                    All security tips unlocked
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Historical tracking
+                    Personalized action plan
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Priority support
+                    PDF report with password
+                  </li>
+                  <li style={styles.pricingFeature}>
+                    <span style={styles.pricingFeatureIcon}>✓</span>
+                    Unlimited re-assessments
                   </li>
                 </ul>
-                <button onClick={onSignup} style={styles.pricingButtonFeatured}>Get Premium</button>
+                <button onClick={onSignup} style={styles.pricingButtonFeatured}>Get Complete Plan</button>
+              </div>
+            </div>
+
+            {/* Pro Consultation - $100 */}
+            <div className="pricing-card" style={{...styles.pricingCard, ...styles.pricingCardPro}}>
+              <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBgPro}}>
+                <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowPro}} />
+                <div className="floating-element-slow" style={{...styles.pricingFloatingElement, width: '45px', height: '45px', top: '18px', right: '28px', '--rotate': '12deg'}} />
+                <div className="floating-element" style={{...styles.pricingFloatingElement, width: '38px', height: '30px', bottom: '12px', left: '22px', borderRadius: '8px'}} />
+                <div style={{...styles.pricingBadge, ...styles.pricingBadgePro}}>WHITE GLOVE</div>
+                <h3 style={styles.pricingTitle}>Consultation</h3>
+                <div style={{...styles.pricingPrice, ...styles.pricingPricePro}}>$100<span style={styles.pricingPeriod}> one-time</span></div>
+              </div>
+              <div style={styles.pricingCardBody}>
+                <ul style={styles.pricingFeatures}>
+                  <li style={styles.pricingFeature}>
+                    <span style={styles.pricingFeatureIcon}>✓</span>
+                    Everything in Complete
+                  </li>
+                  <li style={styles.pricingFeature}>
+                    <span style={styles.pricingFeatureIcon}>✓</span>
+                    1-on-1 video consultation
+                  </li>
+                  <li style={styles.pricingFeature}>
+                    <span style={styles.pricingFeatureIcon}>✓</span>
+                    Custom inheritance plan
+                  </li>
+                  <li style={styles.pricingFeature}>
+                    <span style={styles.pricingFeatureIcon}>✓</span>
+                    Multi-sig setup guidance
+                  </li>
+                  <li style={styles.pricingFeature}>
+                    <span style={styles.pricingFeatureIcon}>✓</span>
+                    30-day follow-up support
+                  </li>
+                </ul>
+                <button onClick={onSignup} style={styles.pricingButtonPro}>Book Consultation</button>
               </div>
             </div>
           </div>
