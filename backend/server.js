@@ -21,6 +21,21 @@ const PRICES = {
   consultation: 100
 };
 
+// Root route - Mensaje de bienvenida y estado rápido
+app.get('/', (req, res) => {
+  res.send(`
+    <div style="font-family: sans-serif; text-align: center; padding-top: 50px; background: #1a1a1a; color: white; height: 100vh;">
+      <h1 style="color: #F7931A;">Kyward API is Online 🚀</h1>
+      <p>El backend está funcionando correctamente.</p>
+      <div style="margin-top: 20px;">
+        <a href="/api/health" style="color: #F7931A; text-decoration: none; border: 1px solid #F7931A; padding: 10px 20px; border-radius: 5px;">
+          Verificar Estado del Sistema (Health Check)
+        </a>
+      </div>
+    </div>
+  `);
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
