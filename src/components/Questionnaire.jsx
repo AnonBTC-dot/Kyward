@@ -254,7 +254,7 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
 
   return (
     <div style={styles.dashContainer}>
-      <div style={styles.questionnaireContainer}>
+      <div className="questionnaire-container" style={styles.questionnaireContainer}>
         {error && <div style={styles.errorBox}>{error}</div>}
 
         {/* Enhanced Progress Section */}
@@ -282,7 +282,7 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
         </div>
 
         {/* Question Card with Glow */}
-        <div style={styles.questionCard}>
+        <div className="question-card" style={styles.questionCard}>
           <div style={styles.questionCardGlow} />
 
           {/* Question Number Badge */}
@@ -290,7 +290,7 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
             {currentQ.type === 'checkbox' ? '☑ Select all that apply' : `Question ${currentQuestion + 1}`}
           </div>
 
-          <h2 style={styles.questionTitle}>{currentQ.question}</h2>
+          <h2 className="question-title" style={styles.questionTitle}>{currentQ.question}</h2>
 
           <div style={styles.optionsContainer}>
             {currentQ.options.map(option => {
@@ -357,7 +357,7 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
             })}
           </div>
 
-          <div style={styles.questionButtons}>
+          <div className="question-buttons" style={styles.questionButtons}>
             {currentQuestion > 0 && (
               <button
                 className="prev-button"

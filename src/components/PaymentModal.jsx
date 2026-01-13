@@ -227,16 +227,16 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
               </svg>
             </div>
 
-            <h2 style={pms.title}>Pay with Bitcoin</h2>
+            <h2 className="payment-title" style={pms.title}>Pay with Bitcoin</h2>
             <p style={pms.subtitle}>Scan QR code or copy address below</p>
 
             {/* QR Code */}
-            <div style={pms.qrContainer}>
+            <div className="qr-container" style={pms.qrContainer}>
               <QRCode data={paymentData.qrData} size={180} />
             </div>
 
             {/* Amount with USD equivalent */}
-            <div style={pms.amountBox}>
+            <div className="amount-box" style={pms.amountBox}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <span style={pms.amountLabel}>Amount</span>
                 <span style={{ fontSize: '12px', color: '#6b7280' }}>
@@ -293,9 +293,9 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
             </div>
 
             {/* Address */}
-            <div style={pms.addressBox}>
+            <div className="address-box" style={pms.addressBox}>
               <div style={pms.addressLabel}>Bitcoin Address</div>
-              <div style={pms.address}>{paymentData.address}</div>
+              <div className="address-text" style={pms.address}>{paymentData.address}</div>
             </div>
 
             {/* Status */}
@@ -310,20 +310,22 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
             </div>
 
             {/* Copy Button */}
-            <button onClick={handleCopyAddress} style={pms.copyButton}>
-              {copied ? '✓ Copied!' : 'Copy Address'}
-            </button>
-
-            {/* Demo Button (if demo mode) */}
-            {paymentData.demo && (
-              <button onClick={handleDemoPayment} style={pms.demoButton}>
-                Simulate Payment (Demo)
+            <div className="payment-buttons">
+              <button onClick={handleCopyAddress} style={pms.copyButton}>
+                {copied ? '✓ Copied!' : 'Copy Address'}
               </button>
-            )}
 
-            <button onClick={handleClose} style={pms.cancelButton}>
-              Cancel
-            </button>
+              {/* Demo Button (if demo mode) */}
+              {paymentData.demo && (
+                <button onClick={handleDemoPayment} style={pms.demoButton}>
+                  Simulate Payment (Demo)
+                </button>
+              )}
+
+              <button onClick={handleClose} style={pms.cancelButton}>
+                Cancel
+              </button>
+            </div>
           </>
         );
 
@@ -403,8 +405,8 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
   };
 
   return (
-    <div style={pms.overlay} onClick={stage !== 'loading' ? handleClose : undefined}>
-      <div style={pms.modal} onClick={(e) => e.stopPropagation()}>
+    <div className="payment-modal-overlay" style={pms.overlay} onClick={stage !== 'loading' ? handleClose : undefined}>
+      <div className="payment-modal" style={pms.modal} onClick={(e) => e.stopPropagation()}>
         {renderContent()}
       </div>
       <style>{`

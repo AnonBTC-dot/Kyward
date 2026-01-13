@@ -1,9 +1,80 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { kywardDB } from '../services/Database';
 import { styles } from '../styles/Theme';
 import { openPdfPreview } from '../services/PdfGenerator';
 import { previewEmail } from '../services/EmailService';
 import TelegramBlur from './TelegramBlur';
+
+// Daily security tips - rotates based on date
+const DAILY_TIPS = [
+  {
+    title: "Seed Phrase Security",
+    text: "Never share your 24-word seed phrase with anyone, including us. Kyward will never ask for your keys or private information."
+  },
+  {
+    title: "Hardware Wallet Best Practice",
+    text: "Always verify receiving addresses on your hardware wallet's screen before sending Bitcoin. Never trust addresses shown only on your computer."
+  },
+  {
+    title: "Backup Redundancy",
+    text: "Store your seed phrase backup in at least 2 geographically separate locations. Consider using metal backup plates for fire and water resistance."
+  },
+  {
+    title: "Passphrase Protection",
+    text: "Consider using a 25th word (passphrase) with your seed phrase. Store it separately from your seed for maximum security."
+  },
+  {
+    title: "Test Your Recovery",
+    text: "Periodically test your wallet recovery process with a small amount. Better to discover issues now than during an emergency."
+  },
+  {
+    title: "Multisig Security",
+    text: "For significant holdings, consider a 2-of-3 multisig setup. It protects against single points of failure and physical threats."
+  },
+  {
+    title: "Cold Storage Priority",
+    text: "Keep 90%+ of your Bitcoin in cold storage. Only maintain small amounts in hot wallets for regular transactions."
+  },
+  {
+    title: "Address Privacy",
+    text: "Never reuse Bitcoin addresses. Using fresh addresses for each transaction improves your financial privacy significantly."
+  },
+  {
+    title: "Software Updates",
+    text: "Always verify software signatures before updating your wallet. Download only from official sources and check GPG signatures."
+  },
+  {
+    title: "Inheritance Planning",
+    text: "Document your Bitcoin inheritance plan. Your heirs should know how to access your Bitcoin if something happens to you."
+  },
+  {
+    title: "Dedicated Device",
+    text: "Use a dedicated device for Bitcoin transactions. Air-gapped computers provide the highest security for signing transactions."
+  },
+  {
+    title: "UTXO Management",
+    text: "Learn coin control and UTXO management. Consolidate small UTXOs during low-fee periods to save on future transaction costs."
+  },
+  {
+    title: "Security Review",
+    text: "Review your security setup quarterly. Technology and best practices evolve - make sure your setup stays current."
+  },
+  {
+    title: "Phishing Awareness",
+    text: "Be vigilant about phishing attacks. Bookmark official wallet websites and never click links in emails claiming to be from Bitcoin services."
+  },
+  {
+    title: "Physical Security",
+    text: "Consider physical security threats. Don't publicly disclose your Bitcoin holdings, and be cautious about who knows you own Bitcoin."
+  }
+];
+
+// Get daily tip based on current date (changes once per day)
+const getDailyTip = () => {
+  const today = new Date();
+  const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+  return DAILY_TIPS[dayOfYear % DAILY_TIPS.length];
+};
 
 const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport }) => {
   const [copiedPassword, setCopiedPassword] = useState(false);
@@ -106,17 +177,17 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
         <div style={styles.dashboardGlow2} />
         <div style={styles.dashboardGlow3} />
 
-        <div style={styles.dashboardContent}>
+        <div className="dashboard-content" style={styles.dashboardContent}>
           {/* Header Section */}
-          <header style={styles.dashboardHeader}>
+          <header className="dashboard-header" style={styles.dashboardHeader}>
             <div style={styles.dashboardWelcomeBadge}>
               <span style={styles.dashboardBadgeIcon}>🛡️</span>
               Security Dashboard
             </div>
-            <h1 style={styles.dashboardTitle}>
+            <h1 className="dashboard-title" style={styles.dashboardTitle}>
               Welcome back, <span style={styles.dashboardTitleAccent}>Bitcoiner</span>
             </h1>
-            <p style={styles.dashboardSubtitle}>
+            <p className="dashboard-subtitle" style={styles.dashboardSubtitle}>
               {isPremium
                 ? 'Manage your security assessments, download reports, and track your progress.'
                 : 'Take your security assessment and discover how to better protect your Bitcoin.'
@@ -125,7 +196,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
           </header>
 
           {/* Stats Grid */}
-          <div style={styles.dashStatsGrid}>
+          <div className="stats-grid" style={styles.dashStatsGrid}>
             {/* Score Card */}
             <div className="dash-stat-card" style={{...styles.dashStatCard, ...styles.dashStatCardScore}}>
               <div style={{...styles.dashStatCardGlow, ...styles.dashStatCardGlow1}} className="glow-element" />
@@ -256,14 +327,14 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
               </div>
 
               {/* Comparison Stats Row */}
-              <div style={{
+              <div className="comparison-grid" style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: '16px',
                 marginBottom: '20px'
               }}>
                 {/* Your Score */}
-                <div style={{
+                <div className="comparison-card" style={{
                   background: `${lastScore >= 80 ? '#22c55e' : lastScore >= 50 ? '#F7931A' : '#ef4444'}10`,
                   border: `1px solid ${lastScore >= 80 ? '#22c55e' : lastScore >= 50 ? '#F7931A' : '#ef4444'}30`,
                   borderRadius: '12px',
@@ -271,7 +342,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                   textAlign: 'center'
                 }}>
                   <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px' }}>YOU</div>
-                  <div style={{
+                  <div className="comparison-number" style={{
                     fontSize: '28px',
                     fontWeight: '800',
                     color: lastScore >= 80 ? '#22c55e' : lastScore >= 50 ? '#F7931A' : '#ef4444'
@@ -281,7 +352,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                 </div>
 
                 {/* Average */}
-                <div style={{
+                <div className="comparison-card" style={{
                   background: 'rgba(107,114,128,0.1)',
                   border: '1px solid rgba(107,114,128,0.2)',
                   borderRadius: '12px',
@@ -289,13 +360,13 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                   textAlign: 'center'
                 }}>
                   <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px' }}>AVG</div>
-                  <div style={{ fontSize: '28px', fontWeight: '800', color: '#6b7280' }}>
+                  <div className="comparison-number" style={{ fontSize: '28px', fontWeight: '800', color: '#6b7280' }}>
                     {comparison.averageScore}
                   </div>
                 </div>
 
                 {/* Percentile */}
-                <div style={{
+                <div className="comparison-card" style={{
                   background: 'rgba(168,85,247,0.1)',
                   border: '1px solid rgba(168,85,247,0.2)',
                   borderRadius: '12px',
@@ -303,7 +374,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                   textAlign: 'center'
                 }}>
                   <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px' }}>TOP</div>
-                  <div style={{ fontSize: '28px', fontWeight: '800', color: '#a855f7' }}>
+                  <div className="comparison-number" style={{ fontSize: '28px', fontWeight: '800', color: '#a855f7' }}>
                     {100 - comparison.percentile}%
                   </div>
                 </div>
@@ -417,7 +488,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
           {isPremium && (
             <>
               {/* Quick Actions Panel */}
-              <div style={{
+              <div className="quick-actions" style={{
                 background: 'linear-gradient(135deg, rgba(247,147,26,0.1) 0%, rgba(34,197,94,0.1) 100%)',
                 border: '1px solid rgba(247,147,26,0.3)',
                 borderRadius: '20px',
@@ -427,7 +498,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                 <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '700', marginBottom: '24px', margin: '0 0 24px 0' }}>
                   Quick Actions
                 </h3>
-                <div style={{
+                <div className="quick-actions-grid" style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                   gap: '16px'
@@ -539,7 +610,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
 
               {/* PDF Password Box with Compact Telegram Blur Effect */}
               {user.pdfPassword && (
-                <div style={{
+                <div className="password-box" style={{
                   background: 'linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%)',
                   border: '1px solid #2a2a2a',
                   borderRadius: '12px',
@@ -622,7 +693,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                       </div>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div className="password-buttons" style={{ display: 'flex', gap: '8px' }}>
                     <button
                       onClick={() => setShowPassword(!showPassword)}
                       style={{
@@ -764,36 +835,46 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                 </div>
 
                 <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                  <button
-                    onClick={() => onUpgrade && onUpgrade('complete')}
-                    style={{
-                      padding: '14px 32px',
-                      background: '#F7931A',
-                      border: 'none',
-                      borderRadius: '12px',
-                      color: '#000',
-                      fontSize: '16px',
-                      fontWeight: '700',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Get Complete Plan - $10
-                  </button>
-                  <button
-                    onClick={() => onUpgrade && onUpgrade('consultation')}
-                    style={{
-                      padding: '14px 32px',
-                      background: 'transparent',
-                      border: '2px solid #22c55e',
-                      borderRadius: '12px',
-                      color: '#22c55e',
-                      fontSize: '16px',
-                      fontWeight: '700',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Book Consultation - $100
-                  </button>
+                  <div style={{ textAlign: 'center' }}>
+                    <button
+                      onClick={() => onUpgrade && onUpgrade('complete')}
+                      style={{
+                        padding: '14px 32px',
+                        background: '#F7931A',
+                        border: 'none',
+                        borderRadius: '12px',
+                        color: '#000',
+                        fontSize: '16px',
+                        fontWeight: '700',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Subscribe - $7.99/month
+                    </button>
+                    <p style={{ fontSize: '11px', color: '#9ca3af', marginTop: '8px', marginBottom: 0 }}>
+                      Cancel anytime
+                    </p>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <button
+                      onClick={() => onUpgrade && onUpgrade('consultation')}
+                      style={{
+                        padding: '14px 32px',
+                        background: 'transparent',
+                        border: '2px solid #22c55e',
+                        borderRadius: '12px',
+                        color: '#22c55e',
+                        fontSize: '16px',
+                        fontWeight: '700',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Book Consultation - $99
+                    </button>
+                    <p style={{ fontSize: '11px', color: '#9ca3af', marginTop: '8px', marginBottom: 0 }}>
+                      1-hour session
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -861,24 +942,33 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
             )}
           </div>
 
-          {/* Security Tip */}
-          <div style={styles.dashTipCard}>
-            <div style={styles.dashTipCardGlow} />
-            <div style={styles.dashTipIcon}>
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <circle cx="16" cy="16" r="14" fill="rgba(34,197,94,0.15)" stroke="#22c55e" strokeWidth="2"/>
-                <path d="M16 10V18" stroke="#22c55e" strokeWidth="2" strokeLinecap="round"/>
-                <circle cx="16" cy="22" r="1.5" fill="#22c55e"/>
-              </svg>
-            </div>
-            <div style={styles.dashTipContent}>
-              <h3 style={styles.dashTipTitle}>Security Tip</h3>
-              <p style={styles.dashTipText}>
-                Never share your 24-word seed phrase with anyone, including us.
-                Kyward will never ask for your keys or private information.
-              </p>
-            </div>
-          </div>
+          {/* Daily Security Tip */}
+          {(() => {
+            const dailyTip = getDailyTip();
+            return (
+              <div style={styles.dashTipCard}>
+                <div style={styles.dashTipCardGlow} />
+                <div style={styles.dashTipIcon}>
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <circle cx="16" cy="16" r="14" fill="rgba(34,197,94,0.15)" stroke="#22c55e" strokeWidth="2"/>
+                    <path d="M16 10V18" stroke="#22c55e" strokeWidth="2" strokeLinecap="round"/>
+                    <circle cx="16" cy="22" r="1.5" fill="#22c55e"/>
+                  </svg>
+                </div>
+                <div style={styles.dashTipContent}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <h3 style={{ ...styles.dashTipTitle, margin: 0 }}>{dailyTip.title}</h3>
+                    <span style={{ fontSize: '10px', color: '#6b7280', background: 'rgba(107,114,128,0.15)', padding: '2px 8px', borderRadius: '10px' }}>
+                      Daily Tip
+                    </span>
+                  </div>
+                  <p style={styles.dashTipText}>
+                    {dailyTip.text}
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Assessment History */}
           {user.assessments && user.assessments.length > 0 && (
@@ -901,7 +991,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                   </button>
                 )}
               </div>
-              <div style={styles.dashHistoryGrid}>
+              <div className="history-grid" style={styles.dashHistoryGrid}>
                 {(showAllHistory ? user.assessments : user.assessments.slice(-3)).reverse().map((assessment, index) => (
                   <div key={index} className="dash-history-card" style={{
                     ...styles.dashHistoryCard,

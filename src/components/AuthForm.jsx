@@ -209,7 +209,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
 
   return (
     <div style={styles.authContainer}>
-      <div style={styles.authCard}>
+      <div className="auth-card" style={styles.authCard}>
         <button onClick={mode === 'forgot' || mode === 'reset' ? () => { setMode('login'); setIsLogin(true); setError(''); setSuccess(''); } : onBack} style={styles.backButton}>
           ← {mode === 'forgot' || mode === 'reset' ? 'Back to Login' : 'Back'}
         </button>
@@ -219,8 +219,8 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
             <circle cx="20" cy="20" r="18" fill="#F7931A" opacity="0.2"/>
             <path d="M20 8L28 13V27L20 32L12 27V13L20 8Z" stroke="#F7931A" strokeWidth="2.5" strokeLinejoin="round"/>
           </svg>
-          <h2 style={styles.authTitle}>{getTitle()}</h2>
-          <p style={styles.authSubtitle}>{getSubtitle()}</p>
+          <h2 className="auth-title" style={styles.authTitle}>{getTitle()}</h2>
+          <p className="auth-subtitle" style={styles.authSubtitle}>{getSubtitle()}</p>
         </div>
 
         {success && <div style={styles.successBox}>{success}</div>}

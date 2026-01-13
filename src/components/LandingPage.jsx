@@ -6,41 +6,41 @@ const LandingPage = ({ onLogin, onSignup }) => {
     <div style={styles.landingContainer}>
       {/* NAVIGATION */}
       <nav style={styles.nav}>
-        <div style={styles.navContent}>
+        <div className="nav-content" style={styles.navContent}>
           <div style={styles.navLogo}>
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
               <circle cx="20" cy="20" r="18" fill="#F7931A" opacity="0.2"/>
               <path d="M20 8L28 13V27L20 32L12 27V13L20 8Z" stroke="#F7931A" strokeWidth="2.5" strokeLinejoin="round"/>
               <circle cx="20" cy="20" r="4" fill="#F7931A"/>
             </svg>
-            <span style={styles.navLogoText}>Kyward</span>
+            <span className="nav-logo-text" style={styles.navLogoText}>Kyward</span>
           </div>
-          <div style={styles.navButtons}>
-            <button onClick={onLogin} style={styles.navButtonLogin}>Login</button>
-            <button onClick={onSignup} style={styles.navButtonSignup}>Get Started</button>
+          <div className="nav-buttons" style={styles.navButtons}>
+            <button onClick={onLogin} className="nav-button" style={styles.navButtonLogin}>Login</button>
+            <button onClick={onSignup} className="nav-button" style={styles.navButtonSignup}>Get Started</button>
           </div>
         </div>
       </nav>
 
       {/* HERO SECTION */}
-      <section style={styles.hero}>
+      <section className="hero-section" style={styles.hero}>
         <div style={styles.heroBackground}>
           <div style={{...styles.orangeGlow, top: '10%', left: '10%'}} />
           <div style={{...styles.orangeGlow, bottom: '20%', right: '15%', animationDelay: '1s'}} />
         </div>
-        
-        <div style={styles.heroContent}>
+
+        <div className="hero-content" style={styles.heroContent}>
           <div style={styles.heroBadge}>₿ITCOIN SECURITY MADE SIMPLE</div>
-          <h1 style={styles.heroTitle}>
+          <h1 className="hero-title" style={styles.heroTitle}>
             Stop Guessing.<br />
             <span style={styles.heroTitleAccent}>Secure Your Sats</span><br />
             The Right Way.
           </h1>
-          <p style={styles.heroSubtitle}>
-            A questionnaire-based assessment that shows you exactly how to protect your private keys. 
+          <p className="hero-subtitle" style={styles.heroSubtitle}>
+            A questionnaire-based assessment that shows you exactly how to protect your private keys.
             No BS. No wallet recommendations. Just honest security advice from fellow Bitcoiners.
           </p>
-          <div style={styles.heroButtons}>
+          <div className="hero-buttons" style={styles.heroButtons}>
             <button onClick={onSignup} style={styles.heroCTA}>
               Start Free Assessment
               <span style={styles.heroCtaArrow}>→</span>
@@ -51,17 +51,17 @@ const LandingPage = ({ onLogin, onSignup }) => {
               See How It Works
             </button>
           </div>
-          <div style={styles.heroStats}>
+          <div className="hero-stats" style={styles.heroStats}>
             <div style={styles.heroStat}>
               <div style={styles.heroStatNumber}>100%</div>
               <div style={styles.heroStatLabel}>Non-Custodial</div>
             </div>
-            <div style={styles.heroStatDivider} />
+            <div className="hero-stat-divider" style={styles.heroStatDivider} />
             <div style={styles.heroStat}>
               <div style={styles.heroStatNumber}>0</div>
               <div style={styles.heroStatLabel}>Data Stored</div>
             </div>
-            <div style={styles.heroStatDivider} />
+            <div className="hero-stat-divider" style={styles.heroStatDivider} />
             <div style={styles.heroStat}>
               <div style={styles.heroStatNumber}>∞</div>
               <div style={styles.heroStatLabel}>Privacy First</div>
@@ -69,8 +69,8 @@ const LandingPage = ({ onLogin, onSignup }) => {
           </div>
         </div>
 
-        <div style={styles.heroImage}>
-          <div style={styles.mockupCard}>
+        <div className="hero-image" style={styles.heroImage}>
+          <div className="mockup-card" style={styles.mockupCard}>
             <div style={styles.mockupHeader}>
               <div style={styles.mockupDots}>
                 <div style={{...styles.mockupDot, backgroundColor: '#FF5F56'}} />
@@ -117,11 +117,11 @@ const LandingPage = ({ onLogin, onSignup }) => {
         <div style={styles.pvuSectionGlow} />
         <div style={styles.pvuSectionGlow2} />
         <div style={styles.sectionContent}>
-          <h2 style={styles.sectionTitle}>What Makes Kyward Different?</h2>
-          <p style={styles.sectionSubtitle}>
+          <h2 className="section-title" style={styles.sectionTitle}>What Makes Kyward Different?</h2>
+          <p className="section-subtitle" style={styles.sectionSubtitle}>
             We're not trying to sell you a wallet. We're here to educate you on securing what's already yours.
           </p>
-          <div style={styles.pvuGrid}>
+          <div className="pvu-grid" style={styles.pvuGrid}>
             {/* Card 1 - Personalized Assessment */}
             <div className="pvu-card" style={styles.pvuCard}>
               <div style={{...styles.pvuCardVisual, ...styles.pvuCardVisualBg1}}>
@@ -215,9 +215,9 @@ const LandingPage = ({ onLogin, onSignup }) => {
       <section id="how-it-works" style={styles.howSection}>
         <div style={styles.howSectionGlow} />
         <div style={styles.sectionContent}>
-          <h2 style={styles.sectionTitle}>How It Works</h2>
-          <p style={styles.sectionSubtitle}>Three simple steps to better security</p>
-          <div style={styles.stepsContainer}>
+          <h2 className="section-title" style={styles.sectionTitle}>How It Works</h2>
+          <p className="section-subtitle" style={styles.sectionSubtitle}>Three simple steps to better security</p>
+          <div className="steps-grid" style={styles.stepsContainer}>
             {/* Step 1 - Take Assessment */}
             <div className="step-card" style={styles.stepCard}>
               <div style={{...styles.stepVisual, ...styles.stepVisualBg1}}>
@@ -293,9 +293,9 @@ const LandingPage = ({ onLogin, onSignup }) => {
       <section style={styles.pricingSection}>
         <div style={styles.pricingSectionGlow} />
         <div style={styles.sectionContent}>
-          <h2 style={styles.sectionTitle}>Simple, Honest Pricing</h2>
-          <p style={styles.sectionSubtitle}>No hidden fees. No subscriptions. Pay once, own forever.</p>
-          <div style={styles.pricingGrid}>
+          <h2 className="section-title" style={styles.sectionTitle}>Simple, Honest Pricing</h2>
+          <p className="section-subtitle" style={styles.sectionSubtitle}>No hidden fees. No subscriptions. Pay once, own forever.</p>
+          <div className="pricing-grid" style={styles.pricingGrid}>
             {/* Free Plan */}
             <div className="pricing-card" style={styles.pricingCard}>
               <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBg}}>
@@ -329,7 +329,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
               </div>
             </div>
 
-            {/* Complete Plan - $10 */}
+            {/* Complete Plan - $7.99/month */}
             <div className="pricing-card-featured" style={{...styles.pricingCard, ...styles.pricingCardFeatured}}>
               <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBgFeatured}}>
                 <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowFeatured}} />
@@ -337,7 +337,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
                 <div className="floating-element-slow" style={{...styles.pricingFloatingElement, width: '40px', height: '40px', bottom: '15px', left: '20px', borderRadius: '50%'}} />
                 <div style={{...styles.pricingBadge, ...styles.pricingBadgeFeatured}}>BEST VALUE</div>
                 <h3 style={styles.pricingTitle}>Complete</h3>
-                <div style={{...styles.pricingPrice, ...styles.pricingPriceFeatured}}>$10<span style={styles.pricingPeriod}> one-time</span></div>
+                <div style={{...styles.pricingPrice, ...styles.pricingPriceFeatured}}>$7.99<span style={styles.pricingPeriod}>/month</span></div>
               </div>
               <div style={styles.pricingCardBody}>
                 <ul style={styles.pricingFeatures}>
@@ -355,18 +355,21 @@ const LandingPage = ({ onLogin, onSignup }) => {
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    PDF report with password
+                    Unlimited PDF downloads
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
                     Unlimited re-assessments
                   </li>
                 </ul>
-                <button onClick={onSignup} style={styles.pricingButtonFeatured}>Get Complete Plan</button>
+                <p style={{ fontSize: '12px', color: '#9ca3af', textAlign: 'center', marginBottom: '16px', marginTop: '-8px' }}>
+                  Cancel anytime. Billed monthly.
+                </p>
+                <button onClick={onSignup} style={styles.pricingButtonFeatured}>Subscribe Now</button>
               </div>
             </div>
 
-            {/* Pro Consultation - $100 */}
+            {/* Pro Consultation - $99 first, $49 additional */}
             <div className="pricing-card" style={{...styles.pricingCard, ...styles.pricingCardPro}}>
               <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBgPro}}>
                 <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowPro}} />
@@ -374,7 +377,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
                 <div className="floating-element" style={{...styles.pricingFloatingElement, width: '38px', height: '30px', bottom: '12px', left: '22px', borderRadius: '8px'}} />
                 <div style={{...styles.pricingBadge, ...styles.pricingBadgePro}}>WHITE GLOVE</div>
                 <h3 style={styles.pricingTitle}>Consultation</h3>
-                <div style={{...styles.pricingPrice, ...styles.pricingPricePro}}>$100<span style={styles.pricingPeriod}> one-time</span></div>
+                <div style={{...styles.pricingPrice, ...styles.pricingPricePro}}>$99<span style={styles.pricingPeriod}>/session</span></div>
               </div>
               <div style={styles.pricingCardBody}>
                 <ul style={styles.pricingFeatures}>
@@ -384,7 +387,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    1-on-1 video consultation
+                    1-hour video consultation
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
@@ -396,7 +399,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    30-day follow-up support
+                    Additional sessions: $49/hr
                   </li>
                 </ul>
                 <button onClick={onSignup} style={styles.pricingButtonPro}>Book Consultation</button>

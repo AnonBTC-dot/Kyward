@@ -6,8 +6,9 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 // Payment configuration
 const PAYMENT_CONFIG = {
   prices: {
-    complete: 10, // $10 USD
-    consultation: 100 // $100 USD
+    complete: 7.99, // $7.99 USD/month subscription
+    consultation: 99, // $99 USD first session
+    consultationAdditional: 49 // $49 USD additional sessions
   },
   pollInterval: 5000, // Check payment status every 5 seconds
   maxPollAttempts: 360 // Poll for max 30 minutes
@@ -17,9 +18,11 @@ const PAYMENT_CONFIG = {
 export const getPriceDisplay = (plan) => {
   switch (plan) {
     case 'complete':
-      return { amount: '$10', description: 'Complete Plan - One-time payment' };
+      return { amount: '$7.99', description: 'Complete Plan - Monthly subscription', isSubscription: true };
     case 'consultation':
-      return { amount: '$100', description: 'Consultation - One-time payment' };
+      return { amount: '$99', description: 'Consultation - 1 hour session', additionalPrice: '$49/hr' };
+    case 'consultation_additional':
+      return { amount: '$49', description: 'Additional Consultation - 1 hour session' };
     default:
       return { amount: '$0', description: 'Free Plan' };
   }

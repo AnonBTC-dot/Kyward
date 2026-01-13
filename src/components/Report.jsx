@@ -77,7 +77,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
   const criticalCount = recommendations.filter(r => r.priority === 'critical' || r.priority === 'high').length;
 
   return (
-    <div style={styles.reportContainer2}>
+    <div className="report-container" style={styles.reportContainer2}>
       {/* Background Effects */}
       <div style={styles.reportGlow1} />
       <div style={styles.reportGlow2} />
@@ -87,17 +87,17 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
         <div style={styles.reportBadge}>
           Security Assessment Complete
         </div>
-        <h1 style={styles.reportTitle}>Your Security Report</h1>
-        <p style={styles.reportSubtitle}>
+        <h1 className="report-title" style={styles.reportTitle}>Your Security Report</h1>
+        <p className="report-subtitle" style={styles.reportSubtitle}>
           Based on your answers, here's your personalized Bitcoin security analysis.
         </p>
       </header>
 
       {/* Score Section */}
       <div style={styles.reportScoreSection}>
-        <div style={styles.reportScoreCard}>
+        <div className="score-card" style={styles.reportScoreCard}>
           <div style={styles.reportScoreCardGlow} />
-          <div style={styles.reportScoreVisual}>
+          <div className="score-visual" style={styles.reportScoreVisual}>
             <svg width="180" height="180" viewBox="0 0 180 180">
               <circle cx="90" cy="90" r="80" fill="none" stroke="#2a2a2a" strokeWidth="12"/>
               <circle
@@ -112,7 +112,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
               />
             </svg>
             <div style={styles.reportScoreInner}>
-              <div style={{...styles.reportScoreNumber, color: getScoreColor(score)}}>{score}</div>
+              <div className="score-number" style={{...styles.reportScoreNumber, color: getScoreColor(score)}}>{score}</div>
               <div style={styles.reportScoreOf}>/100</div>
             </div>
           </div>
@@ -170,14 +170,14 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
             </div>
 
             {/* Main Comparison */}
-            <div style={{
+            <div className="comparison-stats-grid" style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
               gap: '24px',
               marginBottom: '32px'
             }}>
               {/* Your Score */}
-              <div style={{
+              <div className="comparison-stat-card" style={{
                 background: `${getScoreColor(score)}10`,
                 border: `1px solid ${getScoreColor(score)}40`,
                 borderRadius: '16px',
@@ -185,7 +185,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 textAlign: 'center'
               }}>
                 <div style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '8px' }}>YOUR SCORE</div>
-                <div style={{ fontSize: '48px', fontWeight: '800', color: getScoreColor(score) }}>
+                <div className="comparison-stat-number" style={{ fontSize: '48px', fontWeight: '800', color: getScoreColor(score) }}>
                   {score}
                 </div>
                 <div style={{
@@ -203,7 +203,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
               </div>
 
               {/* Community Average */}
-              <div style={{
+              <div className="comparison-stat-card" style={{
                 background: 'rgba(107,114,128,0.1)',
                 border: '1px solid rgba(107,114,128,0.3)',
                 borderRadius: '16px',
@@ -211,7 +211,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 textAlign: 'center'
               }}>
                 <div style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '8px' }}>COMMUNITY AVERAGE</div>
-                <div style={{ fontSize: '48px', fontWeight: '800', color: '#6b7280' }}>
+                <div className="comparison-stat-number" style={{ fontSize: '48px', fontWeight: '800', color: '#6b7280' }}>
                   {comparison.averageScore}
                 </div>
                 <div style={{
@@ -235,7 +235,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
               </div>
 
               {/* Percentile */}
-              <div style={{
+              <div className="comparison-stat-card" style={{
                 background: 'rgba(168,85,247,0.1)',
                 border: '1px solid rgba(168,85,247,0.3)',
                 borderRadius: '16px',
@@ -243,7 +243,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 textAlign: 'center'
               }}>
                 <div style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '8px' }}>YOUR PERCENTILE</div>
-                <div style={{ fontSize: '48px', fontWeight: '800', color: '#a855f7' }}>
+                <div className="comparison-stat-number" style={{ fontSize: '48px', fontWeight: '800', color: '#a855f7' }}>
                   {comparison.percentile}%
                 </div>
                 <div style={{ color: '#9ca3af', fontSize: '13px', marginTop: '8px' }}>
@@ -253,7 +253,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
             </div>
 
             {/* Distribution Chart */}
-            <div style={{
+            <div className="distribution-chart" style={{
               background: 'rgba(0,0,0,0.3)',
               borderRadius: '16px',
               padding: '24px'
@@ -263,7 +263,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
               </div>
 
               {/* Bar Chart */}
-              <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', height: '100px', marginBottom: '16px' }}>
+              <div className="distribution-bar" style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', height: '100px', marginBottom: '16px' }}>
                 {/* Needs Work */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <div style={{
@@ -451,7 +451,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
       {/* Recommendations Section */}
       <div style={styles.reportRecsSection}>
         <div style={styles.reportRecsHeader}>
-          <h2 style={styles.reportRecsTitle}>
+          <h2 className="recs-title" style={styles.reportRecsTitle}>
             {isPremium ? 'Your Complete Action Plan' : 'Your Free Security Tips'}
           </h2>
           <p style={styles.reportRecsSubtitle}>
@@ -467,7 +467,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
           {displayTips.map((tip, index) => (
             <div
               key={tip.id}
-              className="report-tip-card"
+              className="report-tip-card tip-card"
               style={styles.reportTipCard}
               onClick={() => isPremium && setExpandedTip(expandedTip === tip.id ? null : tip.id)}
             >
@@ -630,7 +630,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
                 </svg>
-                Unlock All Recommendations - $10
+                Unlock All Recommendations - $7.99/mo
               </button>
             </div>
 
@@ -657,7 +657,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
               </div>
 
               {/* Benefits Grid */}
-              <div style={{
+              <div className="benefits-grid" style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
                 gap: '20px',
@@ -812,13 +812,13 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
               </div>
 
               {/* Pricing Options */}
-              <div style={{
+              <div className="upgrade-pricing-grid" style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
                 gap: '20px'
               }}>
                 {/* Complete Plan */}
-                <div style={{
+                <div className="upgrade-pricing-card" style={{
                   background: 'linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%)',
                   border: '2px solid #F7931A',
                   borderRadius: '20px',
@@ -843,10 +843,13 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                   <h3 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>
                     Complete Plan
                   </h3>
-                  <div style={{ marginBottom: '16px' }}>
-                    <span style={{ fontSize: '48px', fontWeight: '800', color: '#F7931A' }}>$10</span>
-                    <span style={{ color: '#6b7280', fontSize: '14px' }}> one-time</span>
+                  <div style={{ marginBottom: '8px' }}>
+                    <span style={{ fontSize: '48px', fontWeight: '800', color: '#F7931A' }}>$7.99</span>
+                    <span style={{ color: '#6b7280', fontSize: '14px' }}>/month</span>
                   </div>
+                  <p style={{ color: '#6b7280', fontSize: '12px', marginBottom: '16px' }}>
+                    Cancel anytime. Billed monthly.
+                  </p>
                   <ul style={{
                     listStyle: 'none',
                     padding: 0,
@@ -856,7 +859,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                     fontSize: '14px'
                   }}>
                     <li style={{ marginBottom: '8px' }}>✓ All {recommendations.length} recommendations</li>
-                    <li style={{ marginBottom: '8px' }}>✓ Downloadable PDF report</li>
+                    <li style={{ marginBottom: '8px' }}>✓ Unlimited PDF downloads</li>
                     <li style={{ marginBottom: '8px' }}>✓ Complete inheritance plan</li>
                     <li style={{ marginBottom: '8px' }}>✓ Sparrow & Liana guides</li>
                     <li style={{ marginBottom: '8px' }}>✓ Unlimited re-assessments</li>
@@ -876,12 +879,12 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                       cursor: 'pointer'
                     }}
                   >
-                    Pay with Bitcoin
+                    Subscribe Now
                   </button>
                 </div>
 
                 {/* Consultation */}
-                <div style={{
+                <div className="upgrade-pricing-card" style={{
                   background: 'linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%)',
                   border: '1px solid #3a3a3a',
                   borderRadius: '20px',
@@ -891,10 +894,13 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                   <h3 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>
                     Consultation
                   </h3>
-                  <div style={{ marginBottom: '16px' }}>
-                    <span style={{ fontSize: '48px', fontWeight: '800', color: '#22c55e' }}>$100</span>
-                    <span style={{ color: '#6b7280', fontSize: '14px' }}> one-time</span>
+                  <div style={{ marginBottom: '8px' }}>
+                    <span style={{ fontSize: '48px', fontWeight: '800', color: '#22c55e' }}>$99</span>
+                    <span style={{ color: '#6b7280', fontSize: '14px' }}>/session</span>
                   </div>
+                  <p style={{ color: '#6b7280', fontSize: '12px', marginBottom: '16px' }}>
+                    Additional sessions: $49/hr
+                  </p>
                   <ul style={{
                     listStyle: 'none',
                     padding: 0,
@@ -904,7 +910,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                     fontSize: '14px'
                   }}>
                     <li style={{ marginBottom: '8px' }}>✓ Everything in Complete</li>
-                    <li style={{ marginBottom: '8px' }}>✓ 60-min video consultation</li>
+                    <li style={{ marginBottom: '8px' }}>✓ 1-hour video consultation</li>
                     <li style={{ marginBottom: '8px' }}>✓ Custom inheritance strategy</li>
                     <li style={{ marginBottom: '8px' }}>✓ Live multisig setup help</li>
                     <li style={{ marginBottom: '8px' }}>✓ 30-day follow-up support</li>
@@ -930,7 +936,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
               </div>
 
               {/* Trust Badges */}
-              <div style={{
+              <div className="trust-badges" style={{
                 display: 'flex',
                 justifyContent: 'center',
                 gap: '32px',
