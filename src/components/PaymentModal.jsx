@@ -8,8 +8,10 @@ import {
   paymentModalStyles as pms
 } from '../services/PaymentService';
 import { kywardDB } from '../services/Database';
+import { useLanguage } from '../i18n';
 
 const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
+  const { t } = useLanguage();
   const [stage, setStage] = useState('loading'); // loading, payment, success, error
   const [paymentData, setPaymentData] = useState(null);
   const [status, setStatus] = useState('pending');
@@ -25,7 +27,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
   const priceTimerRef = useRef(null);
 
   const priceInfo = getPriceDisplay(plan);
-  const planName = plan === 'complete' ? 'Complete Plan' : 'Consultation';
+  const planName = plan === 'complete' ? t.landing.plans.complete.name : t.landing.plans.consultation.name;
 
   // Initialize payment on mount
   useEffect(() => {
@@ -211,8 +213,8 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                 animation: 'spin 1s linear infinite'
               }} />
             </div>
-            <h2 style={pms.title}>Generating Payment...</h2>
-            <p style={pms.subtitle}>Creating your Bitcoin payment address</p>
+            <h2 style={pms.title}>{t.payment.generating}</h2>
+            <p style={pms.subtitle}>{t.payment.generatingDesc}</p>
           </>
         );
 
@@ -227,8 +229,8 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
               </svg>
             </div>
 
-            <h2 className="payment-title" style={pms.title}>Pay with Bitcoin</h2>
-            <p style={pms.subtitle}>Scan QR code or copy address below</p>
+            <h2 className="payment-title" style={pms.title}>{t.payment.title}</h2>
+            <p style={pms.subtitle}>{t.payment.subtitle}</p>
 
             {/* QR Code */}
             <div className="qr-container" style={pms.qrContainer}>
@@ -238,7 +240,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
             {/* Amount with USD equivalent */}
             <div className="amount-box" style={pms.amountBox}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <span style={pms.amountLabel}>Amount</span>
+                <span style={pms.amountLabel}>{t.payment.amount}</span>
                 <span style={{ fontSize: '12px', color: '#6b7280' }}>
                   ${paymentData.usdAmount || priceInfo.amount.replace('$', '')} USD
                 </span>
@@ -268,11 +270,11 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
             }}>
               <span style={{ color: priceTimeLeft <= 30 ? '#ef4444' : '#F7931A' }}>
                 {isRefreshingPrice ? (
-                  'Updating price...'
+                  t.payment.updatingPrice
                 ) : priceTimeLeft <= 0 ? (
-                  'Price expired'
+                  t.payment.priceExpired
                 ) : (
-                  <>Price updates in: <strong>{formatTime(priceTimeLeft)}</strong></>
+                  <>{t.payment.priceUpdates} <strong>{formatTime(priceTimeLeft)}</strong></>
                 )}
               </span>
               <button
@@ -288,42 +290,42 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                   opacity: isRefreshingPrice ? 0.5 : 1
                 }}
               >
-                {isRefreshingPrice ? '...' : 'Refresh Now'}
+                {isRefreshingPrice ? '...' : t.payment.refreshNow}
               </button>
             </div>
 
             {/* Address */}
             <div className="address-box" style={pms.addressBox}>
-              <div style={pms.addressLabel}>Bitcoin Address</div>
+              <div style={pms.addressLabel}>{t.payment.address}</div>
               <div className="address-text" style={pms.address}>{paymentData.address}</div>
             </div>
 
             {/* Status */}
             <div style={pms.status}>
               <div style={pms.spinner} />
-              <span style={pms.statusText}>Waiting for payment...</span>
+              <span style={pms.statusText}>{t.payment.waiting}</span>
             </div>
 
             {/* Payment Timer */}
             <div style={pms.timer}>
-              Payment expires in: <strong>{formatTime(timeLeft)}</strong>
+              {t.payment.expiresIn} <strong>{formatTime(timeLeft)}</strong>
             </div>
 
             {/* Copy Button */}
             <div className="payment-buttons">
               <button onClick={handleCopyAddress} style={pms.copyButton}>
-                {copied ? '✓ Copied!' : 'Copy Address'}
+                {copied ? `✓ ${t.payment.copied}` : t.payment.copyAddress}
               </button>
 
               {/* Demo Button (if demo mode) */}
               {paymentData.demo && (
                 <button onClick={handleDemoPayment} style={pms.demoButton}>
-                  Simulate Payment (Demo)
+                  {t.payment.simulateDemo}
                 </button>
               )}
 
               <button onClick={handleClose} style={pms.cancelButton}>
-                Cancel
+                {t.payment.cancel}
               </button>
             </div>
           </>
@@ -334,23 +336,23 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
           <>
             <div style={pms.successBox}>
               <div style={pms.successIcon}>✓</div>
-              <div style={pms.successTitle}>Payment Confirmed!</div>
+              <div style={pms.successTitle}>{t.payment.confirmed}</div>
               <p style={{ color: '#9ca3af', margin: 0 }}>
-                Your {planName} is now active
+                {t.payment.planActive.replace('{plan}', planName)}
               </p>
             </div>
 
             <div style={pms.passwordBox}>
-              <div style={pms.passwordLabel}>YOUR PDF PASSWORD</div>
+              <div style={pms.passwordLabel}>{t.payment.yourPassword}</div>
               <div style={pms.password}>{pdfPassword}</div>
               <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '12px', marginBottom: 0 }}>
-                Save this password! You'll need it to open your security plan PDF.
+                {t.payment.savePassword}
               </p>
             </div>
 
             <div style={{ marginTop: '24px' }}>
               <button onClick={handleClose} style={pms.copyButton}>
-                Continue to Report
+                {t.payment.continueToReport}
               </button>
             </div>
           </>
@@ -365,14 +367,14 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                 <path d="M24 24L40 40M40 24L24 40" stroke="#ef4444" strokeWidth="3" strokeLinecap="round"/>
               </svg>
             </div>
-            <h2 style={pms.title}>Payment Expired</h2>
-            <p style={pms.subtitle}>The payment window has closed. Please try again.</p>
+            <h2 style={pms.title}>{t.payment.expired}</h2>
+            <p style={pms.subtitle}>{t.payment.expiredDesc}</p>
 
             <button onClick={initializePayment} style={pms.copyButton}>
-              Try Again
+              {t.payment.tryAgain}
             </button>
             <button onClick={handleClose} style={pms.cancelButton}>
-              Close
+              {t.payment.close}
             </button>
           </>
         );
@@ -387,14 +389,14 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                 <circle cx="32" cy="44" r="2" fill="#ef4444"/>
               </svg>
             </div>
-            <h2 style={pms.title}>Payment Error</h2>
-            <p style={pms.subtitle}>{error || 'Something went wrong. Please try again.'}</p>
+            <h2 style={pms.title}>{t.payment.error}</h2>
+            <p style={pms.subtitle}>{error || t.payment.errorDesc}</p>
 
             <button onClick={initializePayment} style={pms.copyButton}>
-              Try Again
+              {t.payment.tryAgain}
             </button>
             <button onClick={handleClose} style={pms.cancelButton}>
-              Close
+              {t.payment.close}
             </button>
           </>
         );

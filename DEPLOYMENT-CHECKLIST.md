@@ -1,41 +1,150 @@
-# Kyward Deployment Checklist
+# Kyward Complete Deployment Guide
 
-## What's New in v1.1
+## Project Overview
 
-- **Telegram-Style Blur Effects** - Premium content preview with animated stars and shadows
-- **Community Comparison** - Users see how their score compares to other Bitcoiners
-- **Real-Time BTC Pricing** - Live prices from mempool.space with 2-min refresh
-- **Improved Password Display** - Animated blur effect for PDF password
+**Kyward** - Bitcoin Security Assessment Platform
+- Multi-language support (English/Spanish)
+- Bitcoin payment processing with real-time BTC pricing
+- Supabase PostgreSQL database
+- Subscription plans: Complete ($7.99/month), Consultation ($99 first / $49 additional)
 
 ---
 
-## Quick Start Commands
+## Architecture Overview
 
-### Run Locally (Testing)
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Frontend      │────▶│   Backend       │────▶│   Supabase      │
+│   (Vercel)      │     │   (Railway)     │     │   (Database)    │
+│   React + Vite  │     │   Express.js    │     │   PostgreSQL    │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                              │
+                              ▼
+                        ┌─────────────────┐
+                        │   mempool.space │
+                        │   (BTC Price)   │
+                        └─────────────────┘
+```
 
-**Terminal 1 - Frontend:**
+---
+
+## Quick Start (Local Development)
+
+### Terminal 1 - Frontend:
 ```bash
 cd C:\Users\Leonardo\Desktop\Kyward
 npm install
+cp .env.example .env
 npm run dev
 ```
-Opens at: http://localhost:5173
+Opens at: http://localhost:3000 (or 5173 for Vite)
 
-**Terminal 2 - Backend:**
+### Terminal 2 - Backend:
 ```bash
 cd C:\Users\Leonardo\Desktop\Kyward\backend
 npm install
+cp .env.example .env
 npm run dev
 ```
 Opens at: http://localhost:3001
 
 ---
 
-## Pre-Deployment Checklist
+## Step-by-Step Deployment
 
-### 1. Get Your Bitcoin XPUB
+### 1. Supabase Database Setup
 
-Choose ONE wallet:
+1. Go to **supabase.com** and create account
+2. Create new project (choose a region close to your users)
+3. Wait for project to initialize (~2 minutes)
+4. Go to **SQL Editor** and run this schema:
+
+```sql
+-- Users table
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  subscription_level TEXT DEFAULT 'free',
+  subscription_start TIMESTAMPTZ,
+  subscription_end TIMESTAMPTZ,
+  pdf_password TEXT,
+  consultation_count INTEGER DEFAULT 0,
+  language_preference TEXT DEFAULT 'en',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  last_login TIMESTAMPTZ
+);
+
+-- Assessments table
+CREATE TABLE assessments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  score INTEGER NOT NULL,
+  responses JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Session tokens table
+CREATE TABLE session_tokens (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  token TEXT UNIQUE NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Payments table
+CREATE TABLE payments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  payment_id TEXT UNIQUE NOT NULL,
+  plan TEXT NOT NULL,
+  amount_usd DECIMAL(10,2) NOT NULL,
+  amount_btc DECIMAL(16,8),
+  btc_address TEXT,
+  status TEXT DEFAULT 'pending',
+  txid TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ,
+  confirmed_at TIMESTAMPTZ
+);
+
+-- Community stats table (aggregated data)
+CREATE TABLE community_stats (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  total_assessments INTEGER DEFAULT 0,
+  average_score DECIMAL(5,2) DEFAULT 50,
+  score_distribution JSONB DEFAULT '{"0-20": 10, "21-40": 20, "41-60": 35, "61-80": 25, "81-100": 10}',
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insert initial community stats
+INSERT INTO community_stats (total_assessments, average_score)
+VALUES (0, 50);
+
+-- Create indexes for performance
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_assessments_user_id ON assessments(user_id);
+CREATE INDEX idx_session_tokens_token ON session_tokens(token);
+CREATE INDEX idx_payments_payment_id ON payments(payment_id);
+
+-- Enable Row Level Security
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE assessments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE session_tokens ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+```
+
+5. Go to **Settings → API** and copy:
+   - **Project URL** (e.g., `https://xxxx.supabase.co`)
+   - **service_role key** (secret, for backend only)
+
+---
+
+### 2. Get Your Bitcoin XPUB
+
+Choose ONE wallet for receiving payments:
 
 **Sparrow Wallet (Recommended):**
 1. Download from sparrowwallet.com
@@ -53,11 +162,9 @@ Choose ONE wallet:
 2. Wallet → Export/Backup → Watch-only
 3. Copy the xpub/zpub
 
-Save this key - you'll need it for the backend!
-
 ---
 
-### 2. Create Email App Password (Gmail)
+### 3. Email Setup (Gmail SMTP)
 
 1. Go to myaccount.google.com
 2. Security → 2-Step Verification (enable if not done)
@@ -65,49 +172,13 @@ Save this key - you'll need it for the backend!
 4. Create new app password for "Mail"
 5. Copy the 16-character password
 
----
-
-### 3. Create Configuration Files
-
-**Frontend (.env):**
-```bash
-cd C:\Users\Leonardo\Desktop\Kyward
-copy .env.example .env
-```
-
-Edit `.env`:
-```
-VITE_API_URL=http://localhost:3001
-```
-
-**Backend (.env):**
-```bash
-cd C:\Users\Leonardo\Desktop\Kyward\backend
-copy .env.example .env
-```
-
-Edit `.env`:
-```
-PORT=3001
-FRONTEND_URL=http://localhost:5173
-
-# Your Bitcoin XPUB
-XPUB=zpub6rFR7y4Q2AijBEqTUquh...paste-your-xpub-here
-
-# Gmail SMTP (optional)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-email@gmail.com
-SMTP_PASS=your-16-char-app-password
-SMTP_FROM=Kyward <your-email@gmail.com>
-```
+**Alternative: Brevo (free, recommended for production)**
+1. Sign up at brevo.com
+2. Get SMTP credentials from Settings → SMTP & API
 
 ---
 
-## Deployment Steps
-
-### Step 1: Push Code to GitHub
+### 4. GitHub Repository
 
 ```bash
 cd C:\Users\Leonardo\Desktop\Kyward
@@ -120,31 +191,51 @@ git push -u origin main
 
 ---
 
-### Step 2: Deploy Backend (Railway)
+### 5. Deploy Backend (Railway)
 
-1. Go to **railway.app**
-2. Click "Start a New Project"
-3. Select "Deploy from GitHub repo"
-4. Choose your Kyward repository
-5. **Important:** Set root directory to `/backend`
-6. Click "Add Variables" and add:
-   ```
-   PORT=3001
-   XPUB=your-xpub-key
-   FRONTEND_URL=https://kyward.vercel.app (update later)
-   SMTP_HOST=smtp.gmail.com
-   SMTP_PORT=587
-   SMTP_USER=your-email@gmail.com
-   SMTP_PASS=your-app-password
-   SMTP_FROM=Kyward <your-email@gmail.com>
-   ```
-7. Deploy and copy your backend URL (e.g., `https://kyward-production.up.railway.app`)
+1. Go to **railway.app** and sign in with GitHub
+2. Click "New Project" → "Deploy from GitHub repo"
+3. Select your Kyward repository
+4. **Important:** Set root directory to `backend`
+5. Add environment variables:
+
+```
+PORT=3001
+NODE_ENV=production
+FRONTEND_URL=https://your-domain.vercel.app
+
+# Supabase
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your-service-role-key
+
+# Security
+PASSWORD_SALT=generate-a-32-character-random-string
+
+# Bitcoin
+XPUB=your-bitcoin-xpub-key
+ADDRESS_START_INDEX=0
+
+# Email (Gmail SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-16-char-app-password
+SMTP_FROM=Kyward <your-email@gmail.com>
+
+# Pricing
+PRICE_COMPLETE=7.99
+PRICE_CONSULTATION=99
+PRICE_CONSULTATION_ADDITIONAL=49
+```
+
+6. Deploy and copy your backend URL (e.g., `https://kyward-production.up.railway.app`)
 
 ---
 
-### Step 3: Deploy Frontend (Vercel)
+### 6. Deploy Frontend (Vercel)
 
-1. Go to **vercel.com**
+1. Go to **vercel.com** and sign in with GitHub
 2. Click "Add New" → "Project"
 3. Import your GitHub repository
 4. Configure:
@@ -152,15 +243,16 @@ git push -u origin main
    - Root Directory: `.` (main folder)
    - Build Command: `npm run build`
    - Output Directory: `dist`
-5. Click "Environment Variables" and add:
-   ```
-   VITE_API_URL=https://your-railway-url.up.railway.app
-   ```
+5. Add environment variables:
+```
+VITE_API_URL=https://your-railway-url.up.railway.app/api
+REACT_APP_API_URL=https://your-railway-url.up.railway.app/api
+```
 6. Deploy
 
 ---
 
-### Step 4: Update Backend CORS
+### 7. Update Backend CORS
 
 Go back to Railway and update:
 ```
@@ -169,20 +261,20 @@ FRONTEND_URL=https://your-project.vercel.app
 
 ---
 
-### Step 5: Add Custom Domain (Optional)
+### 8. Custom Domain Setup
 
 **Buy Domain:**
-- Cloudflare Registrar: cloudflare.com/products/registrar
+- Cloudflare Registrar: cloudflare.com/products/registrar (~$10/year)
 - Namecheap: namecheap.com
 
 **Connect to Vercel:**
 1. Vercel → Your Project → Settings → Domains
-2. Add your domain
+2. Add your domain (e.g., kyward.io)
 3. Copy the DNS records shown
 4. Add them to your domain registrar
 5. Wait 5-30 minutes for SSL
 
-**Update Backend:**
+**Update Backend Environment:**
 ```
 FRONTEND_URL=https://kyward.io
 ```
@@ -192,97 +284,181 @@ FRONTEND_URL=https://kyward.io
 ## Testing Checklist
 
 ### Local Testing
-- [ ] Frontend loads at localhost:5173
-- [ ] Backend health check: localhost:3001/api/health
-- [ ] Can create account
-- [ ] Can complete questionnaire
-- [ ] Report shows score and tips
-- [ ] Payment modal opens (demo mode works)
+- [ ] Frontend loads at localhost
+- [ ] Backend health check: `curl http://localhost:3001/api/health`
+- [ ] Can create account (signup)
+- [ ] Can login with created account
+- [ ] Can complete questionnaire (all 15 questions)
+- [ ] Report shows score and comparison
+- [ ] Language toggle works (EN/ES)
+- [ ] Payment modal opens with QR code
+- [ ] Demo payment simulation works
 
-### New Features Testing (v1.1)
-- [ ] Report shows "How You Compare" section with average score
-- [ ] Distribution bar chart displays with "You're here" indicator
-- [ ] Premium password box shows animated blur effect
-- [ ] Click on password reveals/hides it
-- [ ] Copy button works regardless of blur state
-- [ ] Locked tips in Report show Telegram-style blur with stars
-- [ ] Payment modal shows exact BTC amount (e.g., 0.00010526 BTC)
-- [ ] Payment modal shows current BTC/USD rate
-- [ ] 2-minute price countdown is visible
-- [ ] "Refresh Now" button updates the price
+### New Features Testing (v2.0)
+- [ ] Spanish translation complete for all pages
+- [ ] Report shows "How You Compare" section
+- [ ] Distribution chart displays correctly
+- [ ] Premium password box shows animated blur
+- [ ] Daily tips rotate in Dashboard
+- [ ] Complete Plan price shows $7.99
+- [ ] Consultation shows $99/$49 pricing
+- [ ] BTC price refreshes every 2 minutes
 
 ### Production Testing
-- [ ] Site loads on Vercel URL
-- [ ] Can create account
-- [ ] Questionnaire works
-- [ ] Payment modal shows QR code with real BTC price
-- [ ] Demo payment works
-- [ ] Real small payment works ($1 equivalent)
+- [ ] Site loads on custom domain with HTTPS
+- [ ] Can create account and login
+- [ ] Questionnaire works end-to-end
+- [ ] Payment modal shows real BTC address
+- [ ] Real small payment works (~$1 equivalent)
 - [ ] Email received after payment
-- [ ] Comparison feature works with real user data
+- [ ] User data persists (Supabase working)
 
 ---
 
-## Recommended Services Summary
+## Feature Checklist
 
-| Service | URL | Purpose | Cost |
-|---------|-----|---------|------|
-| **Vercel** | vercel.com | Frontend hosting | Free |
-| **Railway** | railway.app | Backend hosting | ~$5/mo |
-| **Cloudflare** | cloudflare.com | Domain + DNS | ~$10/yr |
-| **Brevo** | brevo.com | Email sending | Free |
-| **Sparrow** | sparrowwallet.com | Bitcoin wallet | Free |
+### Core Features
+- [x] User authentication (signup/login/logout)
+- [x] Password reset flow
+- [x] 15-question security assessment
+- [x] Score calculation and report generation
+- [x] PDF password protection
+- [x] Session management (30-day tokens)
+
+### Subscription Features
+- [x] Free tier (1 assessment/month)
+- [x] Complete Plan ($7.99/month) - unlimited assessments
+- [x] Consultation Plan ($99 first, $49 additional)
+- [x] Premium content unlock (detailed tips)
+
+### Payment Features
+- [x] Bitcoin payment with HD wallet (XPUB)
+- [x] Real-time BTC/USD price from mempool.space
+- [x] QR code generation
+- [x] 2-minute price refresh countdown
+- [x] 30-minute payment expiry
+- [x] Payment confirmation polling
+- [x] Demo mode for testing
+
+### Internationalization
+- [x] English (default)
+- [x] Spanish translation
+- [x] Language toggle component
+- [x] Persistent language preference
+
+### UI/UX Features
+- [x] Dark theme design
+- [x] Bitcoin orange accents
+- [x] Telegram-style blur effects
+- [x] Animated score display
+- [x] Community comparison chart
+- [x] Daily tips rotation
+- [x] Responsive design
+
+---
+
+## Pricing Summary
+
+| Plan | Price | Features |
+|------|-------|----------|
+| **Free** | $0 | 1 assessment/month, basic tips |
+| **Complete** | $7.99/month | Unlimited assessments, all tips, PDF download |
+| **Consultation** | $99 first / $49 additional | Personal expert consultation + everything above |
+
+---
+
+## Services & Costs
+
+| Service | Purpose | Estimated Cost |
+|---------|---------|----------------|
+| **Supabase** | Database | Free (up to 500MB) |
+| **Vercel** | Frontend hosting | Free |
+| **Railway** | Backend hosting | ~$5/month |
+| **Cloudflare** | Domain + DNS | ~$10/year |
+| **Gmail SMTP** | Email sending | Free |
+
+**Total: ~$6/month + domain**
 
 ---
 
 ## Troubleshooting
 
 ### "Failed to fetch" error
-→ Backend not running or wrong URL in frontend .env
+- Backend not running or wrong API URL
+- Check CORS settings (FRONTEND_URL must match)
+- Check browser console for detailed error
+
+### Login not working
+- Check Supabase connection
+- Verify PASSWORD_SALT matches between deployments
+- Check session_tokens table has entries
 
 ### Payment not detecting
-→ Check XPUB is correct
-→ Check mempool.space is working
-→ Wait 10-30 seconds for mempool to see transaction
+- Verify XPUB is correct format (zpub recommended)
+- Check mempool.space is accessible
+- Wait 10-30 seconds for mempool to see transaction
 
 ### Emails not sending
-→ Check SMTP credentials
-→ Use App Password, not regular password
-→ Check spam folder
+- Use App Password, not regular Gmail password
+- Check SMTP credentials
+- Check spam folder
+- Try Brevo if Gmail doesn't work
 
-### CORS error
-→ Backend FRONTEND_URL doesn't match actual frontend URL
+### Database errors
+- Check Supabase URL and service key
+- Verify tables exist with correct schema
+- Check Row Level Security policies
+
+### Language not switching
+- Clear browser localStorage
+- Check translations.js for missing keys
+- Verify LanguageProvider wraps App
 
 ---
 
-## Quick Commands Reference
+## File Structure
 
-```bash
-# Install dependencies
-npm install
-
-# Run frontend development server
-npm run dev
-
-# Build frontend for production
-npm run build
-
-# Run backend development server (in /backend folder)
-npm run dev
-
-# Start backend production server
-npm start
+```
+kyward/
+├── .env.example              # Frontend environment template
+├── package.json              # Frontend dependencies
+├── DEPLOYMENT-CHECKLIST.md   # This file
+├── src/
+│   ├── App.jsx              # Main app component
+│   ├── components/
+│   │   ├── AuthForm.jsx     # Login/Signup
+│   │   ├── Dashboard.jsx    # User dashboard
+│   │   ├── Questionnaire.jsx # 15-question assessment
+│   │   ├── Report.jsx       # Score report
+│   │   ├── PaymentModal.jsx # BTC payment
+│   │   └── LandingPage.jsx  # Public landing
+│   ├── services/
+│   │   ├── Database.js      # API client
+│   │   └── PaymentService.js # Payment logic
+│   ├── i18n/
+│   │   ├── translations.js  # EN/ES translations
+│   │   └── LanguageContext.jsx # i18n provider
+│   └── styles/
+│       └── Theme.js         # Design tokens
+├── backend/
+│   ├── .env.example         # Backend environment template
+│   ├── package.json         # Backend dependencies
+│   ├── server.js            # Express API server
+│   └── services/
+│       └── database.js      # Supabase integration
+└── supabase-schema.sql      # Database schema
 ```
 
 ---
 
-## Support Resources
+## Support
 
-- Vercel Docs: vercel.com/docs
-- Railway Docs: docs.railway.app
-- Bitcoin Address Check: mempool.space
-- SMTP Testing: mailtrap.io
+- **Supabase Docs:** supabase.com/docs
+- **Vercel Docs:** vercel.com/docs
+- **Railway Docs:** docs.railway.app
+- **Bitcoin Address Check:** mempool.space
+- **SMTP Testing:** mailtrap.io
 
 ---
 
-*Print this checklist and check off each step as you complete it!*
+*Last updated: January 2026*

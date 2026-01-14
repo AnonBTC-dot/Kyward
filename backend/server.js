@@ -1,4 +1,4 @@
-// KYWARD BACKEND SERVER
+// KYWARD BACKEND SERVER - FULL API
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -7,38 +7,318 @@ const { v4: uuidv4 } = require('uuid');
 const bitcoinService = require('./services/bitcoin');
 const emailService = require('./services/email');
 const paymentStore = require('./services/paymentStore');
+const db = require('./services/database');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*',
+  credentials: true
+}));
 app.use(express.json());
+
+// Auth middleware
+const authMiddleware = async (req, res, next) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const user = await db.validateSession(token);
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid or expired session' });
+  }
+
+  req.user = user;
+  req.token = token;
+  next();
+};
 
 // Pricing configuration (in USD)
 const PRICES = {
-  complete: 10,
-  consultation: 100
+  complete: 7.99,           // Monthly subscription
+  consultation: 99,         // First session
+  consultation_additional: 49  // Additional sessions
 };
 
-// Root route - Mensaje de bienvenida y estado rápido
+// ============================================
+// ROOT & HEALTH
+// ============================================
+
 app.get('/', (req, res) => {
   res.send(`
-    <div style="font-family: sans-serif; text-align: center; padding-top: 50px; background: #1a1a1a; color: white; height: 100vh;">
-      <h1 style="color: #F7931A;">Kyward API is Online 🚀</h1>
-      <p>El backend está funcionando correctamente.</p>
+    <div style="font-family: sans-serif; text-align: center; padding-top: 50px; background: #1a1a1a; color: white; min-height: 100vh;">
+      <h1 style="color: #F7931A;">Kyward API is Online</h1>
+      <p>Bitcoin Security Assessment Platform</p>
       <div style="margin-top: 20px;">
         <a href="/api/health" style="color: #F7931A; text-decoration: none; border: 1px solid #F7931A; padding: 10px 20px; border-radius: 5px;">
-          Verificar Estado del Sistema (Health Check)
+          Health Check
         </a>
       </div>
     </div>
   `);
 });
 
-// Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    services: {
+      database: !!process.env.SUPABASE_URL,
+      email: !!process.env.SMTP_HOST,
+      bitcoin: !!process.env.XPUB
+    }
+  });
+});
+
+// ============================================
+// AUTH ENDPOINTS
+// ============================================
+
+// Sign up
+app.post('/api/auth/signup', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    const result = await db.createUser(email.toLowerCase(), password);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.message });
+    }
+
+    // Auto-login after signup
+    const loginResult = await db.loginUser(email.toLowerCase(), password);
+
+    res.json({
+      success: true,
+      user: loginResult.user,
+      token: loginResult.token
+    });
+
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ error: 'Failed to create account' });
+  }
+});
+
+// Login
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const result = await db.loginUser(email.toLowerCase(), password);
+
+    if (!result.success) {
+      return res.status(401).json({ error: result.message });
+    }
+
+    res.json({
+      success: true,
+      user: result.user,
+      token: result.token
+    });
+
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+// Logout
+app.post('/api/auth/logout', authMiddleware, async (req, res) => {
+  try {
+    await db.logout(req.token);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: 'Logout failed' });
+  }
+});
+
+// Validate session
+app.get('/api/auth/validate', authMiddleware, (req, res) => {
+  res.json({
+    success: true,
+    user: req.user
+  });
+});
+
+// Check if email exists
+app.post('/api/auth/check-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const exists = await db.userExists(email.toLowerCase());
+    res.json({ exists });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to check email' });
+  }
+});
+
+// Reset password
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+      return res.status(400).json({ error: 'Email and new password are required' });
+    }
+
+    const exists = await db.userExists(email.toLowerCase());
+    if (!exists) {
+      return res.status(404).json({ error: 'No account found with this email' });
+    }
+
+    const result = await db.resetPassword(email.toLowerCase(), newPassword);
+    res.json(result);
+
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
+});
+
+// ============================================
+// USER ENDPOINTS
+// ============================================
+
+// Get current user
+app.get('/api/user', authMiddleware, (req, res) => {
+  res.json({
+    success: true,
+    user: req.user
+  });
+});
+
+// Get user usage status
+app.get('/api/user/usage', authMiddleware, async (req, res) => {
+  try {
+    const result = await db.canTakeAssessment(req.user.email);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get usage status' });
+  }
+});
+
+// Check premium access
+app.get('/api/user/premium', authMiddleware, async (req, res) => {
+  try {
+    const hasPremium = await db.hasPremiumAccess(req.user.email);
+    res.json({ hasPremium });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to check premium status' });
+  }
+});
+
+// ============================================
+// ASSESSMENT ENDPOINTS
+// ============================================
+
+// Save assessment
+app.post('/api/assessments', authMiddleware, async (req, res) => {
+  try {
+    const { score, responses } = req.body;
+
+    if (score === undefined || !responses) {
+      return res.status(400).json({ error: 'Score and responses are required' });
+    }
+
+    // Check if user can take assessment
+    const canTake = await db.canTakeAssessment(req.user.email);
+    if (!canTake.canTake) {
+      return res.status(403).json({ error: 'Monthly assessment limit reached. Upgrade to premium.' });
+    }
+
+    const success = await db.saveAssessment(req.user.email, { score, responses });
+
+    if (success) {
+      res.json({ success: true });
+    } else {
+      res.status(500).json({ error: 'Failed to save assessment' });
+    }
+
+  } catch (error) {
+    console.error('Save assessment error:', error);
+    res.status(500).json({ error: 'Failed to save assessment' });
+  }
+});
+
+// Get user assessments
+app.get('/api/assessments', authMiddleware, async (req, res) => {
+  try {
+    const assessments = await db.getUserAssessments(req.user.email);
+    res.json({ success: true, assessments });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get assessments' });
+  }
+});
+
+// ============================================
+// COMMUNITY STATS
+// ============================================
+
+// Get community stats
+app.get('/api/stats/community', async (req, res) => {
+  try {
+    const stats = await db.getCommunityStats();
+    res.json({ success: true, ...stats });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get community stats' });
+  }
+});
+
+// Compare score to community
+app.get('/api/stats/compare/:score', async (req, res) => {
+  try {
+    const score = parseInt(req.params.score);
+    if (isNaN(score) || score < 0 || score > 100) {
+      return res.status(400).json({ error: 'Invalid score' });
+    }
+
+    const comparison = await db.compareToAverage(score);
+    res.json({ success: true, ...comparison });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to compare score' });
+  }
+});
+
+// ============================================
+// PRICE ENDPOINTS
+// ============================================
+
+// Get pricing
+app.get('/api/pricing', (req, res) => {
+  res.json({
+    complete: {
+      price: PRICES.complete,
+      period: 'month',
+      currency: 'USD'
+    },
+    consultation: {
+      firstSession: PRICES.consultation,
+      additionalSession: PRICES.consultation_additional,
+      currency: 'USD'
+    }
+  });
 });
 
 // Get current BTC price
@@ -60,7 +340,7 @@ app.get('/api/price', async (req, res) => {
 // PAYMENT ENDPOINTS
 // ============================================
 
-// Create a new payment request
+// Create payment request
 app.post('/api/payments/create', async (req, res) => {
   try {
     const { email, plan } = req.body;
@@ -69,8 +349,19 @@ app.post('/api/payments/create', async (req, res) => {
       return res.status(400).json({ error: 'Email and plan are required' });
     }
 
-    const usdAmount = PRICES[plan];
-    if (!usdAmount) {
+    // Determine USD amount
+    let usdAmount;
+    if (plan === 'complete') {
+      usdAmount = PRICES.complete;
+    } else if (plan === 'consultation') {
+      // Check if user already has consultation (additional session)
+      const user = await db.getUserByEmail(email.toLowerCase());
+      if (user && user.consultationCount > 0) {
+        usdAmount = PRICES.consultation_additional;
+      } else {
+        usdAmount = PRICES.consultation;
+      }
+    } else {
       return res.status(400).json({ error: 'Invalid plan' });
     }
 
@@ -98,7 +389,7 @@ app.post('/api/payments/create', async (req, res) => {
       addressIndex: addressData.index,
       status: 'pending',
       createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min expiry
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
       priceExpiresAt: new Date(Date.now() + priceData.priceExpiresIn * 1000).toISOString()
     };
 
@@ -123,7 +414,7 @@ app.post('/api/payments/create', async (req, res) => {
   }
 });
 
-// Refresh payment amount (recalculate based on new BTC price)
+// Refresh payment price
 app.post('/api/payments/:paymentId/refresh-price', async (req, res) => {
   try {
     const { paymentId } = req.params;
@@ -137,10 +428,8 @@ app.post('/api/payments/:paymentId/refresh-price', async (req, res) => {
       return res.status(400).json({ error: 'Payment is no longer pending' });
     }
 
-    // Recalculate amount with fresh price
     const priceData = await bitcoinService.usdToSats(payment.usdAmount);
 
-    // Update payment
     payment.amountSats = priceData.sats;
     payment.amountBTC = priceData.btcAmount;
     payment.btcPriceUsd = priceData.priceUsd;
@@ -173,7 +462,6 @@ app.get('/api/payments/:paymentId/status', async (req, res) => {
       return res.status(404).json({ error: 'Payment not found' });
     }
 
-    // Check if already confirmed
     if (payment.status === 'confirmed') {
       return res.json({
         success: true,
@@ -189,14 +477,14 @@ app.get('/api/payments/:paymentId/status', async (req, res) => {
     );
 
     if (txStatus.paid) {
-      // Update payment status
       payment.status = 'confirmed';
       payment.txid = txStatus.txid;
       payment.confirmedAt = new Date().toISOString();
       paymentStore.savePayment(payment);
 
-      // Generate PDF password
-      const pdfPassword = generatePdfPassword();
+      // Upgrade user subscription
+      const upgradeResult = await db.upgradeSubscription(payment.email, payment.plan);
+      const pdfPassword = upgradeResult.pdfPassword;
 
       // Send confirmation email
       await emailService.sendPaymentConfirmation(payment.email, payment.plan, pdfPassword);
@@ -209,14 +497,12 @@ app.get('/api/payments/:paymentId/status', async (req, res) => {
       });
     }
 
-    // Check if expired
     if (new Date() > new Date(payment.expiresAt)) {
       payment.status = 'expired';
       paymentStore.savePayment(payment);
       return res.json({ success: true, status: 'expired' });
     }
 
-    // Calculate price expiration
     const priceExpiresAt = new Date(payment.priceExpiresAt);
     const now = new Date();
     const priceExpiresIn = Math.max(0, Math.ceil((priceExpiresAt - now) / 1000));
@@ -236,30 +522,42 @@ app.get('/api/payments/:paymentId/status', async (req, res) => {
   }
 });
 
-// Get payment details
-app.get('/api/payments/:paymentId', (req, res) => {
-  const { paymentId } = req.params;
-  const payment = paymentStore.getPayment(paymentId);
+// Simulate payment (demo mode)
+app.post('/api/payments/:paymentId/simulate', async (req, res) => {
+  try {
+    const { paymentId } = req.params;
+    const payment = paymentStore.getPayment(paymentId);
 
-  if (!payment) {
-    return res.status(404).json({ error: 'Payment not found' });
-  }
-
-  res.json({
-    success: true,
-    payment: {
-      id: payment.id,
-      plan: payment.plan,
-      usdAmount: payment.usdAmount,
-      amountBTC: payment.amountBTC,
-      amountSats: payment.amountSats,
-      btcPriceUsd: payment.btcPriceUsd,
-      address: payment.address,
-      status: payment.status,
-      createdAt: payment.createdAt,
-      expiresAt: payment.expiresAt
+    if (!payment) {
+      return res.status(404).json({ error: 'Payment not found' });
     }
-  });
+
+    // Only allow in demo mode
+    if (process.env.NODE_ENV === 'production' && !process.env.DEMO_MODE) {
+      return res.status(403).json({ error: 'Simulation not allowed in production' });
+    }
+
+    // Simulate confirmation
+    payment.status = 'confirmed';
+    payment.txid = 'demo_' + uuidv4();
+    payment.confirmedAt = new Date().toISOString();
+    paymentStore.savePayment(payment);
+
+    // Upgrade user
+    const upgradeResult = await db.upgradeSubscription(payment.email, payment.plan);
+    const pdfPassword = upgradeResult.pdfPassword;
+
+    res.json({
+      success: true,
+      status: 'confirmed',
+      txid: payment.txid,
+      pdfPassword
+    });
+
+  } catch (error) {
+    console.error('Simulate payment error:', error);
+    res.status(500).json({ error: 'Failed to simulate payment' });
+  }
 });
 
 // ============================================
@@ -267,15 +565,20 @@ app.get('/api/payments/:paymentId', (req, res) => {
 // ============================================
 
 // Send security plan email
-app.post('/api/email/send-plan', async (req, res) => {
+app.post('/api/email/send-plan', authMiddleware, async (req, res) => {
   try {
-    const { email, pdfPassword, htmlContent } = req.body;
+    const { htmlContent } = req.body;
 
-    if (!email || !pdfPassword) {
-      return res.status(400).json({ error: 'Email and pdfPassword are required' });
+    const hasPremium = await db.hasPremiumAccess(req.user.email);
+    if (!hasPremium) {
+      return res.status(403).json({ error: 'Premium access required' });
     }
 
-    const result = await emailService.sendSecurityPlan(email, pdfPassword, htmlContent);
+    const result = await emailService.sendSecurityPlan(
+      req.user.email,
+      req.user.pdfPassword,
+      htmlContent
+    );
 
     if (result.success) {
       res.json({ success: true, message: 'Email sent successfully' });
@@ -290,42 +593,40 @@ app.post('/api/email/send-plan', async (req, res) => {
 });
 
 // ============================================
-// UTILITY FUNCTIONS
-// ============================================
-
-function generatePdfPassword() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-  let password = '';
-  for (let i = 0; i < 12; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return password;
-}
-
-// ============================================
 // START SERVER
 // ============================================
 
 app.listen(PORT, () => {
   console.log(`
-╔═══════════════════════════════════════╗
-║         KYWARD BACKEND SERVER         ║
-╠═══════════════════════════════════════╣
-║  Status: Running                      ║
-║  Port: ${PORT}                            ║
-║  API: http://localhost:${PORT}/api       ║
-╚═══════════════════════════════════════╝
+╔═══════════════════════════════════════════╗
+║          KYWARD BACKEND SERVER            ║
+╠═══════════════════════════════════════════╣
+║  Status: Running                          ║
+║  Port: ${PORT}                                ║
+║  API: http://localhost:${PORT}/api            ║
+╚═══════════════════════════════════════════╝
   `);
 
   // Validate configuration
-  if (!process.env.XPUB) {
-    console.warn('⚠️  WARNING: XPUB not configured in .env file');
-    console.warn('   Payment addresses will not be generated correctly.');
+  console.log('\n📋 Configuration Status:');
+
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+    console.log('✅ Supabase: Configured');
   } else {
-    console.log('✅ XPUB configured:', process.env.XPUB.substring(0, 20) + '...');
+    console.log('⚠️  Supabase: Not configured (using in-memory fallback)');
   }
 
-  if (!process.env.SMTP_HOST) {
-    console.warn('⚠️  WARNING: Email (SMTP) not configured - emails will be logged to console');
+  if (process.env.XPUB) {
+    console.log('✅ Bitcoin XPUB: Configured');
+  } else {
+    console.log('⚠️  Bitcoin XPUB: Not configured');
   }
+
+  if (process.env.SMTP_HOST) {
+    console.log('✅ Email SMTP: Configured');
+  } else {
+    console.log('⚠️  Email SMTP: Not configured (emails logged to console)');
+  }
+
+  console.log('\n');
 });

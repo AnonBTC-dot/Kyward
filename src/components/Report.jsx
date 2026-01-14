@@ -5,8 +5,10 @@ import { generateRecommendations, getFreeTips, getLockedTipsPreview, generateInh
 import { openPdfPreview, downloadHtmlReport } from '../services/PdfGenerator';
 import { previewEmail, sendSecurityPlanEmail } from '../services/EmailService';
 import TelegramBlur from './TelegramBlur';
+import { useLanguage, LanguageToggle } from '../i18n';
 
 const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade }) => {
+  const { t } = useLanguage();
   const [recommendations, setRecommendations] = useState([]);
   const [freeTips, setFreeTips] = useState([]);
   const [lockedTips, setLockedTips] = useState([]);
@@ -45,9 +47,9 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
   };
 
   const getScoreLabel = (s) => {
-    if (s >= 80) return 'Excellent Security';
-    if (s >= 50) return 'Moderate Security';
-    return 'Needs Improvement';
+    if (s >= 80) return t.report.score.excellent;
+    if (s >= 50) return t.report.score.good;
+    return t.report.score.needsWork;
   };
 
   const getPriorityColor = (priority) => {
@@ -62,10 +64,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
 
   const getPriorityLabel = (priority) => {
     switch (priority) {
-      case 'critical': return 'CRITICAL';
-      case 'high': return 'HIGH';
-      case 'medium': return 'MEDIUM';
-      case 'low': return 'LOW';
+      case 'critical': return t.report.recommendations.priority.critical;
+      case 'high': return t.report.recommendations.priority.high;
+      case 'medium': return t.report.recommendations.priority.medium;
+      case 'low': return t.report.recommendations.priority.low;
       default: return 'INFO';
     }
   };
@@ -82,14 +84,19 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
       <div style={styles.reportGlow1} />
       <div style={styles.reportGlow2} />
 
+      {/* Language Toggle */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '20px 20px 0', maxWidth: '900px', margin: '0 auto' }}>
+        <LanguageToggle />
+      </div>
+
       {/* Header */}
       <header style={styles.reportHeader}>
         <div style={styles.reportBadge}>
-          Security Assessment Complete
+          {t.report.badge}
         </div>
-        <h1 className="report-title" style={styles.reportTitle}>Your Security Report</h1>
+        <h1 className="report-title" style={styles.reportTitle}>{t.report.title}</h1>
         <p className="report-subtitle" style={styles.reportSubtitle}>
-          Based on your answers, here's your personalized Bitcoin security analysis.
+          {t.report.subtitle}
         </p>
       </header>
 
@@ -120,9 +127,9 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
             {getScoreLabel(score)}
           </div>
           <p style={styles.reportScoreDesc}>
-            {score >= 80 ? 'Your Bitcoin security practices are excellent. Focus on optimization and inheritance planning.' :
-             score >= 50 ? 'You have a solid foundation, but there are important areas to improve.' :
-             'Your Bitcoin is at significant risk. Follow the recommendations below immediately.'}
+            {score >= 80 ? t.report.score.excellentDesc :
+             score >= 50 ? t.report.score.goodDesc :
+             t.report.score.needsWorkDesc}
           </p>
         </div>
       </div>
@@ -161,11 +168,11 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                   <path d="M16 3.12602C17.7252 3.57006 19 5.13616 19 7C19 8.86384 17.7252 10.4299 16 10.874" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
                 <span style={{ color: '#3b82f6', fontSize: '13px', fontWeight: '600' }}>
-                  Compare with Bitcoin Community
+                  {t.report.comparison.badge}
                 </span>
               </div>
               <h3 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', margin: 0 }}>
-                How You Compare to Other Bitcoiners
+                {t.report.comparison.title}
               </h3>
             </div>
 
@@ -184,7 +191,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 padding: '24px',
                 textAlign: 'center'
               }}>
-                <div style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '8px' }}>YOUR SCORE</div>
+                <div style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '8px' }}>{t.report.comparison.yourScore}</div>
                 <div className="comparison-stat-number" style={{ fontSize: '48px', fontWeight: '800', color: getScoreColor(score) }}>
                   {score}
                 </div>
@@ -210,7 +217,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 padding: '24px',
                 textAlign: 'center'
               }}>
-                <div style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '8px' }}>COMMUNITY AVERAGE</div>
+                <div style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '8px' }}>{t.report.comparison.communityAvg}</div>
                 <div className="comparison-stat-number" style={{ fontSize: '48px', fontWeight: '800', color: '#6b7280' }}>
                   {comparison.averageScore}
                 </div>
@@ -226,10 +233,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                     fontSize: '14px',
                     fontWeight: '700'
                   }}>
-                    {comparison.isAboveAverage ? '+' : ''}{comparison.difference} pts
+                    {comparison.isAboveAverage ? '+' : ''}{comparison.difference} {t.report.comparison.points}
                   </span>
                   <span style={{ color: '#6b7280', fontSize: '13px' }}>
-                    {comparison.isAboveAverage ? 'above avg' : comparison.isBelowAverage ? 'below avg' : 'at avg'}
+                    {comparison.isAboveAverage ? t.report.comparison.aboveAvg : comparison.isBelowAverage ? t.report.comparison.belowAvg : t.report.comparison.atAvg}
                   </span>
                 </div>
               </div>
@@ -242,12 +249,12 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 padding: '24px',
                 textAlign: 'center'
               }}>
-                <div style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '8px' }}>YOUR PERCENTILE</div>
+                <div style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '8px' }}>{t.report.comparison.percentile}</div>
                 <div className="comparison-stat-number" style={{ fontSize: '48px', fontWeight: '800', color: '#a855f7' }}>
                   {comparison.percentile}%
                 </div>
                 <div style={{ color: '#9ca3af', fontSize: '13px', marginTop: '8px' }}>
-                  Better than {comparison.percentile}% of users
+                  {t.report.comparison.betterThan} {comparison.percentile}{t.report.comparison.ofUsers}
                 </div>
               </div>
             </div>
@@ -259,7 +266,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
               padding: '24px'
             }}>
               <div style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '16px', textAlign: 'center' }}>
-                SCORE DISTRIBUTION AMONG BITCOIN HOLDERS
+                {t.report.distribution.title}
               </div>
 
               {/* Bar Chart */}
@@ -288,7 +295,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                         fontWeight: '700',
                         whiteSpace: 'nowrap'
                       }}>
-                        You're here
+                        {t.report.distribution.youAreHere}
                       </div>
                     )}
                   </div>
@@ -318,7 +325,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                         fontWeight: '700',
                         whiteSpace: 'nowrap'
                       }}>
-                        You're here
+                        {t.report.distribution.youAreHere}
                       </div>
                     )}
                   </div>
@@ -348,7 +355,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                         fontWeight: '700',
                         whiteSpace: 'nowrap'
                       }}>
-                        You're here
+                        {t.report.distribution.youAreHere}
                       </div>
                     )}
                   </div>
@@ -358,21 +365,21 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
               {/* Labels */}
               <div style={{ display: 'flex', gap: '16px' }}>
                 <div style={{ flex: 1, textAlign: 'center' }}>
-                  <div style={{ color: '#ef4444', fontSize: '12px', fontWeight: '600' }}>Needs Work</div>
+                  <div style={{ color: '#ef4444', fontSize: '12px', fontWeight: '600' }}>{t.report.distribution.needsWork}</div>
                   <div style={{ color: '#6b7280', fontSize: '11px' }}>0-49 pts</div>
                   <div style={{ color: '#9ca3af', fontSize: '13px', fontWeight: '600', marginTop: '4px' }}>
                     {comparison.distribution.needsWork}%
                   </div>
                 </div>
                 <div style={{ flex: 1, textAlign: 'center' }}>
-                  <div style={{ color: '#F7931A', fontSize: '12px', fontWeight: '600' }}>Moderate</div>
+                  <div style={{ color: '#F7931A', fontSize: '12px', fontWeight: '600' }}>{t.report.distribution.average}</div>
                   <div style={{ color: '#6b7280', fontSize: '11px' }}>50-79 pts</div>
                   <div style={{ color: '#9ca3af', fontSize: '13px', fontWeight: '600', marginTop: '4px' }}>
                     {comparison.distribution.moderate}%
                   </div>
                 </div>
                 <div style={{ flex: 1, textAlign: 'center' }}>
-                  <div style={{ color: '#22c55e', fontSize: '12px', fontWeight: '600' }}>Excellent</div>
+                  <div style={{ color: '#22c55e', fontSize: '12px', fontWeight: '600' }}>{t.report.distribution.excellent}</div>
                   <div style={{ color: '#6b7280', fontSize: '11px' }}>80-100 pts</div>
                   <div style={{ color: '#9ca3af', fontSize: '13px', fontWeight: '600', marginTop: '4px' }}>
                     {comparison.distribution.excellent}%
@@ -397,18 +404,18 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
               }}>
                 {comparison.isAboveAverage ? (
                   <>
-                    <strong>Great job!</strong> Your security score is {comparison.comparison} the average Bitcoin holder.
-                    {score < 80 && ' Keep improving to reach the top tier.'}
+                    <strong>{t.report.comparison.greatJob}</strong> {t.report.comparison.yourScoreIs} {comparison.comparison} {t.report.comparison.theAverage}
+                    {score < 80 && ` ${t.report.comparison.keepImproving}`}
                   </>
                 ) : comparison.isBelowAverage ? (
                   <>
-                    <strong>Room for improvement!</strong> Your score is {Math.abs(comparison.difference)} points below the average.
-                    Follow the recommendations below to improve your security.
+                    <strong>{t.report.comparison.roomForImprovement}</strong> {t.report.comparison.pointsBelow} {Math.abs(comparison.difference)} {t.report.comparison.pointsBelowAvg}
+                    {` ${t.report.comparison.followRecs}`}
                   </>
                 ) : (
                   <>
-                    <strong>Right at average!</strong> You're on par with most Bitcoin holders.
-                    Take action on the recommendations to stand out from the crowd.
+                    <strong>{t.report.comparison.rightAtAverage}</strong> {t.report.comparison.onParWith}
+                    {` ${t.report.comparison.takeAction}`}
                   </>
                 )}
               </p>
@@ -429,20 +436,20 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
           textAlign: 'center'
         }}>
           <div style={{ fontSize: '14px', color: '#F7931A', marginBottom: '8px', fontWeight: '600' }}>
-            YOUR ASSESSMENT FOUND
+            {t.report.freeUserSummary.found}
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
             <div>
               <div style={{ fontSize: '36px', fontWeight: '800', color: '#ef4444' }}>{criticalCount}</div>
-              <div style={{ fontSize: '13px', color: '#9ca3af' }}>Critical Issues</div>
+              <div style={{ fontSize: '13px', color: '#9ca3af' }}>{t.report.freeUserSummary.criticalIssues}</div>
             </div>
             <div>
               <div style={{ fontSize: '36px', fontWeight: '800', color: '#F7931A' }}>{recommendations.length}</div>
-              <div style={{ fontSize: '13px', color: '#9ca3af' }}>Total Recommendations</div>
+              <div style={{ fontSize: '13px', color: '#9ca3af' }}>{t.report.freeUserSummary.totalRecs}</div>
             </div>
             <div>
               <div style={{ fontSize: '36px', fontWeight: '800', color: '#22c55e' }}>3</div>
-              <div style={{ fontSize: '13px', color: '#9ca3af' }}>Free Tips Below</div>
+              <div style={{ fontSize: '13px', color: '#9ca3af' }}>{t.report.freeUserSummary.freeTips}</div>
             </div>
           </div>
         </div>
@@ -452,12 +459,12 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
       <div style={styles.reportRecsSection}>
         <div style={styles.reportRecsHeader}>
           <h2 className="recs-title" style={styles.reportRecsTitle}>
-            {isPremium ? 'Your Complete Action Plan' : 'Your Free Security Tips'}
+            {isPremium ? t.report.recommendations.premiumTitle : t.report.recommendations.freeTitle}
           </h2>
           <p style={styles.reportRecsSubtitle}>
             {isPremium
-              ? `${recommendations.length} personalized recommendations based on your answers`
-              : `Here are 3 tips to get you started. Upgrade to unlock all ${recommendations.length} recommendations.`
+              ? `${recommendations.length} ${t.report.recommendations.premiumSubtitle}`
+              : `${t.report.recommendations.freeSubtitle} ${recommendations.length} ${t.report.recommendations.freeSubtitle2}`
             }
           </p>
         </div>
@@ -514,7 +521,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
 
               {isPremium && (
                 <div style={styles.reportTipExpand}>
-                  {expandedTip === tip.id ? 'Click to collapse' : 'Click to expand'}
+                  {expandedTip === tip.id ? t.report.recommendations.clickCollapse : t.report.recommendations.clickExpand}
                 </div>
               )}
             </div>
@@ -544,10 +551,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 <span style={{ fontSize: '24px' }}>🔒</span>
                 <div>
                   <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '700', margin: 0 }}>
-                    {lockedTips.length} More Recommendations Locked
+                    {lockedTips.length} {t.report.recommendations.locked}
                   </h3>
                   <p style={{ color: '#9ca3af', fontSize: '14px', margin: '4px 0 0 0' }}>
-                    Upgrade to unlock all personalized security recommendations
+                    {t.report.recommendations.lockedDesc}
                   </p>
                 </div>
               </div>
@@ -558,7 +565,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 showLockIcon={true}
                 showStars={true}
                 accentColor="#F7931A"
-                revealText={`Unlock ${lockedTips.length} recommendations`}
+                revealText={`${t.report.recommendations.unlock} ${lockedTips.length} ${t.report.recommendations.recommendations}`}
               >
                 <div style={{
                   display: 'flex',
@@ -603,7 +610,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                   marginTop: '16px',
                   marginBottom: 0
                 }}>
-                  + {lockedTips.length - 5} more personalized recommendations...
+                  + {lockedTips.length - 5} {t.report.recommendations.moreRecommendations}
                 </p>
               )}
 
@@ -630,7 +637,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
                 </svg>
-                Unlock All Recommendations - $7.99/mo
+                {t.report.recommendations.unlock} {t.report.recommendations.recommendations} - $7.99/mo
               </button>
             </div>
 
@@ -649,10 +656,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                   color: '#fff',
                   marginBottom: '12px'
                 }}>
-                  Unlock Your Complete Security & Inheritance Plan
+                  {t.report.upgrade.title}
                 </h2>
                 <p style={{ color: '#9ca3af', fontSize: '16px', maxWidth: '600px', margin: '0 auto' }}>
-                  Don't just know your score - know exactly how to fix every issue and protect your Bitcoin for generations.
+                  {t.report.upgrade.subtitle}
                 </p>
               </div>
 
@@ -672,10 +679,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 }}>
                   <div style={{ fontSize: '32px', marginBottom: '12px' }}>📋</div>
                   <h4 style={{ color: '#fff', fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>
-                    All {recommendations.length} Recommendations
+                    {t.report.upgrade.benefits.recommendations.title.replace('All', `${recommendations.length}`)}
                   </h4>
                   <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
-                    Detailed step-by-step instructions for every security improvement, prioritized by urgency.
+                    {t.report.upgrade.benefits.recommendations.description}
                   </p>
                 </div>
 
@@ -688,10 +695,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 }}>
                   <div style={{ fontSize: '32px', marginBottom: '12px' }}>📄</div>
                   <h4 style={{ color: '#fff', fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>
-                    Password-Protected PDF
+                    {t.report.upgrade.benefits.pdf.title}
                   </h4>
                   <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
-                    Download or receive by email a secure document you can save offline and reference anytime.
+                    {t.report.upgrade.benefits.pdf.description}
                   </p>
                 </div>
 
@@ -704,10 +711,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 }}>
                   <div style={{ fontSize: '32px', marginBottom: '12px' }}>🏦</div>
                   <h4 style={{ color: '#fff', fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>
-                    Complete Inheritance Plan
+                    {t.report.upgrade.benefits.inheritance.title}
                   </h4>
                   <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
-                    Step-by-step guide to ensure your Bitcoin passes to your heirs safely using Liana time-locks.
+                    {t.report.upgrade.benefits.inheritance.description}
                   </p>
                 </div>
 
@@ -720,10 +727,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 }}>
                   <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔐</div>
                   <h4 style={{ color: '#fff', fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>
-                    Multi-Signature Setup Guide
+                    {t.report.upgrade.benefits.multisig.title}
                   </h4>
                   <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
-                    Learn how to set up 2-of-3 multisig for maximum security with Sparrow Wallet.
+                    {t.report.upgrade.benefits.multisig.description}
                   </p>
                 </div>
 
@@ -736,10 +743,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 }}>
                   <div style={{ fontSize: '32px', marginBottom: '12px' }}>💼</div>
                   <h4 style={{ color: '#fff', fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>
-                    Sparrow Wallet Tutorial
+                    {t.report.upgrade.benefits.sparrow.title}
                   </h4>
                   <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
-                    Complete guide to setting up and using Sparrow Wallet for maximum sovereignty.
+                    {t.report.upgrade.benefits.sparrow.description}
                   </p>
                 </div>
 
@@ -752,10 +759,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 }}>
                   <div style={{ fontSize: '32px', marginBottom: '12px' }}>♾️</div>
                   <h4 style={{ color: '#fff', fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>
-                    Unlimited Re-Assessments
+                    {t.report.upgrade.benefits.unlimited.title}
                   </h4>
                   <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
-                    Track your progress over time. Retake the assessment whenever you want.
+                    {t.report.upgrade.benefits.unlimited.description}
                   </p>
                 </div>
               </div>
@@ -784,10 +791,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                   </div>
                   <div>
                     <div style={{ color: '#333', fontWeight: '700', fontSize: '16px' }}>
-                      Your Personal Security & Inheritance Plan
+                      {t.report.upgrade.pdfPreview.title}
                     </div>
                     <div style={{ color: '#666', fontSize: '13px' }}>
-                      Password-protected document ready for download
+                      {t.report.upgrade.pdfPreview.subtitle}
                     </div>
                   </div>
                 </div>
@@ -799,14 +806,9 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                   color: '#666'
                 }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                    <span>✓ Executive Summary</span>
-                    <span>✓ Security Score Breakdown</span>
-                    <span>✓ All Recommendations</span>
-                    <span>✓ Sparrow Setup Guide</span>
-                    <span>✓ Multisig Instructions</span>
-                    <span>✓ Liana Inheritance Setup</span>
-                    <span>✓ Backup Strategies</span>
-                    <span>✓ Action Plan Checklist</span>
+                    {t.report.upgrade.pdfPreview.contents.map((item, i) => (
+                      <span key={i}>✓ {item}</span>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -945,19 +947,19 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
               }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '20px', marginBottom: '4px' }}>🔒</div>
-                  <div style={{ color: '#6b7280', fontSize: '12px' }}>Pay with Bitcoin</div>
+                  <div style={{ color: '#6b7280', fontSize: '12px' }}>{t.report.upgrade.trustBadges.bitcoin}</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '20px', marginBottom: '4px' }}>🚫</div>
-                  <div style={{ color: '#6b7280', fontSize: '12px' }}>No KYC Required</div>
+                  <div style={{ color: '#6b7280', fontSize: '12px' }}>{t.report.upgrade.trustBadges.noKyc}</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '20px', marginBottom: '4px' }}>⚡</div>
-                  <div style={{ color: '#6b7280', fontSize: '12px' }}>Instant Access</div>
+                  <div style={{ color: '#6b7280', fontSize: '12px' }}>{t.report.upgrade.trustBadges.instant}</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '20px', marginBottom: '4px' }}>🛡️</div>
-                  <div style={{ color: '#6b7280', fontSize: '12px' }}>100% Private</div>
+                  <div style={{ color: '#6b7280', fontSize: '12px' }}>{t.report.upgrade.trustBadges.private}</div>
                 </div>
               </div>
             </div>
@@ -972,10 +974,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 textAlign: 'center'
               }}>
                 <p style={{ color: '#ef4444', margin: 0, fontSize: '15px' }}>
-                  <strong>⚠️ You have {criticalCount} critical/high priority issues.</strong>
+                  <strong>⚠️ {t.report.upgrade.urgency.message} {criticalCount} {t.report.upgrade.urgency.issues}</strong>
                   <br />
                   <span style={{ color: '#9ca3af' }}>
-                    Get your complete plan now to protect your Bitcoin before it's too late.
+                    {t.report.upgrade.urgency.cta}
                   </span>
                 </p>
               </div>
@@ -995,16 +997,16 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 </svg>
               </div>
               <div style={styles.reportPdfInfo}>
-                <h4 style={styles.reportPdfTitle}>Download Your Inheritance Plan (PDF)</h4>
+                <h4 style={styles.reportPdfTitle}>{t.report.premium.downloadPdf}</h4>
                 <p style={styles.reportPdfText}>
-                  Complete plan with Sparrow, Liana, multisig setup guides, and step-by-step instructions.
+                  {t.report.premium.pdfDescription}
                 </p>
               </div>
               <button
                 style={styles.reportPdfBtn}
                 onClick={() => openPdfPreview(user, score, answers)}
               >
-                Download PDF
+                {t.report.premium.downloadButton}
               </button>
             </div>
 
@@ -1028,7 +1030,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                     <path d="M7 11V7C7 4.23858 9.23858 2 12 2C14.7614 2 17 4.23858 17 7V11" stroke="#F7931A" strokeWidth="2"/>
                   </svg>
                   <div>
-                    <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '2px' }}>PDF Password</div>
+                    <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '2px' }}>{t.report.premium.pdfPassword}</div>
                     <div
                       onClick={() => setShowPassword(!showPassword)}
                       style={{
@@ -1090,7 +1092,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                       cursor: 'pointer'
                     }}
                   >
-                    {showPassword ? 'Hide' : 'Show'}
+                    {showPassword ? t.report.premium.hide : t.report.premium.show}
                   </button>
                   <button
                     onClick={handleCopyPassword}
@@ -1104,7 +1106,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                       cursor: 'pointer'
                     }}
                   >
-                    {copiedPassword ? 'Copied!' : 'Copy'}
+                    {copiedPassword ? t.report.premium.copied : t.report.premium.copy}
                   </button>
                 </div>
               </div>
@@ -1115,13 +1117,13 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
                 }
               `}</style>
               <p style={styles.reportEmailNote}>
-                The PDF will be sent to <strong>{user?.email}</strong> with this password.
+                {t.report.premium.emailNote} <strong>{user?.email}</strong> {t.report.premium.withPassword}
               </p>
               <button
                 style={{...styles.reportPdfBtn, marginTop: '16px', backgroundColor: '#3b82f6'}}
                 onClick={() => previewEmail(user, score, answers)}
               >
-                Preview Email
+                {t.report.premium.previewEmail}
               </button>
             </div>
           </div>
@@ -1131,7 +1133,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
       {/* Back Button */}
       <div style={styles.reportFooter}>
         <button onClick={onBackToDashboard} style={styles.reportBackBtn}>
-          ← Back to Dashboard
+          ← {t.report.backToDashboard}
         </button>
       </div>
     </div>

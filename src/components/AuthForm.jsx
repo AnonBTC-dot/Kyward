@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { kywardDB } from '../services/Database';
 import { styles } from '../styles/Theme';
+import { useLanguage, LanguageToggle } from '../i18n';
 
 const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
+  const { t } = useLanguage();
   const [mode, setMode] = useState(initialMode); // 'login', 'signup', 'forgot', 'reset'
   const [isLogin, setIsLogin] = useState(initialMode === 'login');
   const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '', newPassword: '', confirmNewPassword: '' });
@@ -142,31 +144,31 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
   // Helper to render password requirements
   const renderPasswordRequirements = (checks) => (
     <div style={styles.passwordReqsContainer}>
-      <div style={styles.passwordReqsTitle}>Password must have:</div>
+      <div style={styles.passwordReqsTitle}>{t.auth.passwordRequirements.title}</div>
       <div style={styles.passwordReqsGrid}>
         <div style={{...styles.passwordReqItem, ...(checks.minLength ? styles.passwordReqMet : {})}}>
           <span style={{...styles.passwordReqIcon, ...(checks.minLength ? styles.passwordReqIconMet : {})}}>
             {checks.minLength ? '✓' : '○'}
           </span>
-          8+ characters
+          {t.auth.passwordRequirements.minLength}
         </div>
         <div style={{...styles.passwordReqItem, ...(checks.hasUppercase ? styles.passwordReqMet : {})}}>
           <span style={{...styles.passwordReqIcon, ...(checks.hasUppercase ? styles.passwordReqIconMet : {})}}>
             {checks.hasUppercase ? '✓' : '○'}
           </span>
-          Uppercase letter
+          {t.auth.passwordRequirements.uppercase}
         </div>
         <div style={{...styles.passwordReqItem, ...(checks.hasLowercase ? styles.passwordReqMet : {})}}>
           <span style={{...styles.passwordReqIcon, ...(checks.hasLowercase ? styles.passwordReqIconMet : {})}}>
             {checks.hasLowercase ? '✓' : '○'}
           </span>
-          Lowercase letter
+          {t.auth.passwordRequirements.lowercase}
         </div>
         <div style={{...styles.passwordReqItem, ...(checks.hasNumber ? styles.passwordReqMet : {})}}>
           <span style={{...styles.passwordReqIcon, ...(checks.hasNumber ? styles.passwordReqIconMet : {})}}>
             {checks.hasNumber ? '✓' : '○'}
           </span>
-          Number
+          {t.auth.passwordRequirements.number}
         </div>
       </div>
       <div style={styles.passwordStrengthContainer}>
@@ -186,9 +188,9 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
                  Object.values(checks).filter(Boolean).length <= 2 ? '#f59e0b' :
                  Object.values(checks).filter(Boolean).length <= 3 ? '#F7931A' : '#22c55e'
         }}>
-          {Object.values(checks).filter(Boolean).length <= 1 ? 'Weak' :
-           Object.values(checks).filter(Boolean).length <= 2 ? 'Fair' :
-           Object.values(checks).filter(Boolean).length <= 3 ? 'Good' : 'Strong'}
+          {Object.values(checks).filter(Boolean).length <= 1 ? t.auth.passwordStrength.weak :
+           Object.values(checks).filter(Boolean).length <= 2 ? t.auth.passwordStrength.fair :
+           Object.values(checks).filter(Boolean).length <= 3 ? t.auth.passwordStrength.good : t.auth.passwordStrength.strong}
         </span>
       </div>
     </div>
@@ -196,23 +198,26 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
 
   // Get title and subtitle based on mode
   const getTitle = () => {
-    if (mode === 'forgot') return 'Forgot Password';
-    if (mode === 'reset') return 'Reset Password';
-    return isLogin ? 'Welcome Back' : 'Create Account';
+    if (mode === 'forgot') return t.auth.forgotTitle;
+    if (mode === 'reset') return t.auth.resetTitle;
+    return isLogin ? t.auth.loginTitle : t.auth.signupTitle;
   };
 
   const getSubtitle = () => {
-    if (mode === 'forgot') return 'Enter your email to reset your password';
-    if (mode === 'reset') return `Create a new password for ${resetEmail}`;
-    return isLogin ? 'Enter your details to access your dashboard' : 'Join Kyward and secure your Bitcoin legacy';
+    if (mode === 'forgot') return t.auth.forgotSubtitle;
+    if (mode === 'reset') return `${t.auth.resetSubtitle} ${resetEmail}`;
+    return isLogin ? t.auth.loginSubtitle : t.auth.signupSubtitle;
   };
 
   return (
     <div style={styles.authContainer}>
       <div className="auth-card" style={styles.authCard}>
-        <button onClick={mode === 'forgot' || mode === 'reset' ? () => { setMode('login'); setIsLogin(true); setError(''); setSuccess(''); } : onBack} style={styles.backButton}>
-          ← {mode === 'forgot' || mode === 'reset' ? 'Back to Login' : 'Back'}
-        </button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <button onClick={mode === 'forgot' || mode === 'reset' ? () => { setMode('login'); setIsLogin(true); setError(''); setSuccess(''); } : onBack} style={styles.backButton}>
+            ← {mode === 'forgot' || mode === 'reset' ? t.auth.backToLogin : t.auth.back}
+          </button>
+          <LanguageToggle />
+        </div>
 
         <div style={styles.authLogo}>
           <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
@@ -230,7 +235,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
         {mode === 'forgot' && (
           <form onSubmit={handleForgotPassword}>
             <div style={styles.inputGroup}>
-              <label style={styles.label}>Email Address</label>
+              <label style={styles.label}>{t.auth.email}</label>
               <input
                 type="email"
                 name="email"
@@ -243,7 +248,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
             </div>
 
             <button type="submit" style={styles.authSubmit} disabled={loading}>
-              {loading ? <div style={styles.spinner} /> : 'Verify Email'}
+              {loading ? <div style={styles.spinner} /> : t.auth.verifyEmail}
             </button>
           </form>
         )}
@@ -252,7 +257,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
         {mode === 'reset' && (
           <form onSubmit={handleResetPassword}>
             <div style={styles.inputGroup}>
-              <label style={styles.label}>New Password</label>
+              <label style={styles.label}>{t.auth.newPassword}</label>
               <input
                 type="password"
                 name="newPassword"
@@ -267,7 +272,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
             {formData.newPassword.length > 0 && renderPasswordRequirements(newPasswordChecks)}
 
             <div style={styles.inputGroup}>
-              <label style={styles.label}>Confirm New Password</label>
+              <label style={styles.label}>{t.auth.confirmNewPassword}</label>
               <input
                 type="password"
                 name="confirmNewPassword"
@@ -283,13 +288,13 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
               />
               {formData.confirmNewPassword.length > 0 && (
                 <div style={newPasswordsMatch ? styles.matchSuccess : styles.matchError}>
-                  {newPasswordsMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
+                  {newPasswordsMatch ? `✓ ${t.auth.passwordsMatch}` : `✗ ${t.auth.passwordsNoMatch}`}
                 </div>
               )}
             </div>
 
             <button type="submit" style={styles.authSubmit} disabled={loading}>
-              {loading ? <div style={styles.spinner} /> : 'Reset Password'}
+              {loading ? <div style={styles.spinner} /> : t.auth.resetButton}
             </button>
           </form>
         )}
@@ -299,7 +304,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
           <>
             <form onSubmit={isLogin ? handleLogin : handleSignup}>
               <div style={styles.inputGroup}>
-                <label style={styles.label}>Email Address</label>
+                <label style={styles.label}>{t.auth.email}</label>
                 <input
                   type="email"
                   name="email"
@@ -312,7 +317,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
               </div>
 
               <div style={styles.inputGroup}>
-                <label style={styles.label}>Password</label>
+                <label style={styles.label}>{t.auth.password}</label>
                 <input
                   type="password"
                   name="password"
@@ -328,7 +333,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
               {isLogin && (
                 <div style={styles.forgotPasswordLink}>
                   <span style={styles.authLink} onClick={() => { setMode('forgot'); setError(''); setSuccess(''); }}>
-                    Forgot your password?
+                    {t.auth.forgotLink}
                   </span>
                 </div>
               )}
@@ -338,7 +343,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
 
               {!isLogin && (
                 <div style={styles.inputGroup}>
-                  <label style={styles.label}>Confirm Password</label>
+                  <label style={styles.label}>{t.auth.confirmPassword}</label>
                   <input
                     type="password"
                     name="confirmPassword"
@@ -354,22 +359,22 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
                   />
                   {formData.confirmPassword.length > 0 && (
                     <div style={passwordsMatch ? styles.matchSuccess : styles.matchError}>
-                      {passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
+                      {passwordsMatch ? `✓ ${t.auth.passwordsMatch}` : `✗ ${t.auth.passwordsNoMatch}`}
                     </div>
                   )}
                 </div>
               )}
 
               <button type="submit" style={styles.authSubmit} disabled={loading}>
-                {loading ? <div style={styles.spinner} /> : (isLogin ? 'Login' : 'Create Account')}
+                {loading ? <div style={styles.spinner} /> : (isLogin ? t.auth.loginButton : t.auth.signupButton)}
               </button>
             </form>
 
             <div style={styles.authFooter}>
               {isLogin ? (
-                <p>Don't have an account? <span style={styles.authLink} onClick={() => { setIsLogin(false); setMode('signup'); }}>Sign up</span></p>
+                <p>{t.auth.noAccount} <span style={styles.authLink} onClick={() => { setIsLogin(false); setMode('signup'); }}>{t.nav.signup}</span></p>
               ) : (
-                <p>Already have an account? <span style={styles.authLink} onClick={() => { setIsLogin(true); setMode('login'); }}>Login</span></p>
+                <p>{t.auth.hasAccount} <span style={styles.authLink} onClick={() => { setIsLogin(true); setMode('login'); }}>{t.nav.login}</span></p>
               )}
             </div>
           </>

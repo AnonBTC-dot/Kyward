@@ -4,79 +4,36 @@ import { styles } from '../styles/Theme';
 import { openPdfPreview } from '../services/PdfGenerator';
 import { previewEmail } from '../services/EmailService';
 import TelegramBlur from './TelegramBlur';
+import { useLanguage, LanguageToggle } from '../i18n';
 
-// Daily security tips - rotates based on date
-const DAILY_TIPS = [
-  {
-    title: "Seed Phrase Security",
-    text: "Never share your 24-word seed phrase with anyone, including us. Kyward will never ask for your keys or private information."
-  },
-  {
-    title: "Hardware Wallet Best Practice",
-    text: "Always verify receiving addresses on your hardware wallet's screen before sending Bitcoin. Never trust addresses shown only on your computer."
-  },
-  {
-    title: "Backup Redundancy",
-    text: "Store your seed phrase backup in at least 2 geographically separate locations. Consider using metal backup plates for fire and water resistance."
-  },
-  {
-    title: "Passphrase Protection",
-    text: "Consider using a 25th word (passphrase) with your seed phrase. Store it separately from your seed for maximum security."
-  },
-  {
-    title: "Test Your Recovery",
-    text: "Periodically test your wallet recovery process with a small amount. Better to discover issues now than during an emergency."
-  },
-  {
-    title: "Multisig Security",
-    text: "For significant holdings, consider a 2-of-3 multisig setup. It protects against single points of failure and physical threats."
-  },
-  {
-    title: "Cold Storage Priority",
-    text: "Keep 90%+ of your Bitcoin in cold storage. Only maintain small amounts in hot wallets for regular transactions."
-  },
-  {
-    title: "Address Privacy",
-    text: "Never reuse Bitcoin addresses. Using fresh addresses for each transaction improves your financial privacy significantly."
-  },
-  {
-    title: "Software Updates",
-    text: "Always verify software signatures before updating your wallet. Download only from official sources and check GPG signatures."
-  },
-  {
-    title: "Inheritance Planning",
-    text: "Document your Bitcoin inheritance plan. Your heirs should know how to access your Bitcoin if something happens to you."
-  },
-  {
-    title: "Dedicated Device",
-    text: "Use a dedicated device for Bitcoin transactions. Air-gapped computers provide the highest security for signing transactions."
-  },
-  {
-    title: "UTXO Management",
-    text: "Learn coin control and UTXO management. Consolidate small UTXOs during low-fee periods to save on future transaction costs."
-  },
-  {
-    title: "Security Review",
-    text: "Review your security setup quarterly. Technology and best practices evolve - make sure your setup stays current."
-  },
-  {
-    title: "Phishing Awareness",
-    text: "Be vigilant about phishing attacks. Bookmark official wallet websites and never click links in emails claiming to be from Bitcoin services."
-  },
-  {
-    title: "Physical Security",
-    text: "Consider physical security threats. Don't publicly disclose your Bitcoin holdings, and be cautious about who knows you own Bitcoin."
-  }
+// Daily security tip keys - rotates based on date
+const DAILY_TIP_KEYS = [
+  'seedPhrase',
+  'hardwareWallet',
+  'backupRedundancy',
+  'passphrase',
+  'testRecovery',
+  'multisig',
+  'coldStorage',
+  'addressPrivacy',
+  'softwareUpdates',
+  'inheritance',
+  'dedicatedDevice',
+  'utxoManagement',
+  'securityReview',
+  'phishing',
+  'physicalSecurity'
 ];
 
-// Get daily tip based on current date (changes once per day)
-const getDailyTip = () => {
+// Get daily tip key based on current date (changes once per day)
+const getDailyTipKey = () => {
   const today = new Date();
   const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-  return DAILY_TIPS[dayOfYear % DAILY_TIPS.length];
+  return DAILY_TIP_KEYS[dayOfYear % DAILY_TIP_KEYS.length];
 };
 
 const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport }) => {
+  const { t } = useLanguage();
   const [copiedPassword, setCopiedPassword] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -152,6 +109,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
             <span style={styles.navLogoText}>Kyward</span>
           </div>
           <div style={styles.navButtons}>
+            <LanguageToggle style={{ marginRight: '12px' }} />
             {/* Plan Badge */}
             <span style={{
               padding: '6px 14px',
@@ -162,10 +120,10 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
               color: getPlanColor(),
               marginRight: '12px'
             }}>
-              {getPlanName()} Plan
+              {getPlanName()} {t.dashboard.stats.plan}
             </span>
             <span style={{ color: '#888', marginRight: '15px', fontSize: '14px' }}>{user.email}</span>
-            <button onClick={onLogout} style={styles.navButtonLogin}>Logout</button>
+            <button onClick={onLogout} style={styles.navButtonLogin}>{t.nav.logout}</button>
           </div>
         </div>
       </nav>
@@ -182,16 +140,13 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
           <header className="dashboard-header" style={styles.dashboardHeader}>
             <div style={styles.dashboardWelcomeBadge}>
               <span style={styles.dashboardBadgeIcon}>🛡️</span>
-              Security Dashboard
+              {t.nav.dashboard}
             </div>
             <h1 className="dashboard-title" style={styles.dashboardTitle}>
-              Welcome back, <span style={styles.dashboardTitleAccent}>Bitcoiner</span>
+              {t.dashboard.welcome} <span style={styles.dashboardTitleAccent}>{t.dashboard.welcomeUser}</span>
             </h1>
             <p className="dashboard-subtitle" style={styles.dashboardSubtitle}>
-              {isPremium
-                ? 'Manage your security assessments, download reports, and track your progress.'
-                : 'Take your security assessment and discover how to better protect your Bitcoin.'
-              }
+              {t.dashboard.subtitle}
             </p>
           </header>
 
@@ -223,7 +178,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                 <div style={{...styles.dashStatNum, color: lastScore >= 80 ? '#22c55e' : lastScore >= 50 ? '#F7931A' : lastScore ? '#ef4444' : '#6b7280'}}>
                   {lastScore || '--'}
                 </div>
-                <div style={styles.dashStatLabel}>Security Score</div>
+                <div style={styles.dashStatLabel}>{t.dashboard.stats.securityScore}</div>
                 {lastScore && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
                     <span style={{
@@ -231,7 +186,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                       backgroundColor: lastScore >= 80 ? 'rgba(34,197,94,0.15)' : lastScore >= 50 ? 'rgba(247,147,26,0.15)' : 'rgba(239,68,68,0.15)',
                       color: lastScore >= 80 ? '#22c55e' : lastScore >= 50 ? '#F7931A' : '#ef4444'
                     }}>
-                      {lastScore >= 80 ? 'Excellent' : lastScore >= 50 ? 'Moderate' : 'Needs Work'}
+                      {lastScore >= 80 ? t.report.score.excellent : lastScore >= 50 ? t.report.score.good : t.report.score.needsWork}
                     </span>
                     {scoreTrend !== null && (
                       <span style={{
@@ -270,14 +225,14 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                 <div style={{...styles.dashStatNum, color: getPlanColor(), fontSize: '24px'}}>
                   {getPlanName()}
                 </div>
-                <div style={styles.dashStatLabel}>Current Plan</div>
+                <div style={styles.dashStatLabel}>{t.dashboard.stats.plan}</div>
                 <div style={{
                   ...styles.dashStatBadge,
                   backgroundColor: `${getPlanColor()}15`,
                   color: getPlanColor(),
                   marginTop: '8px'
                 }}>
-                  {isPremium ? '✓ Active' : 'Limited'}
+                  {isPremium ? `✓ ${t.dashboard.stats.active}` : 'Limited'}
                 </div>
               </div>
             </div>
@@ -297,9 +252,9 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                 <div style={{...styles.dashStatNum, color: '#3b82f6'}}>
                   {user.assessments?.length || 0}
                 </div>
-                <div style={styles.dashStatLabel}>Assessments Taken</div>
+                <div style={styles.dashStatLabel}>{t.dashboard.stats.assessments}</div>
                 <div style={{...styles.dashStatBadge, backgroundColor: 'rgba(59,130,246,0.15)', color: '#3b82f6', marginTop: '8px'}}>
-                  {isPremium ? '∞ Unlimited' : `${usageStatus.remaining} remaining`}
+                  {isPremium ? `∞ ${t.dashboard.cta.unlimitedNote.split(' ').slice(-1)[0]}` : `${usageStatus.remaining} remaining`}
                 </div>
               </div>
             </div>
@@ -322,7 +277,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                   <path d="M16 3.13C17.73 3.57 19 5.14 19 7C19 8.86 17.73 10.43 16 10.87" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
                 <h3 style={{ color: '#fff', fontSize: '16px', fontWeight: '600', margin: 0 }}>
-                  How You Compare
+                  {t.report.comparison.title}
                 </h3>
               </div>
 
@@ -341,7 +296,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                   padding: '16px',
                   textAlign: 'center'
                 }}>
-                  <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px' }}>YOU</div>
+                  <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px' }}>{t.dashboard.comparison.you}</div>
                   <div className="comparison-number" style={{
                     fontSize: '28px',
                     fontWeight: '800',
@@ -359,7 +314,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                   padding: '16px',
                   textAlign: 'center'
                 }}>
-                  <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px' }}>AVG</div>
+                  <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px' }}>{t.dashboard.comparison.avg}</div>
                   <div className="comparison-number" style={{ fontSize: '28px', fontWeight: '800', color: '#6b7280' }}>
                     {comparison.averageScore}
                   </div>
@@ -373,7 +328,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                   padding: '16px',
                   textAlign: 'center'
                 }}>
-                  <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px' }}>TOP</div>
+                  <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '4px' }}>{t.dashboard.comparison.top}</div>
                   <div className="comparison-number" style={{ fontSize: '28px', fontWeight: '800', color: '#a855f7' }}>
                     {100 - comparison.percentile}%
                   </div>
@@ -496,7 +451,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                 marginBottom: '32px'
               }}>
                 <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '700', marginBottom: '24px', margin: '0 0 24px 0' }}>
-                  Quick Actions
+                  {t.dashboard.quickActions.title}
                 </h3>
                 <div className="quick-actions-grid" style={{
                   display: 'grid',
@@ -526,7 +481,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                       <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       <path d="M3 17V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                     </svg>
-                    Download PDF
+                    {t.dashboard.quickActions.downloadPdf}
                   </button>
 
                   {/* Email Report */}
@@ -552,7 +507,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                       <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" strokeWidth="2"/>
                       <path d="M3 7L12 13L21 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                     </svg>
-                    Email Report
+                    {t.dashboard.quickActions.emailReport}
                   </button>
 
                   {/* View Report */}
@@ -578,7 +533,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                       <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
                       <path d="M2 12C4 7 7.5 4 12 4C16.5 4 20 7 22 12C20 17 16.5 20 12 20C7.5 20 4 17 2 12Z" stroke="currentColor" strokeWidth="2"/>
                     </svg>
-                    View Report
+                    {t.dashboard.quickActions.viewReport}
                   </button>
 
                   {/* New Assessment */}
@@ -603,7 +558,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
                       <path d="M12 8V16M8 12H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                     </svg>
-                    New Assessment
+                    {t.dashboard.quickActions.takeAssessment}
                   </button>
                 </div>
               </div>
@@ -639,7 +594,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                       </svg>
                     </div>
                     <div>
-                      <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>PDF Password</div>
+                      <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>{t.dashboard.pdfPassword.label}</div>
                       {/* Compact Password with Blur Effect */}
                       <div
                         onClick={() => setShowPassword(!showPassword)}
@@ -710,7 +665,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                         cursor: 'pointer'
                       }}
                     >
-                      {showPassword ? 'Hide' : 'Show'}
+                      {showPassword ? t.dashboard.pdfPassword.hide : t.dashboard.pdfPassword.show}
                     </button>
                     <button
                       onClick={handleCopyPassword}
@@ -728,7 +683,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                         cursor: 'pointer'
                       }}
                     >
-                      {copiedPassword ? 'Copied!' : 'Copy'}
+                      {copiedPassword ? t.dashboard.pdfPassword.copied : t.dashboard.pdfPassword.copy}
                     </button>
                   </div>
                 </div>
@@ -806,10 +761,10 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
               }}>
                 <div style={{ fontSize: '40px', marginBottom: '16px' }}>🔒</div>
                 <h3 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', marginBottom: '12px' }}>
-                  Unlock Your Complete Security Plan
+                  {t.dashboard.upgrade.title}
                 </h3>
                 <p style={{ color: '#9ca3af', fontSize: '15px', maxWidth: '500px', margin: '0 auto 24px' }}>
-                  Get unlimited assessments, download your personalized PDF report, and access your complete inheritance plan.
+                  {t.dashboard.upgrade.description}
                 </p>
 
                 {/* Locked Features */}
@@ -821,16 +776,16 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                   flexWrap: 'wrap'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
-                    <span>🔒</span> Download PDF
+                    <span>🔒</span> {t.dashboard.upgrade.features.pdf}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
-                    <span>🔒</span> Email Report
+                    <span>🔒</span> {t.dashboard.upgrade.features.email}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
-                    <span>🔒</span> All Recommendations
+                    <span>🔒</span> {t.dashboard.upgrade.features.recommendations}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#6b7280' }}>
-                    <span>🔒</span> Inheritance Plan
+                    <span>🔒</span> {t.dashboard.upgrade.features.inheritance}
                   </div>
                 </div>
 
@@ -849,10 +804,10 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                         cursor: 'pointer'
                       }}
                     >
-                      Subscribe - $7.99/month
+                      {t.dashboard.upgrade.subscribeButton}
                     </button>
                     <p style={{ fontSize: '11px', color: '#9ca3af', marginTop: '8px', marginBottom: 0 }}>
-                      Cancel anytime
+                      {t.dashboard.upgrade.cancelNote}
                     </p>
                   </div>
                   <div style={{ textAlign: 'center' }}>
@@ -869,10 +824,10 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                         cursor: 'pointer'
                       }}
                     >
-                      Book Consultation - $99
+                      {t.dashboard.upgrade.consultButton}
                     </button>
                     <p style={{ fontSize: '11px', color: '#9ca3af', marginTop: '8px', marginBottom: 0 }}>
-                      1-hour session
+                      {t.dashboard.upgrade.sessionNote}
                     </p>
                   </div>
                 </div>
@@ -889,10 +844,10 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                   textAlign: 'center'
                 }}>
                   <p style={{ color: '#ef4444', margin: 0, fontSize: '15px' }}>
-                    <strong>Monthly assessment limit reached.</strong>
+                    <strong>{t.dashboard.upgrade.limitReached}</strong>
                     <br />
                     <span style={{ color: '#9ca3af' }}>
-                      Next free assessment available in {getDaysUntilNextAssessment()} days, or upgrade for unlimited access.
+                      {t.dashboard.upgrade.nextAssessment} {getDaysUntilNextAssessment()} {t.dashboard.upgrade.days}, {t.dashboard.upgrade.upgradeForUnlimited}
                     </span>
                   </p>
                 </div>
@@ -912,20 +867,17 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
               </div>
               <div style={styles.dashCtaInfo}>
                 <h2 style={styles.dashCtaTitle}>
-                  {lastAssessment ? 'Ready for a new assessment?' : 'Take Your First Assessment'}
+                  {lastAssessment ? t.dashboard.cta.newAssessment : t.dashboard.cta.firstAssessment}
                 </h2>
                 <p style={styles.dashCtaText}>
-                  {lastAssessment
-                    ? 'Check if your security practices have improved since your last assessment.'
-                    : 'Answer 15 questions about your Bitcoin security to get your personalized score and recommendations.'
-                  }
+                  {lastAssessment ? t.dashboard.cta.newDesc : t.dashboard.cta.firstDesc}
                 </p>
               </div>
             </div>
 
             {usageStatus.canTake ? (
               <button onClick={onStartAssessment} className="dash-cta-button" style={styles.dashCtaButton}>
-                <span>{lastAssessment ? 'Start New Assessment' : 'Start Assessment'}</span>
+                <span>{lastAssessment ? t.dashboard.cta.startNewButton : t.dashboard.cta.startButton}</span>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -933,10 +885,10 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
             ) : (
               <div style={styles.dashCtaLimited}>
                 <button style={styles.dashCtaButtonDisabled} disabled>
-                  Limit Reached
+                  {t.dashboard.cta.limitButton}
                 </button>
                 <p style={styles.dashCtaUpgrade}>
-                  {isPremium ? 'You have unlimited assessments' : 'Upgrade to Premium for unlimited assessments'}
+                  {isPremium ? t.dashboard.cta.unlimitedNote : t.dashboard.cta.upgradeNote}
                 </p>
               </div>
             )}
@@ -944,7 +896,8 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
 
           {/* Daily Security Tip */}
           {(() => {
-            const dailyTip = getDailyTip();
+            const tipKey = getDailyTipKey();
+            const dailyTip = t.tips[tipKey];
             return (
               <div style={styles.dashTipCard}>
                 <div style={styles.dashTipCardGlow} />
@@ -959,7 +912,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     <h3 style={{ ...styles.dashTipTitle, margin: 0 }}>{dailyTip.title}</h3>
                     <span style={{ fontSize: '10px', color: '#6b7280', background: 'rgba(107,114,128,0.15)', padding: '2px 8px', borderRadius: '10px' }}>
-                      Daily Tip
+                      {t.dashboard.dailyTip}
                     </span>
                   </div>
                   <p style={styles.dashTipText}>
@@ -974,7 +927,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
           {user.assessments && user.assessments.length > 0 && (
             <div style={styles.dashHistorySection}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h3 style={styles.dashHistoryTitle}>Assessment History</h3>
+                <h3 style={styles.dashHistoryTitle}>{t.dashboard.history.title}</h3>
                 {user.assessments.length > 3 && (
                   <button
                     onClick={() => setShowAllHistory(!showAllHistory)}
@@ -987,7 +940,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                       cursor: 'pointer'
                     }}
                   >
-                    {showAllHistory ? 'Show Less' : `View All (${user.assessments.length})`}
+                    {showAllHistory ? t.dashboard.history.showLess : `${t.dashboard.history.viewAll} (${user.assessments.length})`}
                   </button>
                 )}
               </div>
@@ -1018,12 +971,12 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                         ...styles.dashHistoryStatus,
                         color: assessment.score >= 80 ? '#22c55e' : assessment.score >= 50 ? '#F7931A' : '#ef4444'
                       }}>
-                        {assessment.score >= 80 ? 'Excellent' : assessment.score >= 50 ? 'Moderate' : 'Needs Work'}
+                        {assessment.score >= 80 ? t.report.score.excellent : assessment.score >= 50 ? t.report.score.good : t.report.score.needsWork}
                       </div>
                     </div>
                     {isPremium && (
                       <div style={{ color: '#6b7280', fontSize: '12px' }}>
-                        View →
+                        {t.dashboard.history.viewReport} →
                       </div>
                     )}
                   </div>

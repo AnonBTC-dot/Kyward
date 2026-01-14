@@ -1,7 +1,9 @@
 import React from 'react';
 import { styles } from '../styles/Theme';
+import { useLanguage, LanguageToggle } from '../i18n';
 
 const LandingPage = ({ onLogin, onSignup }) => {
+  const { t } = useLanguage();
   return (
     <div style={styles.landingContainer}>
       {/* NAVIGATION */}
@@ -16,8 +18,9 @@ const LandingPage = ({ onLogin, onSignup }) => {
             <span className="nav-logo-text" style={styles.navLogoText}>Kyward</span>
           </div>
           <div className="nav-buttons" style={styles.navButtons}>
-            <button onClick={onLogin} className="nav-button" style={styles.navButtonLogin}>Login</button>
-            <button onClick={onSignup} className="nav-button" style={styles.navButtonSignup}>Get Started</button>
+            <LanguageToggle />
+            <button onClick={onLogin} className="nav-button" style={styles.navButtonLogin}>{t.nav.login}</button>
+            <button onClick={onSignup} className="nav-button" style={styles.navButtonSignup}>{t.nav.getStarted}</button>
           </div>
         </div>
       </nav>
@@ -30,41 +33,40 @@ const LandingPage = ({ onLogin, onSignup }) => {
         </div>
 
         <div className="hero-content" style={styles.heroContent}>
-          <div style={styles.heroBadge}>₿ITCOIN SECURITY MADE SIMPLE</div>
+          <div style={styles.heroBadge}>{t.landing.heroBadge}</div>
           <h1 className="hero-title" style={styles.heroTitle}>
-            Stop Guessing.<br />
-            <span style={styles.heroTitleAccent}>Secure Your Sats</span><br />
-            The Right Way.
+            {t.landing.heroLine1}<br />
+            <span style={styles.heroTitleAccent}>{t.landing.heroLine2}</span><br />
+            {t.landing.heroLine3}
           </h1>
           <p className="hero-subtitle" style={styles.heroSubtitle}>
-            A questionnaire-based assessment that shows you exactly how to protect your private keys.
-            No BS. No wallet recommendations. Just honest security advice from fellow Bitcoiners.
+            {t.landing.heroSubtitle}
           </p>
           <div className="hero-buttons" style={styles.heroButtons}>
             <button onClick={onSignup} style={styles.heroCTA}>
-              Start Free Assessment
+              {t.landing.heroCta}
               <span style={styles.heroCtaArrow}>→</span>
             </button>
             <button onClick={() => {
               document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
             }} style={styles.heroSecondary}>
-              See How It Works
+              {t.landing.heroSecondaryCta}
             </button>
           </div>
           <div className="hero-stats" style={styles.heroStats}>
             <div style={styles.heroStat}>
-              <div style={styles.heroStatNumber}>100%</div>
-              <div style={styles.heroStatLabel}>Non-Custodial</div>
+              <div style={styles.heroStatNumber}>{t.landing.heroStats.nonCustodialValue}</div>
+              <div style={styles.heroStatLabel}>{t.landing.heroStats.nonCustodial}</div>
             </div>
             <div className="hero-stat-divider" style={styles.heroStatDivider} />
             <div style={styles.heroStat}>
-              <div style={styles.heroStatNumber}>0</div>
-              <div style={styles.heroStatLabel}>Data Stored</div>
+              <div style={styles.heroStatNumber}>{t.landing.heroStats.dataStoredValue}</div>
+              <div style={styles.heroStatLabel}>{t.landing.heroStats.dataStored}</div>
             </div>
             <div className="hero-stat-divider" style={styles.heroStatDivider} />
             <div style={styles.heroStat}>
-              <div style={styles.heroStatNumber}>∞</div>
-              <div style={styles.heroStatLabel}>Privacy First</div>
+              <div style={styles.heroStatNumber}>{t.landing.heroStats.privacyFirstValue}</div>
+              <div style={styles.heroStatLabel}>{t.landing.heroStats.privacyFirst}</div>
             </div>
           </div>
         </div>
@@ -79,14 +81,14 @@ const LandingPage = ({ onLogin, onSignup }) => {
               </div>
             </div>
             <div style={styles.mockupContent}>
-              <div style={styles.mockupTitle}>Your Security Score</div>
+              <div style={styles.mockupTitle}>{t.landing.mockup.title}</div>
               <div style={styles.mockupScoreContainer}>
                 <svg width="120" height="120" viewBox="0 0 120 120">
                   <circle cx="60" cy="60" r="54" fill="none" stroke="#2A2A2A" strokeWidth="8"/>
-                  <circle 
-                    cx="60" cy="60" r="54" 
-                    fill="none" 
-                    stroke="#F7931A" 
+                  <circle
+                    cx="60" cy="60" r="54"
+                    fill="none"
+                    stroke="#F7931A"
                     strokeWidth="8"
                     strokeDasharray="339.292"
                     strokeDashoffset="84.823"
@@ -98,13 +100,13 @@ const LandingPage = ({ onLogin, onSignup }) => {
               </div>
               <div style={styles.mockupRecommendations}>
                 <div style={styles.mockupRecItem}>
-                  <span style={styles.mockupRecIcon}>✓</span> Hardware wallet detected
+                  <span style={styles.mockupRecIcon}>✓</span> {t.landing.mockup.rec1}
                 </div>
                 <div style={styles.mockupRecItem}>
-                  <span style={{...styles.mockupRecIcon, backgroundColor: '#F7931A'}}>!</span> Consider multi-sig setup
+                  <span style={{...styles.mockupRecIcon, backgroundColor: '#F7931A'}}>!</span> {t.landing.mockup.rec2}
                 </div>
                 <div style={styles.mockupRecItem}>
-                  <span style={styles.mockupRecIcon}>✓</span> Backup strategy solid
+                  <span style={styles.mockupRecIcon}>✓</span> {t.landing.mockup.rec3}
                 </div>
               </div>
             </div>
@@ -117,9 +119,9 @@ const LandingPage = ({ onLogin, onSignup }) => {
         <div style={styles.pvuSectionGlow} />
         <div style={styles.pvuSectionGlow2} />
         <div style={styles.sectionContent}>
-          <h2 className="section-title" style={styles.sectionTitle}>What Makes Kyward Different?</h2>
+          <h2 className="section-title" style={styles.sectionTitle}>{t.landing.whyTitle}</h2>
           <p className="section-subtitle" style={styles.sectionSubtitle}>
-            We're not trying to sell you a wallet. We're here to educate you on securing what's already yours.
+            {t.landing.whySubtitle}
           </p>
           <div className="pvu-grid" style={styles.pvuGrid}>
             {/* Card 1 - Personalized Assessment */}
@@ -141,8 +143,8 @@ const LandingPage = ({ onLogin, onSignup }) => {
                 </div>
               </div>
               <div style={styles.pvuCardContent}>
-                <h3 style={styles.pvuTitle}>Personalized Assessment</h3>
-                <p style={styles.pvuText}>Answer 10-15 questions about your current setup. Get a custom security score and actionable recommendations tailored to YOUR situation.</p>
+                <h3 style={styles.pvuTitle}>{t.landing.whyCards.personalized.title}</h3>
+                <p style={styles.pvuText}>{t.landing.whyCards.personalized.description}</p>
               </div>
             </div>
 
@@ -162,8 +164,8 @@ const LandingPage = ({ onLogin, onSignup }) => {
                 </div>
               </div>
               <div style={styles.pvuCardContent}>
-                <h3 style={styles.pvuTitle}>Zero Data Storage</h3>
-                <p style={styles.pvuText}>Your answers never leave your device. We don't store, track, or sell your data. Ever.</p>
+                <h3 style={styles.pvuTitle}>{t.landing.whyCards.zeroData.title}</h3>
+                <p style={styles.pvuText}>{t.landing.whyCards.zeroData.description}</p>
               </div>
             </div>
 
@@ -182,8 +184,8 @@ const LandingPage = ({ onLogin, onSignup }) => {
                 </div>
               </div>
               <div style={styles.pvuCardContent}>
-                <h3 style={styles.pvuTitle}>Education First</h3>
-                <p style={styles.pvuText}>Learn WHY each recommendation matters. Understand the trade-offs. Make informed decisions.</p>
+                <h3 style={styles.pvuTitle}>{t.landing.whyCards.education.title}</h3>
+                <p style={styles.pvuText}>{t.landing.whyCards.education.description}</p>
               </div>
             </div>
 
@@ -203,8 +205,8 @@ const LandingPage = ({ onLogin, onSignup }) => {
                 </div>
               </div>
               <div style={styles.pvuCardContent}>
-                <h3 style={styles.pvuTitle}>No Wallet Pushing</h3>
-                <p style={styles.pvuText}>We're not affiliated with any wallet provider. Our recommendations are based purely on security best practices.</p>
+                <h3 style={styles.pvuTitle}>{t.landing.whyCards.noWallet.title}</h3>
+                <p style={styles.pvuText}>{t.landing.whyCards.noWallet.description}</p>
               </div>
             </div>
           </div>
@@ -215,8 +217,8 @@ const LandingPage = ({ onLogin, onSignup }) => {
       <section id="how-it-works" style={styles.howSection}>
         <div style={styles.howSectionGlow} />
         <div style={styles.sectionContent}>
-          <h2 className="section-title" style={styles.sectionTitle}>How It Works</h2>
-          <p className="section-subtitle" style={styles.sectionSubtitle}>Three simple steps to better security</p>
+          <h2 className="section-title" style={styles.sectionTitle}>{t.landing.howTitle}</h2>
+          <p className="section-subtitle" style={styles.sectionSubtitle}>{t.landing.howSubtitle}</p>
           <div className="steps-grid" style={styles.stepsContainer}>
             {/* Step 1 - Take Assessment */}
             <div className="step-card" style={styles.stepCard}>
@@ -236,9 +238,9 @@ const LandingPage = ({ onLogin, onSignup }) => {
                 </div>
               </div>
               <div style={styles.stepContent}>
-                <div style={styles.stepNumber}>01</div>
-                <h3 style={styles.stepTitle}>Take the Assessment</h3>
-                <p style={styles.stepText}>Answer questions about your current Bitcoin storage methods and security habits. Takes just 5 minutes.</p>
+                <div style={styles.stepNumber}>{t.landing.howSteps.step1.number}</div>
+                <h3 style={styles.stepTitle}>{t.landing.howSteps.step1.title}</h3>
+                <p style={styles.stepText}>{t.landing.howSteps.step1.description}</p>
               </div>
             </div>
 
@@ -258,9 +260,9 @@ const LandingPage = ({ onLogin, onSignup }) => {
                 </div>
               </div>
               <div style={styles.stepContent}>
-                <div style={styles.stepNumber}>02</div>
-                <h3 style={styles.stepTitle}>Get Your Score</h3>
-                <p style={styles.stepText}>Receive a personalized security score from 0-100 with a detailed breakdown of your strengths and weaknesses.</p>
+                <div style={styles.stepNumber}>{t.landing.howSteps.step2.number}</div>
+                <h3 style={styles.stepTitle}>{t.landing.howSteps.step2.title}</h3>
+                <p style={styles.stepText}>{t.landing.howSteps.step2.description}</p>
               </div>
             </div>
 
@@ -280,9 +282,9 @@ const LandingPage = ({ onLogin, onSignup }) => {
                 </div>
               </div>
               <div style={styles.stepContent}>
-                <div style={styles.stepNumber}>03</div>
-                <h3 style={styles.stepTitle}>Follow the Plan</h3>
-                <p style={styles.stepText}>Get a step-by-step action plan with prioritized recommendations tailored to your security level.</p>
+                <div style={styles.stepNumber}>{t.landing.howSteps.step3.number}</div>
+                <h3 style={styles.stepTitle}>{t.landing.howSteps.step3.title}</h3>
+                <p style={styles.stepText}>{t.landing.howSteps.step3.description}</p>
               </div>
             </div>
           </div>
@@ -293,8 +295,8 @@ const LandingPage = ({ onLogin, onSignup }) => {
       <section style={styles.pricingSection}>
         <div style={styles.pricingSectionGlow} />
         <div style={styles.sectionContent}>
-          <h2 className="section-title" style={styles.sectionTitle}>Simple, Honest Pricing</h2>
-          <p className="section-subtitle" style={styles.sectionSubtitle}>No hidden fees. No subscriptions. Pay once, own forever.</p>
+          <h2 className="section-title" style={styles.sectionTitle}>{t.landing.pricingTitle}</h2>
+          <p className="section-subtitle" style={styles.sectionSubtitle}>{t.landing.pricingSubtitle}</p>
           <div className="pricing-grid" style={styles.pricingGrid}>
             {/* Free Plan */}
             <div className="pricing-card" style={styles.pricingCard}>
@@ -302,30 +304,30 @@ const LandingPage = ({ onLogin, onSignup }) => {
                 <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowFree}} />
                 <div className="floating-element-slow" style={{...styles.pricingFloatingElement, width: '50px', height: '35px', top: '20px', right: '30px', '--rotate': '8deg'}} />
                 <div className="floating-element" style={{...styles.pricingFloatingElement, width: '35px', height: '35px', bottom: '10px', left: '25px', borderRadius: '50%'}} />
-                <div style={styles.pricingBadge}>FREE FOREVER</div>
-                <h3 style={styles.pricingTitle}>Starter</h3>
-                <div style={styles.pricingPrice}>$0<span style={styles.pricingPeriod}></span></div>
+                <div style={styles.pricingBadge}>{t.landing.plans.free.badge}</div>
+                <h3 style={styles.pricingTitle}>{t.landing.plans.free.name}</h3>
+                <div style={styles.pricingPrice}>{t.landing.plans.free.price}<span style={styles.pricingPeriod}></span></div>
               </div>
               <div style={styles.pricingCardBody}>
                 <ul style={styles.pricingFeatures}>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Full security questionnaire
+                    {t.landing.plans.free.features[0]}
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Security score (0-100)
+                    {t.landing.plans.free.features[1]}
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    3 basic security tips
+                    {t.landing.plans.free.features[2]}
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={{...styles.pricingFeatureIcon, backgroundColor: 'rgba(107,114,128,0.15)', color: '#6b7280'}}>-</span>
-                    <span style={{color: '#6b7280'}}>Full action plan locked</span>
+                    <span style={{color: '#6b7280'}}>{t.landing.plans.free.features[3]}</span>
                   </li>
                 </ul>
-                <button onClick={onSignup} style={styles.pricingButton}>Start Free</button>
+                <button onClick={onSignup} style={styles.pricingButton}>{t.landing.plans.free.cta}</button>
               </div>
             </div>
 
@@ -335,37 +337,37 @@ const LandingPage = ({ onLogin, onSignup }) => {
                 <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowFeatured}} />
                 <div className="floating-element" style={{...styles.pricingFloatingElement, width: '55px', height: '40px', top: '15px', right: '25px', '--rotate': '-10deg'}} />
                 <div className="floating-element-slow" style={{...styles.pricingFloatingElement, width: '40px', height: '40px', bottom: '15px', left: '20px', borderRadius: '50%'}} />
-                <div style={{...styles.pricingBadge, ...styles.pricingBadgeFeatured}}>BEST VALUE</div>
-                <h3 style={styles.pricingTitle}>Complete</h3>
-                <div style={{...styles.pricingPrice, ...styles.pricingPriceFeatured}}>$7.99<span style={styles.pricingPeriod}>/month</span></div>
+                <div style={{...styles.pricingBadge, ...styles.pricingBadgeFeatured}}>{t.landing.plans.complete.badge}</div>
+                <h3 style={styles.pricingTitle}>{t.landing.plans.complete.name}</h3>
+                <div style={{...styles.pricingPrice, ...styles.pricingPriceFeatured}}>{t.landing.plans.complete.price}<span style={styles.pricingPeriod}>{t.landing.plans.complete.period}</span></div>
               </div>
               <div style={styles.pricingCardBody}>
                 <ul style={styles.pricingFeatures}>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Everything in Starter
+                    {t.landing.plans.complete.features[0]}
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    All security tips unlocked
+                    {t.landing.plans.complete.features[1]}
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Personalized action plan
+                    {t.landing.plans.complete.features[2]}
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Unlimited PDF downloads
+                    {t.landing.plans.complete.features[3]}
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Unlimited re-assessments
+                    {t.landing.plans.complete.features[4]}
                   </li>
                 </ul>
                 <p style={{ fontSize: '12px', color: '#9ca3af', textAlign: 'center', marginBottom: '16px', marginTop: '-8px' }}>
-                  Cancel anytime. Billed monthly.
+                  {t.landing.plans.complete.cancelNote}
                 </p>
-                <button onClick={onSignup} style={styles.pricingButtonFeatured}>Subscribe Now</button>
+                <button onClick={onSignup} style={styles.pricingButtonFeatured}>{t.landing.plans.complete.cta}</button>
               </div>
             </div>
 
@@ -375,34 +377,34 @@ const LandingPage = ({ onLogin, onSignup }) => {
                 <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowPro}} />
                 <div className="floating-element-slow" style={{...styles.pricingFloatingElement, width: '45px', height: '45px', top: '18px', right: '28px', '--rotate': '12deg'}} />
                 <div className="floating-element" style={{...styles.pricingFloatingElement, width: '38px', height: '30px', bottom: '12px', left: '22px', borderRadius: '8px'}} />
-                <div style={{...styles.pricingBadge, ...styles.pricingBadgePro}}>WHITE GLOVE</div>
-                <h3 style={styles.pricingTitle}>Consultation</h3>
-                <div style={{...styles.pricingPrice, ...styles.pricingPricePro}}>$99<span style={styles.pricingPeriod}>/session</span></div>
+                <div style={{...styles.pricingBadge, ...styles.pricingBadgePro}}>{t.landing.plans.consultation.badge}</div>
+                <h3 style={styles.pricingTitle}>{t.landing.plans.consultation.name}</h3>
+                <div style={{...styles.pricingPrice, ...styles.pricingPricePro}}>{t.landing.plans.consultation.price}<span style={styles.pricingPeriod}>{t.landing.plans.consultation.period}</span></div>
               </div>
               <div style={styles.pricingCardBody}>
                 <ul style={styles.pricingFeatures}>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Everything in Complete
+                    {t.landing.plans.consultation.features[0]}
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    1-hour video consultation
+                    {t.landing.plans.consultation.features[1]}
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Custom inheritance plan
+                    {t.landing.plans.consultation.features[2]}
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Multi-sig setup guidance
+                    {t.landing.plans.consultation.features[3]}
                   </li>
                   <li style={styles.pricingFeature}>
                     <span style={styles.pricingFeatureIcon}>✓</span>
-                    Additional sessions: $49/hr
+                    {t.landing.plans.consultation.features[4]}
                   </li>
                 </ul>
-                <button onClick={onSignup} style={styles.pricingButtonPro}>Book Consultation</button>
+                <button onClick={onSignup} style={styles.pricingButtonPro}>{t.landing.plans.consultation.cta}</button>
               </div>
             </div>
           </div>
@@ -420,9 +422,9 @@ const LandingPage = ({ onLogin, onSignup }) => {
               </svg>
               <span style={styles.footerLogoText}>Kyward</span>
             </div>
-            <p style={styles.footerTagline}>Empowering Bitcoiners with honest security advice.</p>
+            <p style={styles.footerTagline}>{t.landing.footer.tagline}</p>
           </div>
-          <p style={styles.footerCopyright}>© 2025 Kyward. Built by Bitcoiners.</p>
+          <p style={styles.footerCopyright}>{t.landing.footer.copyright}</p>
         </div>
       </footer>
     </div>

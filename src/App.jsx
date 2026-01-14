@@ -6,6 +6,7 @@ import Questionnaire from './components/Questionnaire';
 import Report from './components/Report';
 import PaymentModal from './components/PaymentModal';
 import { kywardDB } from './services/Database';
+import { LanguageProvider } from './i18n';
 
 const KywardApp = () => {
   const [currentPage, setCurrentPage] = useState('landing');
@@ -110,10 +111,10 @@ const KywardApp = () => {
   };
 
   return (
-    <>
+    <LanguageProvider>
       {renderPage()}
       {renderPaymentModal()}
-    </>
+    </LanguageProvider>
   );
 };
 

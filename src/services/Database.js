@@ -1,321 +1,298 @@
-// KYWARD DATABASE & AUTH SYSTEM
+// KYWARD DATABASE SERVICE - API CLIENT
+// Connects to backend API for all database operations
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 class KywardDatabase {
   constructor() {
-    this.DB_PREFIX = 'kyward_db_';
-    this.USERS_KEY = this.DB_PREFIX + 'users';
-    this.ASSESSMENTS_KEY = this.DB_PREFIX + 'assessments';
-    this.SESSIONS_KEY = this.DB_PREFIX + 'sessions';
-    this.initializeDatabase();
+    this.TOKEN_KEY = 'kyward_session_token';
+    this.USER_CACHE_KEY = 'kyward_user_cache';
   }
 
-  initializeDatabase() {
-    if (!localStorage.getItem(this.USERS_KEY)) {
-      localStorage.setItem(this.USERS_KEY, JSON.stringify({}));
-    }
-    if (!localStorage.getItem(this.ASSESSMENTS_KEY)) {
-      localStorage.setItem(this.ASSESSMENTS_KEY, JSON.stringify({}));
-    }
-    if (!localStorage.getItem(this.SESSIONS_KEY)) {
-      localStorage.setItem(this.SESSIONS_KEY, JSON.stringify({}));
-    }
+  // Get stored session token
+  getToken() {
+    return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  getUsers() {
-    return JSON.parse(localStorage.getItem(this.USERS_KEY) || '{}');
-  }
-
-  getSessions() {
-    return JSON.parse(localStorage.getItem(this.SESSIONS_KEY) || '{}');
-  }
-
-  createUser(userData) {
-    try {
-      const users = this.getUsers();
-      if (users[userData.email]) {
-        return { success: false, message: 'An account with this email already exists.' };
-      }
-      const passwordHash = hashPassword(userData.password);
-      const newUser = {
-        email: userData.email,
-        passwordHash: passwordHash,
-        subscriptionLevel: 'free', // 'free', 'complete', 'consultation'
-        subscriptionDate: null,
-        pdfPassword: null,
-        assessments: [],
-        createdAt: new Date().toISOString(),
-        assessmentCount: 0,
-        monthlyAssessmentCount: 0,
-        lastResetDate: new Date().toISOString(),
-      };
-      users[userData.email] = newUser;
-      localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
-      return { success: true, user: this.sanitizeUser(newUser) };
-    } catch (error) {
-      return { success: false, message: 'Failed to create account. Please try again.' };
+  // Store session token
+  setToken(token) {
+    if (token) {
+      localStorage.setItem(this.TOKEN_KEY, token);
+    } else {
+      localStorage.removeItem(this.TOKEN_KEY);
     }
   }
 
-  getUser(email) {
-    const users = this.getUsers();
-    const user = users[email];
-    return user ? this.sanitizeUser(user) : null;
+  // Get cached user data
+  getCachedUser() {
+    const cached = localStorage.getItem(this.USER_CACHE_KEY);
+    return cached ? JSON.parse(cached) : null;
   }
 
-  getUserWithPassword(email) {
-    const users = this.getUsers();
-    return users[email] || null;
+  // Cache user data
+  setCachedUser(user) {
+    if (user) {
+      localStorage.setItem(this.USER_CACHE_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(this.USER_CACHE_KEY);
+    }
   }
 
-  sanitizeUser(user) {
-    if (!user) return null;
-    const sanitized = { ...user };
-    delete sanitized.passwordHash;
-    return sanitized;
-  }
-
-  createSession(email) {
-    const sessionToken = btoa(email + Date.now() + Math.random());
-    const sessions = this.getSessions();
-    sessions[sessionToken] = {
-      email,
-      createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+  // API request helper
+  async apiRequest(endpoint, options = {}) {
+    const token = this.getToken();
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
+      ...options.headers
     };
-    localStorage.setItem(this.SESSIONS_KEY, JSON.stringify(sessions));
-    return sessionToken;
-  }
 
-  validateSession(sessionToken) {
-    const sessions = this.getSessions();
-    const session = sessions[sessionToken];
-    if (!session) return null;
-    const expiresAt = new Date(session.expiresAt);
-    if (expiresAt < new Date()) {
-      delete sessions[sessionToken];
-      localStorage.setItem(this.SESSIONS_KEY, JSON.stringify(sessions));
-      return null;
-    }
-    return session.email;
-  }
-
-  deleteSession(sessionToken) {
-    const sessions = this.getSessions();
-    delete sessions[sessionToken];
-    localStorage.setItem(this.SESSIONS_KEY, JSON.stringify(sessions));
-  }
-
-  login(email, password) {
     try {
-      const user = this.getUserWithPassword(email);
-      if (!user) {
-        return { success: false, message: 'User not found. Please sign up first.' };
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return { success: false, message: data.error || 'Request failed' };
       }
-      const hashedPassword = hashPassword(password);
-      if (user.passwordHash !== hashedPassword) {
-        return { success: false, message: 'Incorrect password. Please try again.' };
-      }
-      const token = this.createSession(email);
-      return { success: true, user: this.sanitizeUser(user), token };
+
+      return data;
     } catch (error) {
-      return { success: false, message: 'Login failed. Please try again.' };
+      console.error('API request failed:', error);
+      return { success: false, message: 'Network error. Please check your connection.' };
     }
   }
 
-  userExists(email) {
-    const users = this.getUsers();
-    return !!users[email];
-  }
+  // ============================================
+  // AUTHENTICATION OPERATIONS
+  // ============================================
 
-  resetPassword(email, newPassword) {
-    try {
-      const users = this.getUsers();
-      if (!users[email]) {
-        return { success: false, message: 'User not found.' };
-      }
-      users[email].passwordHash = hashPassword(newPassword);
-      localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
-      return { success: true, message: 'Password reset successfully.' };
-    } catch (error) {
-      return { success: false, message: 'Failed to reset password.' };
+  // Create new user (signup)
+  async createUser(userData) {
+    const result = await this.apiRequest('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: userData.email,
+        password: userData.password
+      })
+    });
+
+    if (result.success && result.token) {
+      this.setToken(result.token);
+      this.setCachedUser(result.user);
     }
+
+    return result;
   }
 
-  getUserUsageStatus(email) {
+  // Login user
+  async login(email, password) {
+    const result = await this.apiRequest('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
+    });
+
+    if (result.success && result.token) {
+      this.setToken(result.token);
+      this.setCachedUser(result.user);
+    }
+
+    return result;
+  }
+
+  // Validate current session
+  async validateSession(token = null) {
+    const sessionToken = token || this.getToken();
+    if (!sessionToken) return null;
+
+    const result = await this.apiRequest('/auth/validate', {
+      headers: { 'Authorization': `Bearer ${sessionToken}` }
+    });
+
+    if (result.success && result.user) {
+      this.setCachedUser(result.user);
+      return result.user.email;
+    }
+
+    // Session invalid, clear token
+    this.setToken(null);
+    this.setCachedUser(null);
+    return null;
+  }
+
+  // Logout user
+  async logout() {
+    await this.apiRequest('/auth/logout', { method: 'POST' });
+    this.setToken(null);
+    this.setCachedUser(null);
+  }
+
+  // Delete session (alias for logout)
+  deleteSession(token) {
+    this.logout();
+  }
+
+  // Check if user exists
+  async userExists(email) {
+    const result = await this.apiRequest(`/auth/check?email=${encodeURIComponent(email)}`);
+    return result.exists || false;
+  }
+
+  // Reset password
+  async resetPassword(email, newPassword) {
+    return await this.apiRequest('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ email, newPassword })
+    });
+  }
+
+  // ============================================
+  // USER OPERATIONS
+  // ============================================
+
+  // Get user data
+  async getUser(email) {
+    // First check cache
+    const cached = this.getCachedUser();
+    if (cached && cached.email === email) {
+      return cached;
+    }
+
+    const result = await this.apiRequest('/user');
+    if (result.success && result.user) {
+      this.setCachedUser(result.user);
+      return result.user;
+    }
+    return null;
+  }
+
+  // Sanitize user (for compatibility)
+  sanitizeUser(user) {
+    return user;
+  }
+
+  // Get user usage status
+  async getUserUsageStatus(email) {
     return this.canTakeAssessment(email);
   }
 
-  canTakeAssessment(email) {
-    const user = this.getUser(email);
-    if (!user) return { canTake: false, remaining: 0 };
-    // Complete and Consultation users get unlimited
-    if (user.subscriptionLevel === 'complete' || user.subscriptionLevel === 'consultation') {
-      return { canTake: true, remaining: Infinity, isPremium: true };
+  // Check if user can take assessment
+  async canTakeAssessment(email) {
+    const result = await this.apiRequest('/user/usage');
+    if (result.success) {
+      return {
+        canTake: result.canTake,
+        remaining: result.remaining,
+        isPremium: result.isPremium
+      };
     }
-    // Free users get 1 per month
-    const count = user.monthlyAssessmentCount || 0;
-    return {
-      canTake: count < 1,
-      remaining: Math.max(0, 1 - count),
-      isPremium: false
-    };
-  }
-
-  saveAssessment(email, assessmentData) {
-    const users = this.getUsers();
-    if (users[email]) {
-      users[email].assessmentCount += 1;
-      users[email].monthlyAssessmentCount += 1;
-      users[email].lastAssessmentDate = new Date().toISOString();
-      if (!users[email].assessments) users[email].assessments = [];
-      users[email].assessments.push(assessmentData);
-
-      localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
-      return true;
-    }
-    return false;
-  }
-
-  // Upgrade user subscription
-  upgradeSubscription(email, level) {
-    try {
-      const users = this.getUsers();
-      if (!users[email]) {
-        return { success: false, message: 'User not found.' };
-      }
-
-      // Generate a secure PDF password
-      const pdfPassword = this.generatePdfPassword();
-
-      users[email].subscriptionLevel = level;
-      users[email].subscriptionDate = new Date().toISOString();
-      users[email].pdfPassword = pdfPassword;
-
-      localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
-      return { success: true, pdfPassword };
-    } catch (error) {
-      return { success: false, message: 'Failed to upgrade subscription.' };
-    }
-  }
-
-  // Generate secure PDF password
-  generatePdfPassword() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-    let password = '';
-    for (let i = 0; i < 12; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return password;
-  }
-
-  // Get user's PDF password
-  getPdfPassword(email) {
-    const users = this.getUsers();
-    return users[email]?.pdfPassword || null;
+    return { canTake: false, remaining: 0, isPremium: false };
   }
 
   // Check if user has premium access
-  hasPremiumAccess(email) {
-    const user = this.getUser(email);
-    return user && (user.subscriptionLevel === 'complete' || user.subscriptionLevel === 'consultation');
+  async hasPremiumAccess(email) {
+    const result = await this.apiRequest('/user/premium');
+    return result.success && result.hasPremium;
   }
 
   // Check if user has consultation access
-  hasConsultationAccess(email) {
-    const user = this.getUser(email);
+  async hasConsultationAccess(email) {
+    const user = await this.getUser(email);
     return user && user.subscriptionLevel === 'consultation';
   }
 
-  // Get global statistics across all users
-  getGlobalStats() {
-    const users = this.getUsers();
-    const allScores = [];
-    let totalAssessments = 0;
-    let totalUsers = 0;
-    let premiumUsers = 0;
+  // Get user's PDF password
+  async getPdfPassword(email) {
+    const user = await this.getUser(email);
+    return user?.pdfPassword || null;
+  }
 
-    // Distribution buckets
-    const distribution = {
-      excellent: 0,  // 80-100
-      moderate: 0,   // 50-79
-      needsWork: 0   // 0-49
-    };
+  // ============================================
+  // SUBSCRIPTION OPERATIONS
+  // ============================================
 
-    Object.values(users).forEach(user => {
-      totalUsers++;
-      if (user.subscriptionLevel === 'complete' || user.subscriptionLevel === 'consultation') {
-        premiumUsers++;
-      }
-
-      if (user.assessments && user.assessments.length > 0) {
-        user.assessments.forEach(assessment => {
-          if (assessment.score !== undefined && assessment.score !== null) {
-            allScores.push(assessment.score);
-            totalAssessments++;
-
-            // Categorize score
-            if (assessment.score >= 80) {
-              distribution.excellent++;
-            } else if (assessment.score >= 50) {
-              distribution.moderate++;
-            } else {
-              distribution.needsWork++;
-            }
-          }
-        });
-      }
+  // Upgrade user subscription
+  async upgradeSubscription(email, level) {
+    const result = await this.apiRequest('/user/upgrade', {
+      method: 'POST',
+      body: JSON.stringify({ plan: level })
     });
 
-    // Calculate statistics
-    const averageScore = allScores.length > 0
-      ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length)
-      : 50; // Default average if no data
+    if (result.success && result.user) {
+      this.setCachedUser(result.user);
+    }
 
-    const sortedScores = [...allScores].sort((a, b) => a - b);
-    const medianScore = sortedScores.length > 0
-      ? sortedScores[Math.floor(sortedScores.length / 2)]
-      : 50;
+    return result;
+  }
 
-    const highestScore = sortedScores.length > 0 ? sortedScores[sortedScores.length - 1] : 0;
-    const lowestScore = sortedScores.length > 0 ? sortedScores[0] : 0;
+  // ============================================
+  // ASSESSMENT OPERATIONS
+  // ============================================
 
+  // Save assessment
+  async saveAssessment(email, assessmentData) {
+    const result = await this.apiRequest('/assessments', {
+      method: 'POST',
+      body: JSON.stringify(assessmentData)
+    });
+    return result.success;
+  }
+
+  // Get user assessments
+  async getUserAssessments(email) {
+    const result = await this.apiRequest('/assessments');
+    return result.success ? result.assessments : [];
+  }
+
+  // ============================================
+  // STATISTICS OPERATIONS
+  // ============================================
+
+  // Get global/community statistics
+  async getGlobalStats() {
+    const result = await this.apiRequest('/stats/community');
+    if (result.success) {
+      return {
+        totalAssessments: result.totalAssessments,
+        averageScore: result.averageScore,
+        distribution: result.distribution,
+        distributionPercent: result.distribution
+      };
+    }
+    // Return defaults if API fails
     return {
-      totalUsers,
-      totalAssessments,
-      premiumUsers,
-      averageScore,
-      medianScore,
-      highestScore,
-      lowestScore,
-      distribution,
-      // Percentages for distribution
-      distributionPercent: {
-        excellent: totalAssessments > 0 ? Math.round((distribution.excellent / totalAssessments) * 100) : 33,
-        moderate: totalAssessments > 0 ? Math.round((distribution.moderate / totalAssessments) * 100) : 34,
-        needsWork: totalAssessments > 0 ? Math.round((distribution.needsWork / totalAssessments) * 100) : 33
-      }
+      totalAssessments: 0,
+      averageScore: 50,
+      distribution: { excellent: 33, moderate: 34, needsWork: 33 },
+      distributionPercent: { excellent: 33, moderate: 34, needsWork: 33 }
     };
   }
 
-  // Compare user score to global average
-  compareToAverage(userScore) {
-    const stats = this.getGlobalStats();
-    const difference = userScore - stats.averageScore;
-
-    // Calculate percentile (approximate)
+  // Compare user score to community average
+  async compareToAverage(userScore) {
+    const result = await this.apiRequest(`/stats/compare/${userScore}`);
+    if (result.success) {
+      return result;
+    }
+    // Return calculated defaults if API fails
+    const averageScore = 50;
+    const difference = userScore - averageScore;
     let percentile;
     if (userScore >= 80) {
-      percentile = 85 + (userScore - 80) * 0.75; // 85-100 percentile
+      percentile = 85 + (userScore - 80) * 0.75;
     } else if (userScore >= 50) {
-      percentile = 35 + ((userScore - 50) / 30) * 50; // 35-85 percentile
+      percentile = 35 + ((userScore - 50) / 30) * 50;
     } else {
-      percentile = (userScore / 50) * 35; // 0-35 percentile
+      percentile = (userScore / 50) * 35;
     }
     percentile = Math.min(99, Math.max(1, Math.round(percentile)));
 
     return {
       userScore,
-      averageScore: stats.averageScore,
+      averageScore,
       difference,
       percentile,
       isAboveAverage: difference > 0,
@@ -324,12 +301,45 @@ class KywardDatabase {
                   difference > 0 ? 'above' :
                   difference === 0 ? 'at' :
                   difference > -10 ? 'below' : 'well below',
-      distribution: stats.distributionPercent
+      distribution: { excellent: 33, moderate: 34, needsWork: 33 }
     };
+  }
+
+  // ============================================
+  // SYNCHRONOUS COMPATIBILITY METHODS
+  // These provide backward compatibility for components
+  // that haven't been updated to use async/await yet
+  // ============================================
+
+  // Sync version - uses cached data
+  getUsers() {
+    return {};
+  }
+
+  getSessions() {
+    return {};
+  }
+
+  getUserWithPassword(email) {
+    return this.getCachedUser();
+  }
+
+  createSession(email) {
+    return this.getToken();
+  }
+
+  // Generate PDF password (fallback, mainly handled by backend)
+  generatePdfPassword() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
   }
 }
 
-// Password hashing
+// Password hashing (for compatibility, actual hashing done on backend)
 export const hashPassword = (password) => {
   return btoa(password + 'kyward_salt_2024_secure');
 };
