@@ -1,7 +1,8 @@
 // KYWARD DATABASE SERVICE - API CLIENT
 // Connects to backend API for all database operations
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+// Cambiamos process.env por import.meta.env (Estándar de Vite)
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 class KywardDatabase {
   constructor() {

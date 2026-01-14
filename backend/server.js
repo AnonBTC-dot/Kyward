@@ -12,12 +12,30 @@ const db = require('./services/database');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// 1. TRADUCTOR JSON (DEBE IR ANTES QUE LAS RUTAS)
+app.use(express.json());
+
+const allowedOrigins = [
+  'http://localhost:5173', // Tu puerto actual de Vite
+  'http://localhost:3000', // Por si acaso usas el puerto viejo
+  'https://kyward.vercel.app', // Tu futuro dominio de producción
+  'https://kyward.onrender.com'
+];
+
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
-  credentials: true
+  origin: function (origin, callback) {
+    // Permitir peticiones sin origen (como Postman o curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(new Error('CORS policy: This origin is not allowed'), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
 
 // Auth middleware
 const authMiddleware = async (req, res, next) => {
@@ -603,7 +621,7 @@ app.listen(PORT, () => {
 ╠═══════════════════════════════════════════╣
 ║  Status: Running                          ║
 ║  Port: ${PORT}                                ║
-║  API: http://localhost:${PORT}/api            ║
+║  API: http://localhost:${PORT}/api/health           ║
 ╚═══════════════════════════════════════════╝
   `);
 

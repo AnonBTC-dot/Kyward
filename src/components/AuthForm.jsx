@@ -212,13 +212,26 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
   return (
     <div style={styles.authContainer}>
       <div className="auth-card" style={styles.authCard}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <button onClick={mode === 'forgot' || mode === 'reset' ? () => { setMode('login'); setIsLogin(true); setError(''); setSuccess(''); } : onBack} style={styles.backButton}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: '24px',
+          width: '100%' 
+        }}>
+          {/* Botón Back a la izquierda */}
+          <button 
+            onClick={mode === 'forgot' || mode === 'reset' ? () => { setMode('login'); setIsLogin(true); setError(''); setSuccess(''); } : onBack} 
+            style={{ ...styles.backButton, margin: 0 }}
+          >
             ← {mode === 'forgot' || mode === 'reset' ? t.auth.backToLogin : t.auth.back}
           </button>
-          <LanguageToggle />
-        </div>
 
+          {/* Idioma a la derecha */}
+          <div style={{ marginLeft: 'auto' }}>
+            <LanguageToggle />
+          </div>
+        </div>
         <div style={styles.authLogo}>
           <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
             <circle cx="20" cy="20" r="18" fill="#F7931A" opacity="0.2"/>
