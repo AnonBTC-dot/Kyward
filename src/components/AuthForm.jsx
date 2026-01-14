@@ -45,25 +45,29 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
   };
 
   // Handle forgot password - verify email exists
-  const handleForgotPassword = (e) => {
+  const handleForgotPassword = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    setTimeout(() => {
-      if (kywardDB.userExists(formData.email)) {
+    try {
+      const exists = await kywardDB.userExists(formData.email);
+      if (exists) {
         setResetEmail(formData.email);
         setMode('reset');
         setSuccess('Email verified! Create your new password.');
       } else {
         setError('No account found with this email address.');
       }
+    } catch (err) {
+      setError('Network error. Please check your connection.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   // Handle password reset
-  const handleResetPassword = (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
 
     if (!isNewPasswordValid) {
@@ -76,8 +80,8 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      const result = kywardDB.resetPassword(resetEmail, formData.newPassword);
+    try {
+      const result = await kywardDB.resetPassword(resetEmail, formData.newPassword);
       if (result.success) {
         setSuccess('Password reset successfully! You can now login.');
         setTimeout(() => {
@@ -87,29 +91,35 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
           setSuccess('');
         }, 2000);
       } else {
-        setError(result.message);
+        setError(result.message || 'Password reset failed. Please try again.');
       }
+    } catch (err) {
+      setError('Network error. Please check your connection.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
-    setTimeout(() => {
-      const result = kywardDB.login(formData.email, formData.password);
+
+    try {
+      const result = await kywardDB.login(formData.email, formData.password);
       if (result.success) {
         onAuthSuccess(result.user, result.token);
       } else {
-        setError(result.message);
+        setError(result.message || 'Login failed. Please try again.');
       }
+    } catch (err) {
+      setError('Network error. Please check your connection.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
 
     if (!isPasswordValid) {
@@ -122,23 +132,25 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      const result = kywardDB.createUser({
+    try {
+      const result = await kywardDB.createUser({
         email: formData.email,
         password: formData.password,
       });
 
       if (result.success) {
         setSuccess('Account created! Logging you in...');
-        setTimeout(() => {
-          const loginRes = kywardDB.login(formData.email, formData.password);
-          onAuthSuccess(loginRes.user, loginRes.token);
-        }, 1500);
+        // User is already logged in from createUser (token stored)
+        // Just call onAuthSuccess with the user data
+        onAuthSuccess(result.user, result.token);
       } else {
-        setError(result.message);
+        setError(result.message || 'Signup failed. Please try again.');
       }
+    } catch (err) {
+      setError('Network error. Please check your connection.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   // Helper to render password requirements
