@@ -138,7 +138,10 @@ class KywardDatabase {
 
   // Check if user exists
   async userExists(email) {
-    const result = await this.apiRequest(`/auth/check?email=${encodeURIComponent(email)}`);
+    const result = await this.apiRequest('/auth/check-email', {
+      method: 'POST',
+      body: JSON.stringify({ email })
+    });
     return result.exists || false;
   }
 

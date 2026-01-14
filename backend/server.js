@@ -15,22 +15,27 @@ const PORT = process.env.PORT || 3001;
 // 1. TRADUCTOR JSON (DEBE IR ANTES QUE LAS RUTAS)
 app.use(express.json());
 
+// Middleware de CORS mejorado
 const allowedOrigins = [
-  'http://localhost:5173', // Tu puerto actual de Vite
-  'http://localhost:3000', // Por si acaso usas el puerto viejo
-  'https://kyward.vercel.app', // Tu futuro dominio de producción
-  'https://kyward.onrender.com'
+  'https://www.kyward.com',
+  'https://kyward.com',
+  'http://localhost:5173'
 ];
 
-// Middleware
 app.use(cors({
   origin: function (origin, callback) {
-    // Permitir peticiones sin origen (como Postman o curl)
+    // 1. Permitir peticiones sin origen (como apps móviles, Postman o servidores)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      return callback(new Error('CORS policy: This origin is not allowed'), false);
+    
+    // 2. Limpiar el origin de posibles barras finales para evitar errores de comparación
+    const cleanOrigin = origin.replace(/\/$/, "");
+
+    if (allowedOrigins.includes(cleanOrigin)) {
+      callback(null, true);
+    } else {
+      console.log('CORS Blocked for origin:', origin); // Esto te ayudará a debuguear en los logs de Render
+      callback(new Error('CORS policy: This origin is not allowed'), false);
     }
-    return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
