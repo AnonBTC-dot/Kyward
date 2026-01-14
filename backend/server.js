@@ -26,16 +26,22 @@ app.use(cors({
   origin: function (origin, callback) {
     // 1. Permitir peticiones sin origen (como apps móviles, Postman o servidores)
     if (!origin) return callback(null, true);
-    
+
     // 2. Limpiar el origin de posibles barras finales para evitar errores de comparación
     const cleanOrigin = origin.replace(/\/$/, "");
 
+    // 3. Check if origin is in the allowed list
     if (allowedOrigins.includes(cleanOrigin)) {
-      callback(null, true);
-    } else {
-      console.log('CORS Blocked for origin:', origin); // Esto te ayudará a debuguear en los logs de Render
-      callback(new Error('CORS policy: This origin is not allowed'), false);
+      return callback(null, true);
     }
+
+    // 4. Allow all Vercel preview deployments (dynamic URLs)
+    if (cleanOrigin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
+    console.log('CORS Blocked for origin:', origin);
+    callback(new Error('CORS policy: This origin is not allowed'), false);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
