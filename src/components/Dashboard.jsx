@@ -4,6 +4,7 @@ import { styles } from '../styles/Theme';
 import { openPdfPreview } from '../services/PdfGenerator';
 import { previewEmail } from '../services/EmailService';
 import TelegramBlur from './TelegramBlur';
+import Footer from './Footer';
 import { useLanguage, LanguageToggle } from '../i18n';
 
 // Daily security tip keys - rotates based on date
@@ -102,10 +103,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
       <nav style={styles.nav}>
         <div style={styles.navContent}>
           <div style={styles.navLogo}>
-            <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-              <circle cx="20" cy="20" r="18" fill="#F7931A" opacity="0.2"/>
-              <path d="M20 8L28 13V27L20 32L12 27V13L20 8Z" stroke="#F7931A" strokeWidth="2.5" strokeLinejoin="round"/>
-            </svg>
+            <img src="/vite.svg" alt="Kyward" style={{ width: '32px', height: '32px' }} />
             <span style={styles.navLogoText}>Kyward</span>
           </div>
           <div style={styles.navButtons}>
@@ -986,6 +984,7 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

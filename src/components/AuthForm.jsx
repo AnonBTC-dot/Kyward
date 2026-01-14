@@ -245,10 +245,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
           </div>
         </div>
         <div style={styles.authLogo}>
-          <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
-            <circle cx="20" cy="20" r="18" fill="#F7931A" opacity="0.2"/>
-            <path d="M20 8L28 13V27L20 32L12 27V13L20 8Z" stroke="#F7931A" strokeWidth="2.5" strokeLinejoin="round"/>
-          </svg>
+          <img src="/vite.svg" alt="Kyward" style={{ width: '48px', height: '48px' }} />
           <h2 className="auth-title" style={styles.authTitle}>{getTitle()}</h2>
           <p className="auth-subtitle" style={styles.authSubtitle}>{getSubtitle()}</p>
         </div>

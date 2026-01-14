@@ -1,6 +1,7 @@
 import React from 'react';
 import { styles } from '../styles/Theme';
 import { useLanguage, LanguageToggle } from '../i18n';
+import Footer from './Footer';
 
 const LandingPage = ({ onLogin, onSignup }) => {
   const { t } = useLanguage();
@@ -10,11 +11,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
       <nav style={styles.nav}>
         <div className="nav-content" style={styles.navContent}>
           <div style={styles.navLogo}>
-            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-              <circle cx="20" cy="20" r="18" fill="#F7931A" opacity="0.2"/>
-              <path d="M20 8L28 13V27L20 32L12 27V13L20 8Z" stroke="#F7931A" strokeWidth="2.5" strokeLinejoin="round"/>
-              <circle cx="20" cy="20" r="4" fill="#F7931A"/>
-            </svg>
+            <img src="/vite.svg" alt="Kyward" style={{ width: '40px', height: '40px' }} />
             <span className="nav-logo-text" style={styles.navLogoText}>Kyward</span>
           </div>
           <div className="nav-buttons" style={styles.navButtons}>
@@ -412,21 +409,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
       </section>
 
       {/* FOOTER */}
-      <footer style={styles.footer}>
-        <div style={styles.footerContent}>
-          <div style={styles.footerLeft}>
-            <div style={styles.footerLogo}>
-              <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" fill="#F7931A" opacity="0.2"/>
-                <path d="M20 8L28 13V27L20 32L12 27V13L20 8Z" stroke="#F7931A" strokeWidth="2.5" strokeLinejoin="round"/>
-              </svg>
-              <span style={styles.footerLogoText}>Kyward</span>
-            </div>
-            <p style={styles.footerTagline}>{t.landing.footer.tagline}</p>
-          </div>
-          <p style={styles.footerCopyright}>{t.landing.footer.copyright}</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

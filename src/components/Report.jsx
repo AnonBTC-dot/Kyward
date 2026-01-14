@@ -5,6 +5,7 @@ import { generateRecommendations, getFreeTips, getLockedTipsPreview, generateInh
 import { openPdfPreview, downloadHtmlReport } from '../services/PdfGenerator';
 import { previewEmail, sendSecurityPlanEmail } from '../services/EmailService';
 import TelegramBlur from './TelegramBlur';
+import Footer from './Footer';
 import { useLanguage, LanguageToggle } from '../i18n';
 
 const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade }) => {
@@ -1136,6 +1137,8 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
           ← {t.report.backToDashboard}
         </button>
       </div>
+
+      <Footer />
     </div>
   );
 };
