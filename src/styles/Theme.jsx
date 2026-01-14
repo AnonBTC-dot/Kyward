@@ -403,6 +403,118 @@ if (typeof document !== 'undefined') {
     .dash-history-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.3); border-color: #3a3a3a; }
     .dash-cta-button:hover { box-shadow: 0 12px 32px rgba(247,147,26,0.4); }
     .report-tip-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.3); border-color: #3a3a3a; }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+      /* Hero Section - Stack vertically on mobile */
+      .hero-section {
+        flex-direction: column-reverse !important;
+        padding-top: 100px !important;
+        padding-bottom: 60px !important;
+        gap: 40px !important;
+        min-height: auto !important;
+      }
+      .hero-content {
+        max-width: 100% !important;
+        text-align: center !important;
+        padding: 0 16px !important;
+      }
+      .hero-title {
+        font-size: 36px !important;
+        letter-spacing: -1px !important;
+      }
+      .hero-subtitle {
+        font-size: 16px !important;
+      }
+      .hero-buttons {
+        flex-direction: column !important;
+        gap: 12px !important;
+      }
+      .hero-stats {
+        flex-direction: column !important;
+        gap: 20px !important;
+      }
+      .hero-stat-divider {
+        display: none !important;
+      }
+      .hero-image {
+        margin-right: 0 !important;
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+      }
+      .mockup-card {
+        width: 90% !important;
+        max-width: 340px !important;
+      }
+
+      /* Navigation */
+      .nav-content {
+        padding: 0 16px !important;
+      }
+      .nav-logo-text {
+        font-size: 20px !important;
+      }
+      .nav-buttons {
+        gap: 8px !important;
+      }
+      .nav-button {
+        padding: 8px 12px !important;
+        font-size: 12px !important;
+      }
+
+      /* Section Titles */
+      .section-title {
+        font-size: 28px !important;
+      }
+      .section-subtitle {
+        font-size: 15px !important;
+        padding: 0 16px !important;
+      }
+
+      /* PVU Grid - Single column on mobile */
+      .pvu-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+
+      /* Steps Grid - Single column on mobile */
+      .steps-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+
+      /* Pricing Grid - Single column on mobile */
+      .pricing-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+      .pricing-card-featured {
+        transform: none !important;
+      }
+
+      /* Auth Card */
+      .auth-card {
+        padding: 24px 20px !important;
+        margin: 0 16px !important;
+      }
+      .auth-title {
+        font-size: 24px !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 28px !important;
+      }
+      .mockup-card {
+        width: 95% !important;
+      }
+      .nav-buttons {
+        flex-direction: column !important;
+        gap: 6px !important;
+      }
+    }
   `;
   document.head.appendChild(styleSheet);
 }
