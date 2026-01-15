@@ -102,6 +102,7 @@ const KywardApp = () => {
             setUser={setUser}
             onBackToDashboard={() => setCurrentPage('dashboard')}
             onUpgrade={handleUpgrade}
+            onStartAssessment={() => setCurrentPage('questionnaire')}
           />
         );
 
