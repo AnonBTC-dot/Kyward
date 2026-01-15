@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { styles } from '../styles/Theme';
 import { kywardDB } from '../services/Database';
-import { useLanguage, LanguageToggle } from '../i18n'; 
+import { useLanguage, LanguageToggle } from '../i18n';
 
 const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
   const { t } = useLanguage();
@@ -9,8 +9,26 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [canStart, setCanStart] = useState(null); // null = cargando, true/false = resultado
 
-  // Question structure with points - labels come from translations
+  // Verificar si el usuario puede empezar el cuestionario
+  useState(() => {
+    const checkPermission = async () => {
+      try {
+        const can = await kywardDB.canTakeNewAssessment(user?.email);
+        setCanStart(can);
+        if (!can) {
+          setError(t.questionnaire.errors.limitReached);
+        }
+      } catch (err) {
+        setError('Error al verificar permisos');
+        setCanStart(false);
+      }
+    };
+    checkPermission();
+  }, [user]);
+
+  // Question structure with points
   const questionData = [
     { id: 'q1', type: 'radio', options: [
       { value: 'yes', points: 15 },
@@ -101,7 +119,7 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
     ]}
   ];
 
-  // Build questions array with translated text
+  // Build questions with translated text
   const questions = questionData.map(q => ({
     ...q,
     question: t.questionnaire.questions[q.id],
@@ -113,11 +131,11 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
 
   const handleAnswerChange = (questionId, value, isCheckbox = false) => {
     if (isCheckbox) {
-      const currentAnswers = answers[questionId] || [];
-      const newAnswers = currentAnswers.includes(value)
-        ? currentAnswers.filter(v => v !== value)
-        : [...currentAnswers, value];
-      setAnswers({ ...answers, [questionId]: newAnswers });
+      const current = answers[questionId] || [];
+      const updated = current.includes(value)
+        ? current.filter(v => v !== value)
+        : [...current, value];
+      setAnswers({ ...answers, [questionId]: updated });
     } else {
       setAnswers({ ...answers, [questionId]: value });
     }
@@ -125,50 +143,55 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
 
   const calculateScore = () => {
     let totalScore = 0;
-    let maxPossibleScore = 0;
+    let maxPossible = 0;
+
     questions.forEach(q => {
       const answer = answers[q.id];
       if (q.type === 'radio' && answer) {
-        const selectedOption = q.options.find(opt => opt.value === answer);
-        if (selectedOption) totalScore += selectedOption.points;
-        maxPossibleScore += Math.max(...q.options.map(opt => opt.points));
-      } else if (q.type === 'checkbox' && answer && answer.length > 0) {
+        const opt = q.options.find(o => o.value === answer);
+        if (opt) totalScore += opt.points;
+        maxPossible += Math.max(...q.options.map(o => o.points));
+      } else if (q.type === 'checkbox' && answer?.length) {
         answer.forEach(val => {
-          const selectedOption = q.options.find(opt => opt.value === val);
-          if (selectedOption) totalScore += selectedOption.points;
+          const opt = q.options.find(o => o.value === val);
+          if (opt) totalScore += opt.points;
         });
-        maxPossibleScore += Math.max(...q.options.map(opt => opt.points));
+        maxPossible += Math.max(...q.options.map(o => o.points));
       }
     });
-    return Math.max(0, Math.min(100, Math.round((totalScore / maxPossibleScore) * 100)));
+
+    return Math.max(0, Math.min(100, Math.round((totalScore / maxPossible) * 100)));
   };
 
   const handleSubmit = async () => {
     setLoading(true);
     setError('');
 
-    const canTake = kywardDB.canTakeAssessment(user.email);
-    if (!canTake.canTake) {
-      setError(t.questionnaire.errors.limitReached);
-      setLoading(false);
-      return;
-    }
-
-    const score = calculateScore();
-    const assessment = {
-      userId: user.email,
-      responses: answers,
-      score: score,
-      timestamp: new Date().toISOString()
-    };
-
     try {
-      kywardDB.saveAssessment(user.email, assessment);
-      const updatedUser = kywardDB.getUser(user.email);
-      setUser(updatedUser); 
-      onComplete(assessment);
-    } catch (e) {
-      setError(t.questionnaire.errors.savingError);
+      const canTake = await kywardDB.canTakeNewAssessment();
+      if (!canTake) {
+        setError(t.questionnaire.errors.limitReached);
+        return;
+      }
+
+      const score = calculateScore();
+      const assessment = {
+        userId: user.email,
+        responses: answers,
+        score,
+        timestamp: new Date().toISOString()
+      };
+
+      const result = await kywardDB.saveAssessment(assessment);
+      if (result.success) {
+        const updatedUser = await kywardDB.getUser(user.email);
+        setUser(updatedUser);
+        onComplete({ score, answers });
+      } else {
+        setError(t.questionnaire.errors.savingError);
+      }
+    } catch (err) {
+      setError('Error al guardar la evaluación');
     } finally {
       setLoading(false);
     }
@@ -178,16 +201,8 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
   const progress = ((currentQuestion + 1) / questions.length) * 100;
   const progressPercent = Math.round(progress);
   const isAnswered = currentQ.type === 'checkbox' ?
-    (answers[currentQ.id] && answers[currentQ.id].length > 0) :
+    (answers[currentQ.id]?.length > 0) :
     !!answers[currentQ.id];
-
-  // Check if option is selected
-  const isOptionSelected = (optionValue) => {
-    if (currentQ.type === 'checkbox') {
-      return (answers[currentQ.id] || []).includes(optionValue);
-    }
-    return answers[currentQ.id] === optionValue;
-  };
 
   return (
     <div style={styles.dashContainer}>
@@ -199,16 +214,17 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
           <LanguageToggle />
         </div>
 
-        {/* Enhanced Progress Section */}
+        {/* Progress */}
         <div style={styles.progressSection}>
           <div style={styles.progressHeader}>
-            <span style={styles.progressLabel}>{t.questionnaire.progress} {currentQuestion + 1} {t.questionnaire.of} {questions.length}</span>
+            <span style={styles.progressLabel}>
+              {t.questionnaire.progress} {currentQuestion + 1} {t.questionnaire.of} {questions.length}
+            </span>
             <span style={styles.progressPercentage}>{progressPercent}% {t.questionnaire.complete}</span>
           </div>
           <div style={styles.progressBar}>
             <div style={{...styles.progressFill, width: `${progress}%`}} />
           </div>
-          {/* Progress dots */}
           <div style={styles.progressSteps}>
             {questions.map((_, idx) => (
               <div
@@ -223,11 +239,10 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
           </div>
         </div>
 
-        {/* Question Card with Glow */}
+        {/* Question Card */}
         <div className="question-card" style={styles.questionCard}>
           <div style={styles.questionCardGlow} />
 
-          {/* Question Number Badge */}
           <div style={styles.questionNumber}>
             {currentQ.type === 'checkbox' ? `☑ ${t.questionnaire.selectAll}` : `${t.questionnaire.progress} ${currentQuestion + 1}`}
           </div>
@@ -236,7 +251,10 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
 
           <div style={styles.optionsContainer}>
             {currentQ.options.map(option => {
-              const selected = isOptionSelected(option.value);
+              const selected = currentQ.type === 'checkbox' 
+                ? (answers[currentQ.id] || []).includes(option.value)
+                : answers[currentQ.id] === option.value;
+
               return (
                 <div
                   key={option.value}
@@ -247,24 +265,21 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
                   }}
                   onClick={() => handleAnswerChange(currentQ.id, option.value, currentQ.type === 'checkbox')}
                 >
-                  {/* Glow bar on left */}
                   <div style={{
                     ...styles.optionGlow,
                     ...(selected ? styles.optionGlowActive : {})
                   }} />
 
-                  <label style={styles.optionLabel} onClick={(e) => e.stopPropagation()}>
-                    {/* Hidden input */}
+                  <label style={styles.optionLabel} onClick={e => e.stopPropagation()}>
                     <input
                       type={currentQ.type}
                       name={currentQ.id}
                       value={option.value}
                       checked={selected}
-                      onChange={() => handleAnswerChange(currentQ.id, option.value, currentQ.type === 'checkbox')}
+                      onChange={() => {}}
                       style={styles.optionInput}
                     />
 
-                    {/* Custom Radio/Checkbox */}
                     {currentQ.type === 'radio' ? (
                       <div style={{
                         ...styles.optionRadio,
@@ -302,14 +317,13 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
           <div className="question-buttons" style={styles.questionButtons}>
             {currentQuestion > 0 && (
               <button
-                className="prev-button"
                 onClick={() => setCurrentQuestion(currentQuestion - 1)}
                 style={styles.prevButton}
               >
                 ← {t.questionnaire.previous}
               </button>
             )}
-            <div style={{flex: 1}} />
+            <div style={{ flex: 1 }} />
             {currentQuestion < questions.length - 1 ? (
               <button
                 onClick={() => isAnswered && setCurrentQuestion(currentQuestion + 1)}
@@ -324,13 +338,29 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
             ) : (
               <button
                 onClick={handleSubmit}
-                style={{...styles.submitButton, ...(loading || !isAnswered ? {opacity: 0.6} : {})}}
-                disabled={loading || !isAnswered}
+                style={{
+                  ...styles.submitButton,
+                  ...(loading || !isAnswered || !canStart ? { opacity: 0.6, cursor: 'not-allowed' } : {}),
+                  backgroundColor: !canStart ? '#ef4444' : '#22c55e'
+                }}
+                disabled={loading || !isAnswered || !canStart}
               >
                 {loading ? t.questionnaire.calculating : `${t.questionnaire.getScore} ✓`}
               </button>
             )}
           </div>
+
+          {/* Mensaje si no puede empezar (Essential ya usado) */}
+          {!canStart && !loading && (
+            <p style={{
+              color: '#ef4444',
+              fontSize: '14px',
+              textAlign: 'center',
+              marginTop: '16px'
+            }}>
+              {t.questionnaire.errors.limitReached}
+            </p>
+          )}
         </div>
 
         <button

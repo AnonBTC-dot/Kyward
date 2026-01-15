@@ -51,7 +51,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
     setError('');
 
     try {
-      const exists = await kywardDB.userExists(formData.email);
+      const exists = await kywardDB.userExists?.(formData.email) ?? false;
       if (exists) {
         setResetEmail(formData.email);
         setMode('reset');
@@ -139,10 +139,14 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
       });
 
       if (result.success) {
-        setSuccess('Account created! Logging you in...');
-        // User is already logged in from createUser (token stored)
-        // Just call onAuthSuccess with the user data
-        onAuthSuccess(result.user, result.token);
+        setSuccess(
+          t.auth.signupSuccess || 
+          'Account created successfully! Welcome to the Free tier. You can upgrade to Essential, Sentinel or Consultation anytime from your Dashboard.'
+        );
+        // Auto-login después de 2.5 segundos
+        setTimeout(() => {
+          onAuthSuccess(result.user, result.token);
+        }, 2500);
       } else {
         setError(result.message || 'Signup failed. Please try again.');
       }
@@ -244,6 +248,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
             <LanguageToggle />
           </div>
         </div>
+
         <div style={styles.authLogo}>
           <img src="/vite.svg" alt="Kyward" style={{ width: '48px', height: '48px' }} />
           <h2 className="auth-title" style={styles.authTitle}>{getTitle()}</h2>
@@ -324,6 +329,24 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
         {/* LOGIN / SIGNUP FORMS */}
         {(mode === 'login' || mode === 'signup') && (
           <>
+            {mode === 'signup' && (
+              <div style={{
+                background: 'rgba(34,197,94,0.1)',
+                border: '1px solid rgba(34,197,94,0.3)',
+                borderRadius: '12px',
+                padding: '16px',
+                marginBottom: '24px',
+                textAlign: 'center'
+              }}>
+                <p style={{ color: '#22c55e', fontSize: '15px', margin: '0 0 8px 0', fontWeight: '600' }}>
+                  Start Free – No credit card required
+                </p>
+                <p style={{ color: '#9ca3af', fontSize: '13px', margin: 0 }}>
+                  All users start on Free tier. Upgrade anytime to Essential ($7.99 one-time), Sentinel ($14.99/month) or Consultation.
+                </p>
+              </div>
+            )}
+
             <form onSubmit={isLogin ? handleLogin : handleSignup}>
               <div style={styles.inputGroup}>
                 <label style={styles.label}>{t.auth.email}</label>
@@ -394,10 +417,29 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
 
             <div style={styles.authFooter}>
               {isLogin ? (
-                <p>{t.auth.noAccount} <span style={styles.authLink} onClick={() => { setIsLogin(false); setMode('signup'); }}>{t.nav.signup}</span></p>
+                <p>
+                  {t.auth.noAccount}{' '}
+                  <span 
+                    style={styles.authLink} 
+                    onClick={() => { setIsLogin(false); setMode('signup'); }}
+                  >
+                    {t.nav.signup}
+                  </span>
+                </p>
               ) : (
-                <p>{t.auth.hasAccount} <span style={styles.authLink} onClick={() => { setIsLogin(true); setMode('login'); }}>{t.nav.login}</span></p>
+                <p>
+                  {t.auth.hasAccount}{' '}
+                  <span 
+                    style={styles.authLink} 
+                    onClick={() => { setIsLogin(true); setMode('login'); }}
+                  >
+                    {t.nav.login}
+                  </span>
+                </p>
               )}
+              <p style={{ marginTop: '12px', color: '#6b7280', fontSize: '13px' }}>
+                Free tier included. Upgrade later to unlock full reports, unlimited assessments & more.
+              </p>
             </div>
           </>
         )}

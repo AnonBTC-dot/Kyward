@@ -493,14 +493,58 @@ if (typeof document !== 'undefined') {
         gap: 16px !important;
       }
 
-      /* Pricing Grid - Single column on mobile */
+      /* ============================================
+      PRICING GRID - 4 CARDS FORZADAS EN HORIZONTAL
+      ============================================ */
+
+    .pricing-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
+      gap: 28px !important;
+      max-width: 1440px !important;
+      margin: 48px auto 0 !important;
+      padding: 0 24px !important;
+      justify-content: center !important;
+      align-items: stretch !important;
+    }
+
+    /* FORZAR 4 columnas en desktop (esto gana a cualquier override) */
+    @media (min-width: 1024px) {
+      .pricing-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 32px !important;
+      }
+      
+      .pricing-card-featured {
+        transform: scale(1.05) !important;
+        z-index: 2 !important;
+        box-shadow: 0 20px 60px rgba(247,147,26,0.35) !important;
+      }
+    }
+
+    /* Tablet: 2 columnas */
+    @media (min-width: 640px) and (max-width: 1023px) {
+      .pricing-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 28px !important;
+      }
+    }
+
+    /* Mobile: 1 columna */
+    @media (max-width: 639px) {
       .pricing-grid {
         grid-template-columns: 1fr !important;
-        gap: 16px !important;
+        gap: 24px !important;
+        padding: 0 16px !important;
       }
+      
+      .pricing-card,
       .pricing-card-featured {
         transform: none !important;
+        max-width: 380px !important;
+        margin: 0 auto !important;
       }
+    }
 
       /* Auth Card */
       .auth-card {

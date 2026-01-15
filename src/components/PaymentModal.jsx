@@ -27,7 +27,10 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
   const priceTimerRef = useRef(null);
 
   const priceInfo = getPriceDisplay(plan);
-  const planName = plan === 'complete' ? t.landing.plans.complete.name : t.landing.plans.consultation.name;
+  // Nombre del plan traducido + tipo (one-time / monthly)
+  const planName = t.landing.plans[plan]?.name || 'Plan';
+  const planTypeLabel = priceInfo.typeLabel; // "One-time payment" o "Monthly subscription"
+  const isSubscription = priceInfo.isSubscription;
 
   // Initialize payment on mount
   useEffect(() => {
@@ -148,14 +151,27 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
     }
   };
 
-  const handlePaymentSuccess = (password) => {
-    // Upgrade user in local database
-    const upgradeResult = kywardDB.upgradeSubscription(user.email, plan);
+  const handlePaymentSuccess = async (password) => {
+  try {
+    // Llamada real al backend (debería ser async)
+    const upgradeResult = await kywardDB.upgradeSubscription(user.email, plan);
+    
     if (upgradeResult.success) {
-      setPdfPassword(password || upgradeResult.pdfPassword);
+      setPdfPassword(password || upgradeResult.user?.pdfPassword);
       setStage('success');
+      
+      // Opcional: refrescar usuario en local
+      const updatedUser = await kywardDB.getUserWithPassword(user.email);
+      if (updatedUser) onSuccess?.(updatedUser);
+    } else {
+      throw new Error('Upgrade failed after payment');
     }
-  };
+  } catch (err) {
+    console.error('Upgrade after payment failed:', err);
+    setError('Payment confirmed but upgrade failed. Contact support.');
+    setStage('error');
+  }
+};
 
   const handleDemoPayment = async () => {
     const result = await simulatePayment(paymentData.paymentId, plan, user.email);
@@ -229,8 +245,31 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
               </svg>
             </div>
 
-            <h2 className="payment-title" style={pms.title}>{t.payment.title}</h2>
-            <p style={pms.subtitle}>{t.payment.subtitle}</p>
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <h2 style={{ 
+                color: '#F7931A', 
+                fontSize: '24px', 
+                margin: '0 0 8px 0',
+                fontWeight: '700'
+              }}>
+                {t.payment.title} — {planName}
+              </h2>
+              
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'rgba(247,147,26,0.1)',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                color: '#F7931A'
+              }}>
+                <span>{planTypeLabel}</span>
+                <span>•</span>
+                <strong>{priceInfo.amount} {priceInfo.period}</strong>
+              </div>
+            </div>
 
             {/* QR Code */}
             <div className="qr-container" style={pms.qrContainer}>
@@ -333,29 +372,91 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
 
       case 'success':
         return (
-          <>
-            <div style={pms.successBox}>
-              <div style={pms.successIcon}>✓</div>
-              <div style={pms.successTitle}>{t.payment.confirmed}</div>
-              <p style={{ color: '#9ca3af', margin: 0 }}>
-                {t.payment.planActive.replace('{plan}', planName)}
-              </p>
-            </div>
+          <div style={pms.successBox}>
+            <div style={{ ...pms.successIcon, fontSize: '48px' }}>✓</div>
+            <h3 style={{ ...pms.successTitle, margin: '16px 0 8px' }}>
+              {t.payment.confirmed}
+            </h3>
 
-            <div style={pms.passwordBox}>
-              <div style={pms.passwordLabel}>{t.payment.yourPassword}</div>
-              <div style={pms.password}>{pdfPassword}</div>
-              <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '12px', marginBottom: 0 }}>
-                {t.payment.savePassword}
-              </p>
-            </div>
+            <p style={{ 
+              fontSize: '18px', 
+              fontWeight: '600', 
+              color: '#22c55e',
+              margin: '0 0 16px 0'
+            }}>
+              {t.payment.planActive.replace('{plan}', planName)} {t.common.activated || 'activated'}
+            </p>
 
-            <div style={{ marginTop: '24px' }}>
-              <button onClick={handleClose} style={pms.copyButton}>
-                {t.payment.continueToReport}
-              </button>
-            </div>
-          </>
+            {/* Mensaje personalizado según tipo de plan - TODO: 100% desde traducciones */}
+            {isSubscription ? (
+              <p 
+                style={{ color: '#9ca3af', fontSize: '15px', lineHeight: '1.5', marginBottom: '24px' }}
+                dangerouslySetInnerHTML={{ __html: t.payment.paymentActivatedSubscription }}
+              />
+            ) : plan === 'essential' ? (
+              <>
+                <p 
+                  style={{ color: '#9ca3af', fontSize: '15px', lineHeight: '1.5', marginBottom: '12px' }}
+                  dangerouslySetInnerHTML={{ __html: t.payment.paymentActivatedOneTime }}
+                />
+                <p 
+                  style={{ color: '#F7931A', fontSize: '14px', fontWeight: '500' }}
+                  dangerouslySetInnerHTML={{ __html: t.payment.essentialRepurchaseNote }}
+                />
+              </>
+            ) : (
+              <p 
+                style={{ color: '#9ca3af', fontSize: '15px', lineHeight: '1.5', marginBottom: '24px' }}
+                dangerouslySetInnerHTML={{ __html: t.payment.consultationBooked }}
+              />
+            )}
+
+            {/* Contraseña PDF */}
+            {pdfPassword && (
+              <div style={{ 
+                background: 'rgba(247,147,26,0.08)',
+                border: '1px solid rgba(247,147,26,0.3)',
+                borderRadius: '12px',
+                padding: '20px',
+                margin: '24px 0'
+              }}>
+                <div style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '12px' }}>
+                  {t.payment.yourPassword}
+                </div>
+                <div style={{ 
+                  fontFamily: 'monospace',
+                  fontSize: '24px',
+                  fontWeight: '700',
+                  color: '#F7931A',
+                  letterSpacing: '2px',
+                  wordBreak: 'break-all'
+                }}>
+                  {pdfPassword}
+                </div>
+                <p style={{ 
+                  fontSize: '13px', 
+                  color: '#F7931A', 
+                  marginTop: '16px',
+                  fontWeight: '500'
+                }}>
+                  {t.payment.savePassword}
+                </p>
+              </div>
+            )}
+
+            <button 
+              onClick={handleClose}
+              style={{
+                ...pms.copyButton,
+                width: '100%',
+                marginTop: '16px',
+                backgroundColor: '#22c55e',
+                border: 'none'
+              }}
+            >
+              {t.payment.continueToReport}
+            </button>
+          </div>
         );
 
       case 'expired':

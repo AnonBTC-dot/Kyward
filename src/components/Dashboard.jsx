@@ -40,29 +40,24 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
   const [showPassword, setShowPassword] = useState(false);
 
   const usageStatus = kywardDB.getUserUsageStatus(user.email);
-  const isPremium = kywardDB.hasPremiumAccess(user.email);
+  const subscriptionLevel = user.subscriptionLevel || user.subscription || 'free';
+  const isEssential = subscriptionLevel === 'essential';
+  const isSentinel = subscriptionLevel === 'sentinel';
+  const isConsultation = subscriptionLevel === 'consultation';
+  const isFree = subscriptionLevel === 'free';
+  const isPremium = isEssential || isSentinel || isConsultation;
 
-  const lastAssessment = user.assessments && user.assessments.length > 0
+  // Nombre y color del plan (usamos traducciones)
+  const planData = t.landing.plans[subscriptionLevel] || { name: 'Free' };
+  const planName = planData.name;
+  const planColor = isSentinel || isConsultation ? '#22c55e' : isEssential ? '#F7931A' : '#6b7280';
+  const planType = isEssential ? '(One-time)' : isSentinel ? '(Monthly)' : '(Free)';
+
+  const lastAssessment = user.assessments?.length > 0
     ? user.assessments[user.assessments.length - 1]
     : null;
-  const lastScore = lastAssessment?.score || null;
+  const lastScore = lastAssessment?.score ?? null;
 
-  // Get subscription level display (check both field names for compatibility)
-  const getSubscription = () => user.subscriptionLevel || user.subscription || 'free';
-
-  const getPlanName = () => {
-    const sub = getSubscription();
-    if (sub === 'consultation') return 'Consultation';
-    if (sub === 'complete') return 'Complete';
-    return 'Free';
-  };
-
-  const getPlanColor = () => {
-    const sub = getSubscription();
-    if (sub === 'consultation') return '#22c55e';
-    if (sub === 'complete') return '#F7931A';
-    return '#6b7280';
-  };
 
   // Copy password to clipboard
   const handleCopyPassword = () => {
@@ -112,13 +107,17 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
             <span style={{
               padding: '6px 14px',
               borderRadius: '20px',
-              fontSize: '12px',
+              fontSize: '13px',
               fontWeight: '700',
-              backgroundColor: `${getPlanColor()}20`,
-              color: getPlanColor(),
-              marginRight: '12px'
+              backgroundColor: `${planColor}20`,
+              color: planColor,
+              marginRight: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
             }}>
-              {getPlanName()} {t.dashboard.stats.plan}
+              {planName}
+              <span style={{ fontSize: '11px', opacity: 0.8 }}>{planType}</span>
             </span>
             <span style={{ color: '#888', marginRight: '15px', fontSize: '14px' }}>{user.email}</span>
             <button onClick={onLogout} style={styles.navButtonLogin}>{t.nav.logout}</button>
@@ -207,8 +206,8 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                   <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
                     {isPremium ? (
                       <>
-                        <circle cx="20" cy="20" r="14" fill={`${getPlanColor()}20`} stroke={getPlanColor()} strokeWidth="2"/>
-                        <path d="M14 20L18 24L26 16" stroke={getPlanColor()} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <circle cx="20" cy="20" r="14" fill={`${planColor}20`} stroke={planColor} strokeWidth="2"/>
+                        <path d="M14 20L18 24L26 16" stroke={planColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </>
                     ) : (
                       <>
@@ -220,18 +219,29 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
                 </div>
               </div>
               <div style={styles.dashStatContent}>
-                <div style={{...styles.dashStatNum, color: getPlanColor(), fontSize: '24px'}}>
-                  {getPlanName()}
+                <div style={{...styles.dashStatNum, color: planColor, fontSize: '24px'}}>
+                  {planName}
                 </div>
                 <div style={styles.dashStatLabel}>{t.dashboard.stats.plan}</div>
                 <div style={{
                   ...styles.dashStatBadge,
-                  backgroundColor: `${getPlanColor()}15`,
-                  color: getPlanColor(),
+                  backgroundColor: `${planColor}15`,
+                  color: planColor,
                   marginTop: '8px'
                 }}>
-                  {isPremium ? `✓ ${t.dashboard.stats.active}` : 'Limited'}
+                  {isPremium 
+                    ? `✓ ${t.dashboard.stats.active}` 
+                    : isEssential 
+                      ? 'One assessment used' 
+                      : 'Limited'}
                 </div>
+                
+                {/* Nota específica para Essential */}
+                {isEssential && (
+                  <p style={{ fontSize: '11px', color: '#F7931A', marginTop: '8px', opacity: 0.9 }}>
+                    {t.common.assessmentLimitEssential || 'Repurchase to retake'}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -873,20 +883,49 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
               </div>
             </div>
 
-            {usageStatus.canTake ? (
+            {canTakeNew ? (
               <button onClick={onStartAssessment} className="dash-cta-button" style={styles.dashCtaButton}>
                 <span>{lastAssessment ? t.dashboard.cta.startNewButton : t.dashboard.cta.startButton}</span>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </button>
-            ) : (
-              <div style={styles.dashCtaLimited}>
-                <button style={styles.dashCtaButtonDisabled} disabled>
-                  {t.dashboard.cta.limitButton}
+            ) : isEssential ? (
+              <div style={{
+                padding: '20px',
+                background: 'rgba(239,68,68,0.1)',
+                border: '1px solid rgba(239,68,68,0.3)',
+                borderRadius: '12px',
+                textAlign: 'center'
+              }}>
+                <p style={{ color: '#ef4444', fontWeight: '600', margin: '0 0 12px 0' }}>
+                  {t.common.assessmentLimitEssential || 'You already used your Essential assessment'}
+                </p>
+                <button
+                  onClick={() => onUpgrade('essential')} // <- Aquí abre PaymentModal con 'essential'
+                  style={{
+                    padding: '12px 24px',
+                    backgroundColor: '#F7931A',
+                    color: '#000',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    marginTop: '12px'
+                  }}
+                >
+                  {t.common.upgrade} - $7.99
                 </button>
-                <p style={styles.dashCtaUpgrade}>
-                  {isPremium ? t.dashboard.cta.unlimitedNote : t.dashboard.cta.upgradeNote}
+              </div>
+            ) : (
+              <div style={{
+                padding: '20px',
+                background: 'rgba(247,147,26,0.1)',
+                borderRadius: '12px',
+                textAlign: 'center'
+              }}>
+                <p style={{ color: '#F7931A', margin: 0 }}>
+                  {t.dashboard.cta.upgradeNote || 'Upgrade to Sentinel for unlimited assessments'}
                 </p>
               </div>
             )}
@@ -920,6 +959,46 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
               </div>
             );
           })()}
+
+          {isSentinel && (
+            <div style={{
+              margin: '32px 0',
+              padding: '24px',
+              background: 'rgba(34,197,94,0.08)',
+              border: '1px solid rgba(34,197,94,0.3)',
+              borderRadius: '16px'
+            }}>
+              <h3 style={{ color: '#22c55e', margin: '0 0 16px 0' }}>
+                {t.dashboard.emailPreferences || 'Email Preferences'}
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9ca3af' }}>
+                  <input type="checkbox" defaultChecked style={{ accentColor: '#22c55e' }} />
+                  {t.dashboard.dailyTips || 'Daily security tips'}
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9ca3af' }}>
+                  <input type="checkbox" defaultChecked style={{ accentColor: '#22c55e' }} />
+                  {t.dashboard.securityAlerts || 'Security alerts & hack notifications'}
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9ca3af' }}>
+                  <input type="checkbox" style={{ accentColor: '#22c55e' }} />
+                  {t.dashboard.monthlyReviews || 'Monthly wallet review reminders'}
+                </label>
+              </div>
+              <button style={{
+                marginTop: '16px',
+                padding: '10px 20px',
+                background: '#22c55e',
+                color: '#000',
+                border: 'none',
+                borderRadius: '8px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}>
+                {t.common.saveChanges || 'Save Preferences'}
+              </button>
+            </div>
+          )}
 
           {/* Assessment History */}
           {user.assessments && user.assessments.length > 0 && (
