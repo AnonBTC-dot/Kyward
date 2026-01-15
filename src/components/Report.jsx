@@ -1208,14 +1208,14 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
       {showNewAssessmentButton && (
         <div style={{ marginTop: '48px', textAlign: 'center' }}>
           <button
-            onClick={onStartNew}
+            onClick={onStartAssessment}
             style={{
               padding: '16px 48px',
               background: '#F7931A',
               color: '#000',
               border: 'none',
               borderRadius: '12px',
-              fontSize: '18px',
+              fontSize: '18px', 
               fontWeight: '700',
               cursor: 'pointer',
               boxShadow: '0 8px 24px rgba(247,147,26,0.3)'
