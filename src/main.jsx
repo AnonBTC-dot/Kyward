@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import './styles/Responsive.css';
 import App from './App.jsx';
-import { kywardDB } from './services/Database'; // ← Importa aquí
+import { kywardDB } from './services/Database.js'; 
 
 // Exponer kywardDB globalmente para debug (solo en desarrollo)
 if (import.meta.env.DEV) {
