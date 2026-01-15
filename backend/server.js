@@ -66,10 +66,12 @@ const authMiddleware = async (req, res, next) => {
 };
 
 // Pricing configuration (in USD)
+// Nota: essential es pago único, sentinel es suscripción mensual recurrente
 const PRICES = {
-  complete: 7.99,           // Monthly subscription
-  consultation: 99,         // First session
-  consultation_additional: 49  // Additional sessions
+  essential: 7.99,               // one-time
+  sentinel: 14.99,               // monthly subscription
+  consultation: 99,              // primera sesión
+  consultation_additional: 49    // sesiones adicionales
 };
 
 // ============================================
@@ -334,18 +336,34 @@ app.get('/api/stats/compare/:score', async (req, res) => {
 // PRICE ENDPOINTS
 // ============================================
 
-// Get pricing
 app.get('/api/pricing', (req, res) => {
   res.json({
-    complete: {
-      price: PRICES.complete,
-      period: 'month',
-      currency: 'USD'
-    },
-    consultation: {
-      firstSession: PRICES.consultation,
-      additionalSession: PRICES.consultation_additional,
-      currency: 'USD'
+    success: true,
+    plans: {
+      free: {
+        price: 0,
+        period: 'forever',
+        type: 'free',
+        currency: 'USD'
+      },
+      essential: {
+        price: PRICES.essential,
+        period: 'one-time',
+        type: 'one_time',
+        currency: 'USD'
+      },
+      sentinel: {
+        price: PRICES.sentinel,
+        period: 'month',
+        type: 'subscription',
+        currency: 'USD'
+      },
+      consultation: {
+        firstSession: PRICES.consultation,
+        additionalSession: PRICES.consultation_additional,
+        type: 'consultation',
+        currency: 'USD'
+      }
     }
   });
 });
@@ -374,25 +392,22 @@ app.post('/api/payments/create', async (req, res) => {
   try {
     const { email, plan } = req.body;
 
-    if (!email || !plan) {
-      return res.status(400).json({ error: 'Email and plan are required' });
-    }
-
-    // Determine USD amount
-    let usdAmount;
-    if (plan === 'complete') {
-      usdAmount = PRICES.complete;
-    } else if (plan === 'consultation') {
-      // Check if user already has consultation (additional session)
-      const user = await db.getUserByEmail(email.toLowerCase());
-      if (user && user.consultationCount > 0) {
-        usdAmount = PRICES.consultation_additional;
-      } else {
-        usdAmount = PRICES.consultation;
-      }
-    } else {
+    // Validate plan
+    if (!PRICES[plan]) {
       return res.status(400).json({ error: 'Invalid plan' });
     }
+
+    // For Essential, check if user can take new (i.e., repurchase allowed only if no assessment or explicit)
+    if (plan === 'essential') {
+      const canTakeResult = await db.canTakeNewAssessment(email);
+      if (!canTakeResult) {
+        return res.status(403).json({ 
+          error: 'Ya tienes una evaluación Essential activa. Para realizar una nueva evaluación debes comprar otra vez Essential ($7.99).' 
+        });
+      }
+    }
+
+    const usdAmount = PRICES[plan];
 
     // Get real BTC price and calculate amount
     const priceData = await bitcoinService.usdToSats(usdAmount);
@@ -515,6 +530,11 @@ app.get('/api/payments/:paymentId/status', async (req, res) => {
       const upgradeResult = await db.upgradeSubscription(payment.email, payment.plan);
       const pdfPassword = upgradeResult.pdfPassword;
 
+      if (!upgradeResult.success) {
+        console.error('Upgrade falló después de pago confirmado:', upgradeResult);
+        // Podrías implementar rollback o notificación manual aquí en producción
+      }
+
       // Send confirmation email
       await emailService.sendPaymentConfirmation(payment.email, payment.plan, pdfPassword);
 
@@ -522,7 +542,8 @@ app.get('/api/payments/:paymentId/status', async (req, res) => {
         success: true,
         status: 'confirmed',
         txid: txStatus.txid,
-        pdfPassword
+        pdfPassword,
+        plan: payment.plan
       });
     }
 

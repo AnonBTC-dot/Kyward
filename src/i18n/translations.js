@@ -87,46 +87,64 @@ export const translations = {
       pricingTitle: 'Simple, Honest Pricing',
       pricingSubtitle: 'No hidden fees. No subscriptions. Pay once, own forever.',
       plans: {
+        subtitle: 'Choose the plan that fits your security needs', // en /es → ver abajo
+
         free: {
-          name: 'Starter',
-          badge: 'FREE FOREVER',
+          badge: 'FREE',
+          name: 'Free',
           price: '$0',
+          period: '/forever',
           features: [
-            'Full security questionnaire',
-            'Security score (0-100)',
-            '3 basic security tips',
-            'Full action plan locked'
+            'Security Questionnaire',
+            'Your Security Score',
+            '1 Most Critical Security Tip'
           ],
-          cta: 'Start Free'
+          cta: 'Start Free Assessment'
         },
-        complete: {
-          name: 'Complete',
-          badge: 'BEST VALUE',
+
+        essential: {
+          badge: 'RECOMMENDED',
+          name: 'Essential',
           price: '$7.99',
+          period: '/one-time',
+          features: [
+            'Full PDF Report Download',
+            'All Personalized Recommendations',
+            'Inheritance Planning Guide',
+            'Unlimited Re-downloads of your report',
+            'One assessment only (repurchase to retake)'
+          ],
+          cta: 'Get Essential ($7.99)'
+        },
+
+        sentinel: {
+          badge: 'ADVANCED',
+          name: 'Sentinel',
+          price: '$14.99',
           period: '/month',
           features: [
-            'Everything in Starter',
-            'All security tips unlocked',
-            'Personalized action plan',
-            'Unlimited PDF downloads',
-            'Unlimited re-assessments'
+            'Unlimited Assessments',
+            'Email Alerts (security news & hacks)',
+            'Daily Security Tips by email',
+            'All Essential features',
+            'Cancel anytime'
           ],
-          cta: 'Subscribe Now',
-          cancelNote: 'Cancel anytime. Billed monthly.'
+          cta: 'Subscribe to Sentinel'
         },
+
         consultation: {
+          badge: 'EXPERT',
           name: 'Consultation',
-          badge: 'WHITE GLOVE',
           price: '$99',
-          period: '/session',
+          period: '+ $49/hr additional',
           features: [
-            'Everything in Complete',
-            '1-hour video consultation',
-            'Custom inheritance plan',
-            'Multi-sig setup guidance',
-            'Additional sessions: $49/hr'
+            '1-hour private audit (video call)',
+            'All Sentinel features',
+            'Personalized deep-dive recommendations',
+            'Priority support',
+            'Additional hours available'
           ],
-          cta: 'Book Consultation'
+          cta: 'Book Your Consultation'
         }
       },
 
@@ -237,22 +255,22 @@ export const translations = {
       },
 
       upgrade: {
-        title: 'Unlock Your Complete Security Plan',
+        title: 'Unlock Your Full Security Plan',
         description: 'Get unlimited assessments, download your personalized PDF report, and access your complete inheritance plan.',
         features: {
-          pdf: 'Download PDF',
+          pdf: 'Download PDF Report',
           email: 'Email Report',
           recommendations: 'All Recommendations',
           inheritance: 'Inheritance Plan'
         },
-        subscribeButton: 'Subscribe - $7.99/month',
+        essentialButton: 'Get Essential - $7.99 one-time',
+        sentinelButton: 'Subscribe Sentinel - $14.99/month',
         cancelNote: 'Cancel anytime',
         consultButton: 'Book Consultation - $99',
         sessionNote: '1-hour session',
-        limitReached: 'Monthly assessment limit reached.',
-        nextAssessment: 'Next free assessment available in',
-        days: 'days',
-        upgradeForUnlimited: 'or upgrade for unlimited access.'
+        limitReached: 'Assessment limit reached for your current plan.',
+        upgradeForUnlimited: 'Upgrade to Sentinel for unlimited assessments.',
+        essentialNote: 'With Essential you get one assessment. Repurchase to take a new one.'
       },
 
       cta: {
@@ -597,6 +615,10 @@ export const translations = {
       yourPassword: 'YOUR PDF PASSWORD',
       savePassword: "Save this password! You'll need it to open your security plan PDF.",
       continueToReport: 'Continue to Report',
+      paymentActivatedSubscription: 'Your monthly subscription is now active.<br/>You now have unlimited assessments, email alerts, and all advanced features.<br/>You can cancel anytime from your dashboard.',
+      paymentActivatedOneTime: 'Your one-time payment is complete.<br/>You now have full access to your PDF report and recommendations.',
+      essentialRepurchaseNote: '<strong>Note:</strong> To take a new assessment, you will need to purchase Essential again ($7.99).',
+      consultationBooked: 'Your consultation session has been booked.<br/>You will receive the details and link in your email soon.',
 
       // Expired
       expired: 'Payment Expired',
@@ -699,7 +721,11 @@ export const translations = {
       month: 'month',
       year: 'year',
       oneTime: 'one-time',
-      perSession: 'per session'
+      perSession: 'per session',
+      assessmentLimitEssential: 'You have already used your one Essential assessment. Purchase again to create a new one.',
+      subscriptionExpired: 'Your subscription has expired. Renew to continue with full access.',
+      oneTimePayment: 'One-time payment',
+      monthlySubscription: 'Monthly subscription'
     }
   },
 
@@ -789,46 +815,64 @@ export const translations = {
       pricingTitle: 'Precios Simples y Honestos',
       pricingSubtitle: 'Sin cargos ocultos. Sin suscripciones sorpresa. Paga una vez, tuyo para siempre.',
       plans: {
+        subtitle: 'Elige el plan que mejor se adapta a tus necesidades de seguridad',
+
         free: {
-          name: 'Inicial',
-          badge: 'GRATIS SIEMPRE',
+          badge: 'GRATIS',
+          name: 'Gratis',
           price: '$0',
+          period: '/siempre',
           features: [
-            'Cuestionario completo de seguridad',
-            'Puntuación de seguridad (0-100)',
-            '3 consejos básicos de seguridad',
-            'Plan de acción bloqueado'
+            'Cuestionario de Seguridad',
+            'Tu Puntaje de Seguridad',
+            '1 Consejo de Seguridad Más Crítico'
           ],
-          cta: 'Comenzar Gratis'
+          cta: 'Comenzar Evaluación Gratis'
         },
-        complete: {
-          name: 'Completo',
-          badge: 'MEJOR VALOR',
+
+        essential: {
+          badge: 'RECOMENDADO',
+          name: 'Essential',
           price: '$7.99',
+          period: '/pago único',
+          features: [
+            'Descarga completa del Informe en PDF',
+            'Todas las Recomendaciones Personalizadas',
+            'Guía de Planificación de Herencia',
+            'Descargas ilimitadas de tu informe',
+            'Solo una evaluación (recomprar para repetir)'
+          ],
+          cta: 'Obtener Essential ($7.99)'
+        },
+
+        sentinel: {
+          badge: 'AVANZADO',
+          name: 'Sentinel',
+          price: '$14.99',
           period: '/mes',
           features: [
-            'Todo lo del plan Inicial',
-            'Todos los consejos desbloqueados',
-            'Plan de acción personalizado',
-            'Descargas PDF ilimitadas',
-            'Evaluaciones ilimitadas'
+            'Evaluaciones Ilimitadas',
+            'Alertas por email (noticias de seguridad y hacks)',
+            'Consejos diarios de seguridad por email',
+            'Todas las características de Essential',
+            'Cancelar cuando quieras'
           ],
-          cta: 'Suscribirse Ahora',
-          cancelNote: 'Cancela cuando quieras. Facturación mensual.'
+          cta: 'Suscribirse a Sentinel'
         },
+
         consultation: {
-          name: 'Consultoría',
-          badge: 'SERVICIO PREMIUM',
+          badge: 'EXPERTO',
+          name: 'Consulta',
           price: '$99',
-          period: '/sesión',
+          period: '+ $49/hora adicional',
           features: [
-            'Todo lo del plan Completo',
-            'Consulta por video de 1 hora',
-            'Plan de herencia personalizado',
-            'Guía de configuración multi-sig',
-            'Sesiones adicionales: $49/hr'
+            'Auditoría privada de 1 hora (videollamada)',
+            'Todas las características de Sentinel',
+            'Recomendaciones personalizadas en profundidad',
+            'Soporte prioritario',
+            'Horas adicionales disponibles'
           ],
-          cta: 'Reservar Consulta'
+          cta: 'Reservar tu Consulta'
         }
       },
 
@@ -938,22 +982,22 @@ export const translations = {
       },
 
       upgrade: {
-        title: 'Desbloquea Tu Plan de Seguridad Completo',
+        title: 'Desbloquea Tu Plan Completo de Seguridad',
         description: 'Obtén evaluaciones ilimitadas, descarga tu reporte PDF personalizado y accede a tu plan completo de herencia.',
         features: {
-          pdf: 'Descargar PDF',
-          email: 'Enviar Reporte',
+          pdf: 'Descargar Reporte PDF',
+          email: 'Enviar Reporte por Email',
           recommendations: 'Todas las Recomendaciones',
           inheritance: 'Plan de Herencia'
         },
-        subscribeButton: 'Suscribirse - $7.99/mes',
+        essentialButton: 'Obtener Essential - $7.99 pago único',
+        sentinelButton: 'Suscribirse a Sentinel - $14.99/mes',
         cancelNote: 'Cancela cuando quieras',
         consultButton: 'Reservar Consulta - $99',
         sessionNote: 'Sesión de 1 hora',
-        limitReached: 'Límite mensual de evaluaciones alcanzado.',
-        nextAssessment: 'Próxima evaluación gratuita disponible en',
-        days: 'días',
-        upgradeForUnlimited: 'o mejora tu plan para acceso ilimitado.'
+        limitReached: 'Límite de evaluaciones alcanzado en tu plan actual.',
+        upgradeForUnlimited: 'Mejora a Sentinel para evaluaciones ilimitadas.',
+        essentialNote: 'Con Essential obtienes una sola evaluación. Recompra para hacer una nueva.'
       },
 
       cta: {
@@ -1297,6 +1341,10 @@ export const translations = {
       yourPassword: 'TU CONTRASEÑA PDF',
       savePassword: '¡Guarda esta contraseña! La necesitarás para abrir tu PDF de seguridad.',
       continueToReport: 'Continuar al Reporte',
+      paymentActivatedSubscription: 'Tu suscripción mensual está activa.<br/>Ahora tienes evaluaciones ilimitadas, alertas por email y todas las funciones avanzadas.<br/>Puedes cancelar cuando quieras desde tu panel.',
+      paymentActivatedOneTime: 'Tu pago único se completó correctamente.<br/>Ya tienes acceso completo a tu reporte PDF y recomendaciones.',
+      essentialRepurchaseNote: '<strong>Nota:</strong> Para realizar una nueva evaluación, deberás comprar Essential nuevamente ($7.99).',
+      consultationBooked: 'Tu sesión de consulta ha sido reservada.<br/>Recibirás los detalles y enlace en tu correo pronto.',
 
       // Expired
       expired: 'Pago Expirado',
@@ -1399,7 +1447,11 @@ export const translations = {
       month: 'mes',
       year: 'año',
       oneTime: 'único pago',
-      perSession: 'por sesión'
+      perSession: 'por sesión',
+      assessmentLimitEssential: 'Ya usaste tu única evaluación Essential. Compra de nuevo para crear una nueva.',
+      subscriptionExpired: 'Tu suscripción ha expirado. Renueva para continuar con acceso completo.',
+      oneTimePayment: 'Pago único',
+      monthlySubscription: 'Suscripción mensual'
     }
   }
 };

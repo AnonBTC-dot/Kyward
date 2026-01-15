@@ -1,7 +1,6 @@
-// KYWARD DATABASE SERVICE - API CLIENT
+// KYWARD DATABASE SERVICE - API CLIENT (Frontend)
 // Connects to backend API for all database operations
 
-// Cambiamos process.env por import.meta.env (Estándar de Vite)
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 class KywardDatabase {
@@ -10,12 +9,11 @@ class KywardDatabase {
     this.USER_CACHE_KEY = 'kyward_user_cache';
   }
 
-  // Get stored session token
+  // Token management
   getToken() {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  // Store session token
   setToken(token) {
     if (token) {
       localStorage.setItem(this.TOKEN_KEY, token);
@@ -24,13 +22,12 @@ class KywardDatabase {
     }
   }
 
-  // Get cached user data
+  // User cache
   getCachedUser() {
     const cached = localStorage.getItem(this.USER_CACHE_KEY);
     return cached ? JSON.parse(cached) : null;
   }
 
-  // Cache user data
   setCachedUser(user) {
     if (user) {
       localStorage.setItem(this.USER_CACHE_KEY, JSON.stringify(user));
@@ -39,46 +36,45 @@ class KywardDatabase {
     }
   }
 
-  // API request helper
+  // API request helper with error handling
   async apiRequest(endpoint, options = {}) {
     const token = this.getToken();
     const headers = {
       'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-      ...options.headers
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
     };
 
     try {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
-        headers
+        headers,
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        return { success: false, message: data.error || 'Request failed' };
+        throw new Error(data.error || 'Request failed');
       }
 
-      return data;
+      return { success: true, ...data };
     } catch (error) {
       console.error('API request failed:', error);
-      return { success: false, message: 'Network error. Please check your connection.' };
+      return { success: false, message: error.message || 'Network error. Please check your connection.' };
     }
   }
 
   // ============================================
-  // AUTHENTICATION OPERATIONS
+  // AUTHENTICATION
   // ============================================
 
-  // Create new user (signup)
   async createUser(userData) {
     const result = await this.apiRequest('/auth/signup', {
       method: 'POST',
       body: JSON.stringify({
         email: userData.email,
-        password: userData.password
-      })
+        password: userData.password,
+      }),
     });
 
     if (result.success && result.token) {
@@ -89,11 +85,10 @@ class KywardDatabase {
     return result;
   }
 
-  // Login user
   async login(email, password) {
     const result = await this.apiRequest('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
     });
 
     if (result.success && result.token) {
@@ -104,66 +99,34 @@ class KywardDatabase {
     return result;
   }
 
-  // Validate current session
-  async validateSession(token = null) {
-    const sessionToken = token || this.getToken();
-    if (!sessionToken) return null;
+  async validateSession() {
+    const token = this.getToken();
+    if (!token) return null;
 
-    const result = await this.apiRequest('/auth/validate', {
-      headers: { 'Authorization': `Bearer ${sessionToken}` }
-    });
-
+    const result = await this.apiRequest('/auth/validate');
     if (result.success && result.user) {
       this.setCachedUser(result.user);
-      return result.user.email;
+      return result.user;
     }
 
-    // Session invalid, clear token
     this.setToken(null);
     this.setCachedUser(null);
     return null;
   }
 
-  // Logout user
   async logout() {
     await this.apiRequest('/auth/logout', { method: 'POST' });
     this.setToken(null);
     this.setCachedUser(null);
   }
 
-  // Delete session (alias for logout)
-  deleteSession(token) {
-    this.logout();
-  }
-
-  // Check if user exists
-  async userExists(email) {
-    const result = await this.apiRequest('/auth/check-email', {
-      method: 'POST',
-      body: JSON.stringify({ email })
-    });
-    return result.exists || false;
-  }
-
-  // Reset password
-  async resetPassword(email, newPassword) {
-    return await this.apiRequest('/auth/reset-password', {
-      method: 'POST',
-      body: JSON.stringify({ email, newPassword })
-    });
-  }
-
   // ============================================
-  // USER OPERATIONS
+  // USER & SUBSCRIPTION
   // ============================================
 
-  // Get user data
-  async getUser(email) {
-    // First check cache
+  async getUser() {
     const cached = this.getCachedUser();
-    if (cached && cached.email === email) {
-      return cached;
-    }
+    if (cached) return cached;
 
     const result = await this.apiRequest('/user');
     if (result.success && result.user) {
@@ -173,56 +136,34 @@ class KywardDatabase {
     return null;
   }
 
-  // Sanitize user (for compatibility)
-  sanitizeUser(user) {
-    return user;
+  // Get current subscription level
+  async getSubscriptionLevel() {
+    const user = await this.getUser();
+    return user?.subscriptionLevel || user?.subscription || 'free';
   }
 
-  // Get user usage status
-  async getUserUsageStatus(email) {
-    return this.canTakeAssessment(email);
+  // Check if user has premium access (Essential, Sentinel, Consultation)
+  async hasPremiumAccess() {
+    const level = await this.getSubscriptionLevel();
+    return ['essential', 'sentinel', 'consultation'].includes(level);
   }
 
-  // Check if user can take assessment
-  async canTakeAssessment(email) {
+  // Check if user can take a new assessment
+  async canTakeNewAssessment() {
     const result = await this.apiRequest('/user/usage');
     if (result.success) {
-      return {
-        canTake: result.canTake,
-        remaining: result.remaining,
-        isPremium: result.isPremium
-      };
+      return result.canTake;
     }
-    return { canTake: false, remaining: 0, isPremium: false };
+    // Fallback: solo 1 por mes si no premium
+    const level = await this.getSubscriptionLevel();
+    return !['essential'].includes(level); // Essential: false si ya usó
   }
 
-  // Check if user has premium access
-  async hasPremiumAccess(email) {
-    const result = await this.apiRequest('/user/premium');
-    return result.success && result.hasPremium;
-  }
-
-  // Check if user has consultation access
-  async hasConsultationAccess(email) {
-    const user = await this.getUser(email);
-    return user && user.subscriptionLevel === 'consultation';
-  }
-
-  // Get user's PDF password
-  async getPdfPassword(email) {
-    const user = await this.getUser(email);
-    return user?.pdfPassword || null;
-  }
-
-  // ============================================
-  // SUBSCRIPTION OPERATIONS
-  // ============================================
-
-  // Upgrade user subscription
-  async upgradeSubscription(email, level) {
+  // Upgrade to new tier
+  async upgradeSubscription(plan) {
     const result = await this.apiRequest('/user/upgrade', {
       method: 'POST',
-      body: JSON.stringify({ plan: level })
+      body: JSON.stringify({ plan }),
     });
 
     if (result.success && result.user) {
@@ -233,106 +174,57 @@ class KywardDatabase {
   }
 
   // ============================================
-  // ASSESSMENT OPERATIONS
+  // ASSESSMENT
   // ============================================
 
-  // Save assessment
-  async saveAssessment(email, assessmentData) {
-    const result = await this.apiRequest('/assessments', {
+  async saveAssessment(assessmentData) {
+    return this.apiRequest('/assessments', {
       method: 'POST',
-      body: JSON.stringify(assessmentData)
+      body: JSON.stringify(assessmentData),
     });
-    return result.success;
   }
 
-  // Get user assessments
-  async getUserAssessments(email) {
+  async getUserAssessments() {
     const result = await this.apiRequest('/assessments');
     return result.success ? result.assessments : [];
   }
 
   // ============================================
-  // STATISTICS OPERATIONS
+  // STATISTICS
   // ============================================
 
-  // Get global/community statistics
-  async getGlobalStats() {
-    const result = await this.apiRequest('/stats/community');
-    if (result.success) {
-      return {
-        totalAssessments: result.totalAssessments,
-        averageScore: result.averageScore,
-        distribution: result.distribution,
-        distributionPercent: result.distribution
-      };
-    }
-    // Return defaults if API fails
-    return {
-      totalAssessments: 0,
-      averageScore: 50,
-      distribution: { excellent: 33, moderate: 34, needsWork: 33 },
-      distributionPercent: { excellent: 33, moderate: 34, needsWork: 33 }
-    };
-  }
-
-  // Compare user score to community average
   async compareToAverage(userScore) {
     const result = await this.apiRequest(`/stats/compare/${userScore}`);
     if (result.success) {
       return result;
     }
-    // Return calculated defaults if API fails
-    const averageScore = 50;
-    const difference = userScore - averageScore;
-    let percentile;
-    if (userScore >= 80) {
-      percentile = 85 + (userScore - 80) * 0.75;
-    } else if (userScore >= 50) {
-      percentile = 35 + ((userScore - 50) / 30) * 50;
-    } else {
-      percentile = (userScore / 50) * 35;
-    }
+
+    // Fallback robusto
+    const average = 50;
+    const difference = userScore - average;
+    let percentile = 50;
+    if (userScore >= 80) percentile = 85 + (userScore - 80) * 0.75;
+    else if (userScore >= 50) percentile = 35 + ((userScore - 50) / 30) * 50;
+    else percentile = (userScore / 50) * 35;
+
     percentile = Math.min(99, Math.max(1, Math.round(percentile)));
 
     return {
       userScore,
-      averageScore,
+      averageScore: average,
       difference,
       percentile,
       isAboveAverage: difference > 0,
       isBelowAverage: difference < 0,
-      comparison: difference > 10 ? 'well above' :
-                  difference > 0 ? 'above' :
-                  difference === 0 ? 'at' :
-                  difference > -10 ? 'below' : 'well below',
+      comparison: difference > 10 ? 'well above' : difference > 0 ? 'above' : difference === 0 ? 'at' : difference > -10 ? 'below' : 'well below',
       distribution: { excellent: 33, moderate: 34, needsWork: 33 }
     };
   }
 
   // ============================================
-  // SYNCHRONOUS COMPATIBILITY METHODS
-  // These provide backward compatibility for components
-  // that haven't been updated to use async/await yet
+  // COMPATIBILITY / LEGACY
   // ============================================
 
-  // Sync version - uses cached data
-  getUsers() {
-    return {};
-  }
-
-  getSessions() {
-    return {};
-  }
-
-  getUserWithPassword(email) {
-    return this.getCachedUser();
-  }
-
-  createSession(email) {
-    return this.getToken();
-  }
-
-  // Generate PDF password (fallback, mainly handled by backend)
   generatePdfPassword() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
     let password = '';
@@ -342,10 +234,5 @@ class KywardDatabase {
     return password;
   }
 }
-
-// Password hashing (for compatibility, actual hashing done on backend)
-export const hashPassword = (password) => {
-  return btoa(password + 'kyward_salt_2024_secure');
-};
 
 export const kywardDB = new KywardDatabase();

@@ -288,125 +288,168 @@ const LandingPage = ({ onLogin, onSignup }) => {
         </div>
       </section>
 
-      {/* PRICING */}
-      <section style={styles.pricingSection}>
-        <div style={styles.pricingSectionGlow} />
-        <div style={styles.sectionContent}>
-          <h2 className="section-title" style={styles.sectionTitle}>{t.landing.pricingTitle}</h2>
-          <p className="section-subtitle" style={styles.sectionSubtitle}>{t.landing.pricingSubtitle}</p>
-          <div className="pricing-grid" style={styles.pricingGrid}>
-            {/* Free Plan */}
-            <div className="pricing-card" style={styles.pricingCard}>
-              <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBg}}>
-                <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowFree}} />
-                <div className="floating-element-slow" style={{...styles.pricingFloatingElement, width: '50px', height: '35px', top: '20px', right: '30px', '--rotate': '8deg'}} />
-                <div className="floating-element" style={{...styles.pricingFloatingElement, width: '35px', height: '35px', bottom: '10px', left: '25px', borderRadius: '50%'}} />
-                <div style={styles.pricingBadge}>{t.landing.plans.free.badge}</div>
-                <h3 style={styles.pricingTitle}>{t.landing.plans.free.name}</h3>
-                <div style={styles.pricingPrice}>{t.landing.plans.free.price}<span style={styles.pricingPeriod}></span></div>
-              </div>
-              <div style={styles.pricingCardBody}>
-                <ul style={styles.pricingFeatures}>
-                  <li style={styles.pricingFeature}>
-                    <span style={styles.pricingFeatureIcon}>✓</span>
-                    {t.landing.plans.free.features[0]}
-                  </li>
-                  <li style={styles.pricingFeature}>
-                    <span style={styles.pricingFeatureIcon}>✓</span>
-                    {t.landing.plans.free.features[1]}
-                  </li>
-                  <li style={styles.pricingFeature}>
-                    <span style={styles.pricingFeatureIcon}>✓</span>
-                    {t.landing.plans.free.features[2]}
-                  </li>
-                  <li style={styles.pricingFeature}>
-                    <span style={{...styles.pricingFeatureIcon, backgroundColor: 'rgba(107,114,128,0.15)', color: '#6b7280'}}>-</span>
-                    <span style={{color: '#6b7280'}}>{t.landing.plans.free.features[3]}</span>
-                  </li>
-                </ul>
-                <button onClick={onSignup} style={styles.pricingButton}>{t.landing.plans.free.cta}</button>
-              </div>
-            </div>
+{/* PRICING SECTION */}
+<section style={styles.pricingSection}>
+  <div style={styles.pricingSectionGlow} />
+  <div style={styles.sectionContent}>
+    <h2 className="section-title" style={styles.sectionTitle}>{t.landing.pricingTitle}</h2>
+    <p className="section-subtitle" style={styles.sectionSubtitle}>{t.landing.pricingSubtitle}</p>
 
-            {/* Complete Plan - $7.99/month */}
-            <div className="pricing-card-featured" style={{...styles.pricingCard, ...styles.pricingCardFeatured}}>
-              <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBgFeatured}}>
-                <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowFeatured}} />
-                <div className="floating-element" style={{...styles.pricingFloatingElement, width: '55px', height: '40px', top: '15px', right: '25px', '--rotate': '-10deg'}} />
-                <div className="floating-element-slow" style={{...styles.pricingFloatingElement, width: '40px', height: '40px', bottom: '15px', left: '20px', borderRadius: '50%'}} />
-                <div style={{...styles.pricingBadge, ...styles.pricingBadgeFeatured}}>{t.landing.plans.complete.badge}</div>
-                <h3 style={styles.pricingTitle}>{t.landing.plans.complete.name}</h3>
-                <div style={{...styles.pricingPrice, ...styles.pricingPriceFeatured}}>{t.landing.plans.complete.price}<span style={styles.pricingPeriod}>{t.landing.plans.complete.period}</span></div>
-              </div>
-              <div style={styles.pricingCardBody}>
-                <ul style={styles.pricingFeatures}>
-                  <li style={styles.pricingFeature}>
-                    <span style={styles.pricingFeatureIcon}>✓</span>
-                    {t.landing.plans.complete.features[0]}
-                  </li>
-                  <li style={styles.pricingFeature}>
-                    <span style={styles.pricingFeatureIcon}>✓</span>
-                    {t.landing.plans.complete.features[1]}
-                  </li>
-                  <li style={styles.pricingFeature}>
-                    <span style={styles.pricingFeatureIcon}>✓</span>
-                    {t.landing.plans.complete.features[2]}
-                  </li>
-                  <li style={styles.pricingFeature}>
-                    <span style={styles.pricingFeatureIcon}>✓</span>
-                    {t.landing.plans.complete.features[3]}
-                  </li>
-                  <li style={styles.pricingFeature}>
-                    <span style={styles.pricingFeatureIcon}>✓</span>
-                    {t.landing.plans.complete.features[4]}
-                  </li>
-                </ul>
-                <p style={{ fontSize: '12px', color: '#9ca3af', textAlign: 'center', marginBottom: '16px', marginTop: '-8px' }}>
-                  {t.landing.plans.complete.cancelNote}
-                </p>
-                <button onClick={onSignup} style={styles.pricingButtonFeatured}>{t.landing.plans.complete.cta}</button>
-              </div>
-            </div>
-
-            {/* Pro Consultation - $99 first, $49 additional */}
-            <div className="pricing-card" style={{...styles.pricingCard, ...styles.pricingCardPro}}>
-              <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBgPro}}>
-                <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowPro}} />
-                <div className="floating-element-slow" style={{...styles.pricingFloatingElement, width: '45px', height: '45px', top: '18px', right: '28px', '--rotate': '12deg'}} />
-                <div className="floating-element" style={{...styles.pricingFloatingElement, width: '38px', height: '30px', bottom: '12px', left: '22px', borderRadius: '8px'}} />
-                <div style={{...styles.pricingBadge, ...styles.pricingBadgePro}}>{t.landing.plans.consultation.badge}</div>
-                <h3 style={styles.pricingTitle}>{t.landing.plans.consultation.name}</h3>
-                <div style={{...styles.pricingPrice, ...styles.pricingPricePro}}>{t.landing.plans.consultation.price}<span style={styles.pricingPeriod}>{t.landing.plans.consultation.period}</span></div>
-              </div>
-              <div style={styles.pricingCardBody}>
-                <ul style={styles.pricingFeatures}>
-                  <li style={styles.pricingFeature}>
-                    <span style={styles.pricingFeatureIcon}>✓</span>
-                    {t.landing.plans.consultation.features[0]}
-                  </li>
-                  <li style={styles.pricingFeature}>
-                    <span style={styles.pricingFeatureIcon}>✓</span>
-                    {t.landing.plans.consultation.features[1]}
-                  </li>
-                  <li style={styles.pricingFeature}>
-                    <span style={styles.pricingFeatureIcon}>✓</span>
-                    {t.landing.plans.consultation.features[2]}
-                  </li>
-                  <li style={styles.pricingFeature}>
-                    <span style={styles.pricingFeatureIcon}>✓</span>
-                    {t.landing.plans.consultation.features[3]}
-                  </li>
-                  <li style={styles.pricingFeature}>
-                    <span style={styles.pricingFeatureIcon}>✓</span>
-                    {t.landing.plans.consultation.features[4]}
-                  </li>
-                </ul>
-                <button onClick={onSignup} style={styles.pricingButtonPro}>{t.landing.plans.consultation.cta}</button>
-              </div>
-            </div>
+    <div 
+      className="pricing-grid"
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr) !important', // ← FUERZA 4 columnas SIEMPRE en desktop
+        gap: '28px !important',
+        maxWidth: '1440px !important',
+        margin: '48px auto 0 !important',
+        padding: '0 24px',
+        justifyContent: 'center',
+        alignItems: 'stretch',
+        ...styles.pricingGrid // mantiene tus estilos base
+      }}
+    >
+      {/* Free */}
+      <div className="pricing-card" style={styles.pricingCard}>
+        <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBg}}>
+          <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowFree}} />
+          <div style={styles.pricingBadge}>{t.landing.plans.free.badge}</div>
+          <h3 style={styles.pricingTitle}>{t.landing.plans.free.name}</h3>
+          <div style={styles.pricingPrice}>
+            {t.landing.plans.free.price}
+            <span style={styles.pricingPeriod}>{t.landing.plans.free.period}</span>
           </div>
         </div>
-      </section>
+        <div style={styles.pricingCardBody}>
+          <ul style={styles.pricingFeatures}>
+            {t.landing.plans.free.features.map((feature, idx) => (
+              <li key={idx} style={styles.pricingFeature}>
+                <span style={styles.pricingFeatureIcon}>✓</span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+          <button onClick={onSignup} style={styles.pricingButton}>
+            {t.landing.plans.free.cta}
+          </button>
+        </div>
+      </div>
+
+      {/* Essential - destacada */}
+      <div 
+        className="pricing-card-featured" 
+        style={{
+          ...styles.pricingCard,
+          ...styles.pricingCardFeatured,
+          transform: 'scale(1.04)',
+          zIndex: 2,
+          boxShadow: '0 20px 60px rgba(247,147,26,0.35)'
+        }}
+      >
+        <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBgFeatured}}>
+          <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowFeatured}} />
+          <div style={styles.pricingBadge}>{t.landing.plans.essential.badge}</div>
+          <h3 style={styles.pricingTitle}>{t.landing.plans.essential.name}</h3>
+          <div style={{...styles.pricingPrice, ...styles.pricingPriceFeatured}}>
+            {t.landing.plans.essential.price}
+            <span style={styles.pricingPeriod}>{t.landing.plans.essential.period}</span>
+          </div>
+        </div>
+        <div style={styles.pricingCardBody}>
+          <ul style={styles.pricingFeatures}>
+            {t.landing.plans.essential.features.map((feature, idx) => (
+              <li key={idx} style={styles.pricingFeature}>
+                <span style={styles.pricingFeatureIcon}>✓</span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+          <button onClick={onSignup} style={styles.pricingButtonFeatured}>
+            {t.landing.plans.essential.cta.split(' ($')[0] || t.landing.plans.essential.cta}
+          </button>
+        </div>
+      </div>
+
+      {/* Sentinel - color lindo que ya te gusta */}
+      <div className="pricing-card" style={styles.pricingCard}>
+        <div style={{
+          ...styles.pricingCardHeader,
+          background: 'linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(59,130,246,0.12) 100%)',
+        }}>
+          <div className="glow-element" style={{
+            ...styles.pricingCardGlow,
+            backgroundColor: 'rgba(34,197,94,0.5)',
+            top: '10%',
+            right: '20%',
+            width: '180px',
+            height: '180px'
+          }} />
+          <div style={styles.pricingBadge}>{t.landing.plans.sentinel.badge}</div>
+          <h3 style={{ ...styles.pricingTitle, color: '#22c55e' }}>
+            {t.landing.plans.sentinel.name}
+          </h3>
+          <div style={{ ...styles.pricingPrice, color: '#a5f3fc' }}>
+            {t.landing.plans.sentinel.price}
+            <span style={styles.pricingPeriod}>{t.landing.plans.sentinel.period}</span>
+          </div>
+        </div>
+        <div style={styles.pricingCardBody}>
+          <ul style={styles.pricingFeatures}>
+            {t.landing.plans.sentinel.features.map((feature, idx) => (
+              <li key={idx} style={styles.pricingFeature}>
+                <span style={{ 
+                  ...styles.pricingFeatureIcon, 
+                  backgroundColor: 'rgba(34,197,94,0.2)', 
+                  color: '#22c55e' 
+                }}>✓</span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+          <button 
+            onClick={onSignup} 
+            style={{
+              ...styles.pricingButton,
+              backgroundColor: '#22c55e',
+              color: '#000',
+              boxShadow: '0 8px 24px rgba(34,197,94,0.3)'
+            }}
+          >
+            {t.landing.plans.sentinel.cta}
+          </button>
+        </div>
+      </div>
+
+      {/* Consultation */}
+      <div className="pricing-card" style={{...styles.pricingCard, ...styles.pricingCardPro}}>
+        <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBgPro}}>
+          <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowPro}} />
+          <div style={{...styles.pricingBadge, ...styles.pricingBadgePro}}>
+            {t.landing.plans.consultation.badge}
+          </div>
+          <h3 style={styles.pricingTitle}>{t.landing.plans.consultation.name}</h3>
+          <div style={{...styles.pricingPrice, ...styles.pricingPricePro}}>
+            {t.landing.plans.consultation.price}
+            <span style={styles.pricingPeriod}>{t.landing.plans.consultation.period}</span>
+          </div>
+        </div>
+        <div style={styles.pricingCardBody}>
+          <ul style={styles.pricingFeatures}>
+            {t.landing.plans.consultation.features.map((feature, idx) => (
+              <li key={idx} style={styles.pricingFeature}>
+                <span style={styles.pricingFeatureIcon}>✓</span>
+                {feature}
+              </li>
+            ))}
+          </ul>
+          <button onClick={onSignup} style={styles.pricingButtonPro}>
+            {t.landing.plans.consultation.cta}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* FOOTER */}
       <Footer />

@@ -18,7 +18,21 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
   const [showPassword, setShowPassword] = useState(false);
   const [copiedPassword, setCopiedPassword] = useState(false);
 
-  const isPremium = user && kywardDB.hasPremiumAccess(user.email);
+  // Plan detection - más preciso para los 4 tiers
+  const subscriptionLevel = user?.subscriptionLevel || user?.subscription || 'free';
+
+  const isFree = subscriptionLevel === 'free';
+  const isEssential = subscriptionLevel === 'essential';
+  const isSentinel = subscriptionLevel === 'sentinel';
+  const isConsultation = subscriptionLevel === 'consultation';
+
+  const isPremium = isEssential || isSentinel || isConsultation;
+
+  // Determinar qué mostrar según plan
+  const showFullReport = isPremium;                          // Full tips + recomendaciones
+  const showPdfButton = isPremium;                           // PDF solo premium
+  const showEmailButton = isPremium;                         // Email solo premium
+  const showNewAssessmentButton = (isSentinel || isConsultation || kywardDB.canTakeNewAssessment?.(user?.email)) ?? false;
 
   const handleCopyPassword = () => {
     if (user?.pdfPassword) {
@@ -74,7 +88,15 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
   };
 
   // Tips to display based on subscription
-  const displayTips = isPremium ? recommendations : freeTips;
+  // Tips a mostrar según plan
+    let displayTips = [];
+    if (isFree) {
+      displayTips = freeTips.slice(0, 1); // Solo 1 tip crítico en Free
+    } else if (isEssential) {
+      displayTips = recommendations; // Todo para Essential
+    } else {
+      displayTips = recommendations; // Todo para Sentinel/Consultation
+    }
 
   // Calculate critical/high priority count for urgency
   const criticalCount = recommendations.filter(r => r.priority === 'critical' || r.priority === 'high').length;
@@ -126,6 +148,26 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
           </div>
           <div style={{...styles.reportScoreLabel, color: getScoreColor(score)}}>
             {getScoreLabel(score)}
+
+            {isEssential && (
+              <p style={{ 
+                marginTop: '16px', 
+                fontSize: '13px', 
+                color: '#F7931A', 
+                fontStyle: 'italic' 
+              }}>
+                {t.common.oneTimeNote || 'One-time assessment - repurchase to retake'}
+              </p>
+            )}
+            {isSentinel && (
+              <p style={{ 
+                marginTop: '16px', 
+                fontSize: '13px', 
+                color: '#22c55e' 
+              }}>
+                {t.common.unlimitedAccess || 'Unlimited assessments & features'}
+              </p>
+            )}
           </div>
           <p style={styles.reportScoreDesc}>
             {score >= 80 ? t.report.score.excellentDesc :
@@ -431,27 +473,51 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
           background: 'linear-gradient(135deg, rgba(247,147,26,0.1) 0%, rgba(239,68,68,0.1) 100%)',
           border: '1px solid rgba(247,147,26,0.3)',
           borderRadius: '16px',
-          padding: '24px',
-          margin: '0 auto 40px',
+          padding: '32px',
+          margin: '48px auto',
           maxWidth: '800px',
           textAlign: 'center'
         }}>
-          <div style={{ fontSize: '14px', color: '#F7931A', marginBottom: '8px', fontWeight: '600' }}>
-            {t.report.freeUserSummary.found}
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', flexWrap: 'wrap' }}>
-            <div>
-              <div style={{ fontSize: '36px', fontWeight: '800', color: '#ef4444' }}>{criticalCount}</div>
-              <div style={{ fontSize: '13px', color: '#9ca3af' }}>{t.report.freeUserSummary.criticalIssues}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '36px', fontWeight: '800', color: '#F7931A' }}>{recommendations.length}</div>
-              <div style={{ fontSize: '13px', color: '#9ca3af' }}>{t.report.freeUserSummary.totalRecs}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '36px', fontWeight: '800', color: '#22c55e' }}>3</div>
-              <div style={{ fontSize: '13px', color: '#9ca3af' }}>{t.report.freeUserSummary.freeTips}</div>
-            </div>
+          <h3 style={{ color: '#F7931A', fontSize: '24px', marginBottom: '16px' }}>
+            {t.report.upgrade.unlockFullReport}
+          </h3>
+
+          <p style={{ color: '#9ca3af', marginBottom: '24px' }}>
+            {t.report.upgrade.freeLimitedTo} {freeTips.length} {t.report.upgrade.tipsOnly}
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '400px', margin: '0 auto' }}>
+            <button
+              onClick={() => onUpgrade('essential')}
+              style={{
+                padding: '16px',
+                background: '#F7931A',
+                color: '#000',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              {t.common.getEssential || 'Get Essential - $7.99 one-time'}
+            </button>
+
+            <button
+              onClick={() => onUpgrade('sentinel')}
+              style={{
+                padding: '16px',
+                background: 'transparent',
+                border: '2px solid #22c55e',
+                color: '#22c55e',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              {t.common.subscribeSentinel || 'Subscribe Sentinel - Unlimited'}
+            </button>
           </div>
         </div>
       )}
@@ -1137,6 +1203,33 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade })
           ← {t.report.backToDashboard}
         </button>
       </div>
+
+      {/* Botón Nueva Evaluación - según plan */}
+      {showNewAssessmentButton && (
+        <div style={{ marginTop: '48px', textAlign: 'center' }}>
+          <button
+            onClick={onStartNew}
+            style={{
+              padding: '16px 48px',
+              background: '#F7931A',
+              color: '#000',
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: '18px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              boxShadow: '0 8px 24px rgba(247,147,26,0.3)'
+            }}
+          >
+            {t.dashboard.cta.startNewButton}
+          </button>
+          {isEssential && (
+            <p style={{ marginTop: '12px', color: '#F7931A', fontSize: '14px' }}>
+              {t.common.oneTimeNote}
+            </p>
+          )}
+        </div>
+      )}
 
       <Footer />
     </div>

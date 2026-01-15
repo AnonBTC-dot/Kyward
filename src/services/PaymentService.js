@@ -4,27 +4,76 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 // Payment configuration
+// Payment configuration
 const PAYMENT_CONFIG = {
   prices: {
-    complete: 7.99, // $7.99 USD/month subscription
-    consultation: 99, // $99 USD first session
-    consultationAdditional: 49 // $49 USD additional sessions
+    essential: 7.99,              // one-time payment
+    sentinel: 14.99,              // monthly subscription
+    consultation: 99,             // first consultation session
+    consultation_additional: 49   // additional hours/sessions
   },
-  pollInterval: 5000, // Check payment status every 5 seconds
-  maxPollAttempts: 360 // Poll for max 30 minutes
+  pollInterval: 5000,             // Check payment status every 5 seconds
+  maxPollAttempts: 360,           // Poll for max 30 minutes (360 × 5s = 1800s = 30min)
+  
+  // Texto que se muestra en el modal según el tipo de plan
+  planTypeLabels: {
+    essential: 'One-time payment',
+    sentinel: 'Monthly subscription',
+    consultation: 'One-time session',
+    consultation_additional: 'Additional session'
+  }
 };
 
-// Get price display text
+/**
+ * Get price display text and metadata for each plan
+ */
 export const getPriceDisplay = (plan) => {
   switch (plan) {
-    case 'complete':
-      return { amount: '$7.99', description: 'Complete Plan - Monthly subscription', isSubscription: true };
+    case 'essential':
+      return {
+        amount: '$7.99',
+        description: 'Essential Plan - One-time payment',
+        typeLabel: PAYMENT_CONFIG.planTypeLabels.essential,
+        isSubscription: false,
+        period: 'one-time'
+      };
+
+    case 'sentinel':
+      return {
+        amount: '$14.99',
+        description: 'Sentinel Plan - Monthly subscription',
+        typeLabel: PAYMENT_CONFIG.planTypeLabels.sentinel,
+        isSubscription: true,
+        period: 'month'
+      };
+
     case 'consultation':
-      return { amount: '$99', description: 'Consultation - 1 hour session', additionalPrice: '$49/hr' };
+      return {
+        amount: '$99',
+        description: 'Consultation - 1 hour private audit',
+        typeLabel: PAYMENT_CONFIG.planTypeLabels.consultation,
+        additionalPrice: '$49/hr',
+        isSubscription: false,
+        period: 'one-time session'
+      };
+
     case 'consultation_additional':
-      return { amount: '$49', description: 'Additional Consultation - 1 hour session' };
+      return {
+        amount: '$49',
+        description: 'Additional Consultation Hour',
+        typeLabel: PAYMENT_CONFIG.planTypeLabels.consultation_additional,
+        isSubscription: false,
+        period: 'per session'
+      };
+
     default:
-      return { amount: '$0', description: 'Free Plan' };
+      return {
+        amount: '$0',
+        description: 'Free Plan',
+        typeLabel: 'No payment required',
+        isSubscription: false,
+        period: 'forever'
+      };
   }
 };
 
@@ -33,6 +82,12 @@ export const getPriceDisplay = (plan) => {
  * Returns payment address and QR code data
  */
 export const createPayment = async (plan, userEmail) => {
+
+  // Validate plan exists in config
+  if (!PAYMENT_CONFIG.prices[plan]) {
+    throw new Error(`Invalid plan type: ${plan}`);
+  }
+
   try {
     const response = await fetch(`${API_URL}/api/payments/create`, {
       method: 'POST',

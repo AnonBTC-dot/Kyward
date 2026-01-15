@@ -83,7 +83,9 @@ const createUser = async (email, password) => {
           email,
           password_hash: passwordHash,
           subscription_level: 'free',
-          pdf_password: pdfPassword
+          pdf_password: pdfPassword,
+          payment_type: 'none', // New default
+          essential_assessment_id: null // New default
         }])
         .select()
         .single();
@@ -110,6 +112,8 @@ const createUser = async (email, password) => {
       password_hash: passwordHash,
       subscription_level: 'free',
       pdf_password: pdfPassword,
+      payment_type: 'none', // New
+      essential_assessment_id: null, // New
       created_at: new Date().toISOString(),
       monthly_assessment_count: 0,
       last_reset_date: new Date().toISOString()
@@ -302,7 +306,13 @@ const sanitizeUser = (user) => {
     consultationCount: user.consultation_count || 0,
     createdAt: user.created_at,
     lastLogin: user.last_login,
-    languagePreference: user.language_preference || 'en'
+    languagePreference: user.language_preference || 'en',
+    // New fields for Essential/Sentinel tiers
+    paymentType: user.payment_type || 'none',
+    essentialAssessmentId: user.essential_assessment_id || null,
+    emailHackAlerts: user.email_hack_alerts !== false,
+    emailDailyTips: user.email_daily_tips !== false,
+    emailWalletReviews: user.email_wallet_reviews !== false
   };
 };
 
@@ -311,62 +321,152 @@ const sanitizeUser = (user) => {
 // ============================================
 
 // Upgrade subscription
-const upgradeSubscription = async (email, plan) => {
+// Plans: 'essential' (one-time $7.99), 'sentinel' ($14.99/mo), 'consultation' ($99 + $49/hr)
+const upgradeSubscription = async (email, newLevel) => {
   const db = initSupabase();
-  const pdfPassword = generatePdfPassword();
-
-  // Calculate subscription end for Complete Plan (monthly)
-  let subscriptionEnd = null;
-  if (plan === 'complete') {
-    subscriptionEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-  }
 
   if (db) {
     try {
+      let updates = {
+        subscription_level: newLevel,
+        subscription_start: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      // Set payment_type and subscription_end based on tier
+      if (newLevel === 'essential') {
+        updates.payment_type = 'one_time';
+        updates.subscription_end = null; // One-time, no end
+      } else if (newLevel === 'sentinel') {
+        updates.payment_type = 'subscription';
+        // Set end to 1 month from now (handle recurring in payment webhook if using Stripe)
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 1);
+        updates.subscription_end = endDate.toISOString();
+      } else if (newLevel === 'consultation') {
+        updates.payment_type = 'subscription'; // Treat as sub for unlimited + audit
+        const endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 1);
+        updates.subscription_end = endDate.toISOString();
+        updates.consultation_count = (updates.consultation_count || 0) + 1; // Increment for audit
+      }
+
       const { data, error } = await db
         .from('users')
-        .update({
-          subscription_level: plan,
-          subscription_start: new Date().toISOString(),
-          subscription_end: subscriptionEnd,
-          pdf_password: pdfPassword,
-          updated_at: new Date().toISOString()
-        })
+        .update(updates)
         .eq('email', email)
-        .select()
+        .select('*')
         .single();
 
       if (error) throw error;
-      return { success: true, pdfPassword, user: sanitizeUser(data) };
+
+      return { success: true, user: data };
     } catch (error) {
+      console.error('Upgrade subscription error:', error);
       return { success: false, message: 'Failed to upgrade subscription.' };
     }
   } else {
-    if (!memoryDB.users[email]) {
-      return { success: false, message: 'User not found.' };
+    // Memory fallback
+    const user = memoryDB.users[email];
+    if (!user) return { success: false, message: 'User not found' };
+
+    user.subscriptionLevel = newLevel;
+    user.updatedAt = new Date().toISOString();
+    user.subscriptionStart = new Date().toISOString();
+
+    if (newLevel === 'essential') {
+      user.payment_type = 'one_time';
+      user.subscriptionEnd = null;
+    } else if (newLevel === 'sentinel' || newLevel === 'consultation') {
+      user.payment_type = 'subscription';
+      const endDate = new Date();
+      endDate.setMonth(endDate.getMonth() + 1);
+      user.subscriptionEnd = endDate.toISOString();
+      if (newLevel === 'consultation') user.consultationCount = (user.consultationCount || 0) + 1;
     }
-    memoryDB.users[email].subscription_level = plan;
-    memoryDB.users[email].subscription_start = new Date().toISOString();
-    memoryDB.users[email].subscription_end = subscriptionEnd;
-    memoryDB.users[email].pdf_password = pdfPassword;
-    return { success: true, pdfPassword, user: sanitizeUser(memoryDB.users[email]) };
+
+    return { success: true, user };
   }
 };
 
-// Check premium access
+// Check premium access (can download PDF, see all tips)
+// Returns true for: essential (with purchase), sentinel (active), consultation
+// Has premium access
 const hasPremiumAccess = async (email) => {
-  const user = await getUserByEmail(email);
-  if (!user) return false;
+  const db = initSupabase();
 
-  if (user.subscriptionLevel === 'consultation') return true;
-  if (user.subscriptionLevel === 'complete') {
-    // Check if subscription is still active
-    if (user.subscriptionEnd && new Date(user.subscriptionEnd) < new Date()) {
+  if (db) {
+    try {
+      const { data: user } = await db
+        .from('users')
+        .select('subscription_level, subscription_end, payment_type, essential_assessment_id')
+        .eq('email', email)
+        .single();
+
+      if (!user) return false;
+
+      const now = new Date();
+      if (user.subscription_level === 'essential') {
+        return !!user.essential_assessment_id; // Access if they have an assessment
+      } else if (user.subscription_level === 'sentinel' || user.subscription_level === 'consultation') {
+        return user.payment_type === 'subscription' && new Date(user.subscription_end) > now;
+      }
+      return false;
+    } catch (error) {
+      console.error('Has premium error:', error);
       return false;
     }
-    return true;
+  } else {
+    const user = memoryDB.users[email];
+    if (!user) return false;
+
+    const now = new Date();
+    if (user.subscriptionLevel === 'essential') {
+      return !!user.essential_assessment_id;
+    } else if (user.subscriptionLevel === 'sentinel' || user.subscriptionLevel === 'consultation') {
+      return user.payment_type === 'subscription' && new Date(user.subscriptionEnd) > now;
+    }
+    return false;
   }
-  return false;
+};
+
+// New: Can take new assessment
+const canTakeNewAssessment = async (email) => {
+  const db = initSupabase();
+
+  if (db) {
+    try {
+      const { data: user } = await db
+        .from('users')
+        .select('subscription_level, subscription_end, payment_type, essential_assessment_id')
+        .eq('email', email)
+        .single();
+
+      if (!user) return false;
+
+      const now = new Date();
+      if (user.subscription_level === 'free') return true; // Unlimited for free, but limited features
+      if (user.subscription_level === 'essential') return !user.essential_assessment_id; // Only if no prior assessment
+      if (user.subscription_level === 'sentinel' || user.subscription_level === 'consultation') {
+        return user.payment_type === 'subscription' && new Date(user.subscription_end) > now; // Unlimited while active
+      }
+      return false;
+    } catch (error) {
+      console.error('Can take assessment error:', error);
+      return false;
+    }
+  } else {
+    const user = memoryDB.users[email];
+    if (!user) return false;
+
+    const now = new Date();
+    if (user.subscriptionLevel === 'free') return true;
+    if (user.subscriptionLevel === 'essential') return !user.essential_assessment_id;
+    if (user.subscriptionLevel === 'sentinel' || user.subscriptionLevel === 'consultation') {
+      return user.payment_type === 'subscription' && new Date(user.subscriptionEnd) > now;
+    }
+    return false;
+  }
 };
 
 // ============================================
@@ -387,46 +487,53 @@ const canTakeAssessment = async (email) => {
   return { canTake: true, remaining: 1, isPremium: false };
 };
 
-// Save assessment
-const saveAssessment = async (email, assessmentData) => {
+// Save assessment (update to set essential_assessment_id if Essential)
+const saveAssessment = async (email, score, responses) => {
   const db = initSupabase();
 
   if (db) {
     try {
-      // Get user ID
-      const { data: user } = await db
-        .from('users')
+      const { data: user } = await db.from('users').select('id, subscription_level, essential_assessment_id').eq('email', email).single();
+
+      const { data: assessment, error } = await db
+        .from('assessments')
+        .insert([{ user_id: user.id, score, responses }])
         .select('id')
-        .eq('email', email)
         .single();
 
-      if (!user) return false;
-
-      // Save assessment
-      const { error } = await db
-        .from('assessments')
-        .insert([{
-          user_id: user.id,
-          score: assessmentData.score,
-          responses: assessmentData.responses
-        }]);
-
       if (error) throw error;
-      return true;
+
+      // If Essential and no prior ID, set it
+      if (user.subscription_level === 'essential' && !user.essential_assessment_id) {
+        await db.from('users').update({ essential_assessment_id: assessment.id }).eq('email', email);
+      }
+
+      // Update community stats (unchanged)
+
+      return { success: true, assessmentId: assessment.id };
     } catch (error) {
       console.error('Save assessment error:', error);
-      return false;
+      return { success: false, message: 'Failed to save assessment.' };
     }
   } else {
-    // Memory fallback
-    if (!memoryDB.assessments[email]) {
-      memoryDB.assessments[email] = [];
+    // Memory fallback (add essential_assessment_id logic)
+    const user = memoryDB.users[email];
+    if (!user) return { success: false, message: 'User not found' };
+
+    const assessmentId = crypto.randomUUID();
+    memoryDB.assessments[assessmentId] = { userId: user.id, score, responses, createdAt: new Date().toISOString() };
+
+    if (user.subscriptionLevel === 'essential' && !user.essential_assessment_id) {
+      user.essential_assessment_id = assessmentId;
     }
-    memoryDB.assessments[email].push({
-      ...assessmentData,
-      createdAt: new Date().toISOString()
-    });
-    return true;
+
+    memoryDB.community_stats.total_assessments++;
+    memoryDB.community_stats.average_score = Math.round((memoryDB.community_stats.average_score * (memoryDB.community_stats.total_assessments - 1) + score) / memoryDB.community_stats.total_assessments);
+
+    const range = score < 21 ? '0-20' : score < 41 ? '21-40' : score < 61 ? '41-60' : score < 81 ? '61-80' : '81-100';
+    memoryDB.community_stats.score_distribution[range] = (memoryDB.community_stats.score_distribution[range] || 0) + 1;
+
+    return { success: true, assessmentId };
   }
 };
 
@@ -544,6 +651,7 @@ module.exports = {
   resetPassword,
   upgradeSubscription,
   hasPremiumAccess,
+  canTakeNewAssessment, // New export
   canTakeAssessment,
   saveAssessment,
   getUserAssessments,
