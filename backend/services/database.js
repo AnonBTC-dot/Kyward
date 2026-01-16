@@ -768,5 +768,6 @@ module.exports = {
   getUserAssessments,
   getCommunityStats,
   compareToAverage,
-  generatePdfPassword
+  generatePdfPassword,
+  sanitizeUser
 };

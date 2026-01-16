@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
+const db = require('./services/database');
 
 const bitcoinService = require('./services/bitcoin');
 const emailService = require('./services/email');
@@ -242,7 +243,7 @@ app.get('/api/user', authMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      user: sanitizeUser(user)  // ← Usa esta función corregida
+      user: db.sanitizeUser(user)  // ← Usa esta función corregida
     });
   } catch (error) {
     console.error('Error en /api/user:', error);
