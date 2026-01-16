@@ -265,7 +265,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
               </div>
               <div style={styles.dashStatContent}>
                 <div style={{...styles.dashStatNum, color: '#3b82f6'}}>
-                  {user.assessments?.length || 0}
+                  {user?.assessments_taken ?? user?.assessments?.length ?? 0}
                 </div>
                 <div style={styles.dashStatLabel}>{t.dashboard.stats.assessments}</div>
                 <div style={{...styles.dashStatBadge, backgroundColor: 'rgba(59,130,246,0.15)', color: '#3b82f6', marginTop: '8px'}}>
