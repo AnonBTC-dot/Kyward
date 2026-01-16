@@ -233,11 +233,35 @@ app.post('/api/auth/reset-password', async (req, res) => {
 // ============================================
 
 // Get current user
-app.get('/api/user', authMiddleware, (req, res) => {
-  res.json({
-    success: true,
-    user: req.user
-  });
+app.get('/api/user', authMiddleware, async (req, res) => {
+  try {
+    const user = await db.getUserByEmail(req.user.email);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        subscriptionLevel: user.subscription_level,
+        subscriptionStart: user.subscription_start,
+        subscriptionEnd: user.subscription_end,
+        pdfPassword: user.pdf_password,
+        paymentType: user.payment_type,
+        essentialAssessmentId: user.essential_assessment_id,
+        consultationCount: user.consultation_count,
+        // ¡Añade estas dos líneas clave!
+        assessmentsTaken: user.assessments_taken || 0,
+        lastAssessmentDate: user.last_assessment_date || null,
+        // ... resto de campos que necesites
+      }
+    });
+  } catch (error) {
+    console.error('Error en /api/user:', error);
+    res.status(500).json({ error: 'Failed to get user' });
+  }
 });
 
 // Get user usage status

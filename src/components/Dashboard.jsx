@@ -28,18 +28,19 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
   const [canTakeNew, setCanTakeNew] = useState(false); // Nuevo estado para gating
 
   useEffect(() => {
-    const refreshUser = async () => {
-      try {
-        const freshUser = await kywardDB.getUser(true); // true = force refresh (sin cache)
-        if (freshUser) {
-          setUser(freshUser);
-        }
-      } catch (err) {
-        console.error('Error refrescando usuario en Dashboard:', err);
+  const refreshUser = async () => {
+    try {
+      const freshUser = await kywardDB.getUser(true);
+      if (freshUser) {
+        setUser(freshUser);
+        console.log('Dashboard - Usuario refrescado:', freshUser.assessmentsTaken);
       }
-    };
-    refreshUser();
-  }, [setUser]); // Dependencia en setUser para evitar warnings
+    } catch (err) {
+      console.error('Error refrescando usuario en Dashboard:', err);
+    }
+  };
+  refreshUser();
+}, [user?.id, setUser]);
 
   // Verificar permiso para nueva evaluación (async)
   useEffect(() => {
@@ -265,7 +266,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
               </div>
               <div style={styles.dashStatContent}>
                 <div style={{...styles.dashStatNum, color: '#3b82f6'}}>
-                  {user?.assessments_taken ?? user?.assessments?.length ?? 0}
+                  {user?.assessments_taken ?? 0}
                 </div>
                 <div style={styles.dashStatLabel}>{t.dashboard.stats.assessments}</div>
                 <div style={{...styles.dashStatBadge, backgroundColor: 'rgba(59,130,246,0.15)', color: '#3b82f6', marginTop: '8px'}}>
