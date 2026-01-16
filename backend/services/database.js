@@ -555,7 +555,7 @@ const saveAssessment = async (userId, score, responses, timestamp = new Date().t
     const { error: updateError } = await db
       .from('users')
       .update({
-        assessments_taken: db.raw('assessments_taken + 1'),
+        assessments_taken: db.from('users').select('assessments_taken').eq('id', userId).single().then(r => (r.data?.assessments_taken || 0) + 1),
         last_assessment_date: timestamp,
         updated_at: new Date().toISOString()
       })
