@@ -124,17 +124,19 @@ class KywardDatabase {
   // USER & SUBSCRIPTION
   // ============================================
 
-  async getUser() {
+  async getUser(forceRefresh = false) {
+  if (!forceRefresh) {
     const cached = this.getCachedUser();
     if (cached) return cached;
-
-    const result = await this.apiRequest('/user');
-    if (result.success && result.user) {
-      this.setCachedUser(result.user);
-      return result.user;
-    }
-    return null;
   }
+
+  const result = await this.apiRequest('/user'); // o /user, según tu ruta
+  if (result.success && result.user) {
+    this.setCachedUser(result.user);
+    return result.user;
+  }
+  return null;
+}
 
   // Get current subscription level
   async getSubscriptionLevel() {

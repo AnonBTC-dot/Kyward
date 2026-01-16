@@ -188,7 +188,7 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
 
       if (result.success) {
         console.log('Guardado OK');
-        const updatedUser = await kywardDB.getUser(); // Refresca usuario completo
+        const updatedUser = await kywardDB.getUser(true); // Refresca usuario completo
         setUser(updatedUser);
         onComplete({ score, answers });
       } else {

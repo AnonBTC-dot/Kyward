@@ -27,6 +27,16 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
   const [showPassword, setShowPassword] = useState(false);
   const [canTakeNew, setCanTakeNew] = useState(false); // Nuevo estado para gating
 
+  useEffect(() => {
+    const refreshUser = async () => {
+      const freshUser = await kywardDB.getUser(true); // Force refresh al cargar Dashboard
+      if (freshUser) {
+        setUser(freshUser); // O usa un setUser del prop si lo tienes
+      }
+    };
+    refreshUser();
+  }, []);
+
   // Verificar permiso para nueva evaluación (async)
   useEffect(() => {
     const checkPermission = async () => {
