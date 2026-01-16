@@ -182,7 +182,7 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
         timestamp: new Date().toISOString()
       };
 
-      const result = await kywardDB.saveAssessment(assessment);
+      const result = await kywardDB.saveAssessment(user.email, score, answers);
       if (result.success) {
         const updatedUser = await kywardDB.getUser(user.email);
         setUser(updatedUser);

@@ -279,7 +279,7 @@ app.post('/api/assessments', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Monthly assessment limit reached. Upgrade to premium.' });
     }
 
-    const success = await db.saveAssessment(req.user.email, { score, responses });
+    const success = await db.saveAssessment(req.user.email, score, responses);
 
     if (success) {
       res.json({ success: true });
