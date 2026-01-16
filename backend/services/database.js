@@ -552,18 +552,16 @@ const saveAssessment = async (userId, score, responses, timestamp = new Date().t
     console.log('Assessment insertado con ID:', assessment.id);
 
     // Actualizar contador y fecha en users
-    const { error: updateError } = await db
-      .from('users')
-      .update({
-        assessments_taken: db.from('users').select('assessments_taken').eq('id', userId).single().then(r => (r.data?.assessments_taken || 0) + 1),
-        last_assessment_date: timestamp,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', userId);
+    // En vez de update directo (que falla)
+    const { error: rpcError } = await db
+      .rpc('increment_assessments_taken', {
+        p_user_id: userId,
+        p_timestamp: timestamp
+      });
 
-    if (updateError) {
-      console.error('Error al actualizar contador en users:', updateError.message);
-      throw updateError;
+    if (rpcError) {
+      console.error('Error en RPC increment_assessments_taken:', rpcError.message);
+      throw rpcError;
     }
 
     // Caso especial: Essential - guardar el ID de la primera evaluación
