@@ -73,6 +73,7 @@ const KywardApp = () => {
         return (
           <Dashboard
             user={user}
+            setUser={setUser}
             onStartAssessment={() => setCurrentPage('questionnaire')}
             onLogout={handleLogout}
             onUpgrade={handleUpgrade}

@@ -20,7 +20,7 @@ const getDailyTipKey = () => {
   return DAILY_TIP_KEYS[dayOfYear % DAILY_TIP_KEYS.length];
 };
 
-const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport }) => {
+const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onViewReport }) => {
   const { t } = useLanguage();
   const [copiedPassword, setCopiedPassword] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
@@ -29,13 +29,17 @@ const Dashboard = ({ user, onStartAssessment, onLogout, onUpgrade, onViewReport 
 
   useEffect(() => {
     const refreshUser = async () => {
-      const freshUser = await kywardDB.getUser(true); // Force refresh al cargar Dashboard
-      if (freshUser) {
-        setUser(freshUser); // O usa un setUser del prop si lo tienes
+      try {
+        const freshUser = await kywardDB.getUser(true); // true = force refresh (sin cache)
+        if (freshUser) {
+          setUser(freshUser);
+        }
+      } catch (err) {
+        console.error('Error refrescando usuario en Dashboard:', err);
       }
     };
     refreshUser();
-  }, []);
+  }, [setUser]); // Dependencia en setUser para evitar warnings
 
   // Verificar permiso para nueva evaluación (async)
   useEffect(() => {
