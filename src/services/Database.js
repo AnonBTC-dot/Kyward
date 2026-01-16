@@ -183,7 +183,7 @@ class KywardDatabase {
       return { success: false, message: 'No authentication token' };
     }
 
-    return this.apiRequest('/api/assessments', {
+    return this.apiRequest('/assessments', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
