@@ -141,7 +141,7 @@ class KywardDatabase {
   }
 
   // Fetch real
-  const result = await this.apiRequest('/api/user');
+  const result = await this.apiRequest('/user');
   if (result.success && result.user) {
     // Guarda cache fresco
     this.setCachedUser(result.user);
