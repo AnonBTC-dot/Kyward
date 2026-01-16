@@ -190,6 +190,10 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
         console.log('Guardado OK');
         const updatedUser = await kywardDB.getUser(true); // Refresca usuario completo
         setUser(updatedUser);
+        localStorage.removeItem('kyward_user_cache'); // Limpia cache manualmente
+        const freshUser = await kywardDB.getUser(true); // Fuerza otro fetch para estar seguros
+        setUser(freshUser);
+        console.log('Usuario final después de save (doble check):', freshUser);
         onComplete({ score, answers });
       } else {
         console.error('Save failed:', result.message);

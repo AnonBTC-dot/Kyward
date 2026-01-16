@@ -125,24 +125,33 @@ class KywardDatabase {
   // ============================================
 
   async getUser(forceRefresh = false) {
-    if (!forceRefresh) {
-      const cached = this.getCachedUser();
-      if (cached) return cached;
-    }
-
-    // Limpia cache antes de fetch fresco
+  // Siempre limpia cache si se fuerza refresh
+  if (forceRefresh) {
     this.setCachedUser(null);
-
-    const result = await this.apiRequest('/user'); // Asegúrate que la ruta sea /api/user
-    if (result.success && result.user) {
-      this.setCachedUser(result.user);
-      console.log('Usuario fresco obtenido:', result.user);
-      return result.user;
-    }
-
-    console.error('Error obteniendo usuario fresco:', result.message);
-    return null;
+    localStorage.removeItem(this.USER_CACHE_KEY); // Limpieza total
   }
+
+  // Intenta cache solo si NO es forceRefresh
+  if (!forceRefresh) {
+    const cached = this.getCachedUser();
+    if (cached) {
+      console.log('Usuario desde cache:', cached);
+      return cached;
+    }
+  }
+
+  // Fetch real
+  const result = await this.apiRequest('/api/user');
+  if (result.success && result.user) {
+    // Guarda cache fresco
+    this.setCachedUser(result.user);
+    console.log('Usuario fresco obtenido y cacheado:', result.user);
+    return result.user;
+  }
+
+  console.error('Error obteniendo usuario fresco:', result.message);
+  return null;
+}
 
   // Get current subscription level
   async getSubscriptionLevel() {

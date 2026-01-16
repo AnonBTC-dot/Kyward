@@ -30,17 +30,21 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
   useEffect(() => {
   const refreshUser = async () => {
     try {
+      // Limpieza agresiva
+      localStorage.removeItem('kyward_user_cache');
+      
       const freshUser = await kywardDB.getUser(true);
       if (freshUser) {
         setUser(freshUser);
-        console.log('Dashboard - Usuario refrescado:', freshUser.assessmentsTaken);
+        console.log('Dashboard - Usuario refrescado (cache limpiado):', freshUser.assessments_taken);
       }
     } catch (err) {
       console.error('Error refrescando usuario en Dashboard:', err);
     }
   };
+
   refreshUser();
-}, [user?.id, setUser]);
+}, [setUser, user?.id]); // Dependencias correctas
 
   // Verificar permiso para nueva evaluación (async)
   useEffect(() => {
