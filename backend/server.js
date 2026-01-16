@@ -267,29 +267,30 @@ app.get('/api/user/premium', authMiddleware, async (req, res) => {
 // Save assessment
 app.post('/api/assessments', authMiddleware, async (req, res) => {
   try {
-    const { score, responses } = req.body;
+    const { score, responses, timestamp } = req.body;
+
+    console.log('POST /api/assessments - Body recibido:', req.body);
+    console.log('Usuario autenticado:', req.user.email, req.user.id);
 
     if (score === undefined || !responses) {
       return res.status(400).json({ error: 'Score and responses are required' });
     }
 
-    // Check if user can take assessment
     const canTake = await db.canTakeAssessment(req.user.email);
     if (!canTake.canTake) {
       return res.status(403).json({ error: 'Monthly assessment limit reached. Upgrade to premium.' });
     }
 
-    const success = await db.saveAssessment(req.user.email, score, responses);
+    const success = await db.saveAssessment(req.user.id, score, responses, timestamp || new Date().toISOString());
 
     if (success) {
       res.json({ success: true });
     } else {
       res.status(500).json({ error: 'Failed to save assessment' });
     }
-
   } catch (error) {
     console.error('Save assessment error:', error);
-    res.status(500).json({ error: 'Failed to save assessment' });
+    res.status(500).json({ error: error.message || 'Failed to save assessment' });
   }
 });
 

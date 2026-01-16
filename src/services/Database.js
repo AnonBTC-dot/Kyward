@@ -177,10 +177,18 @@ class KywardDatabase {
   // ASSESSMENT
   // ============================================
 
-  async saveAssessment(assessmentData) {
-    return this.apiRequest('/assessments', {
+  async saveAssessment(assessment) {
+  const token = this.getToken();
+    if (!token) {
+      return { success: false, message: 'No authentication token' };
+    }
+
+    return this.apiRequest('/api/assessments', {
       method: 'POST',
-      body: JSON.stringify(assessmentData),
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(assessment),
     });
   }
 

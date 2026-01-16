@@ -168,30 +168,36 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
     setError('');
 
     try {
-      const canTake = await kywardDB.canTakeNewAssessment();
-      if (!canTake) {
+      // Verificar permiso (ya lo tienes)
+      const can = await kywardDB.canTakeNewAssessment();
+      if (!can) {
         setError(t.questionnaire.errors.limitReached);
         return;
       }
 
       const score = calculateScore();
       const assessment = {
-        userId: user.email,
-        responses: answers,
         score,
-        timestamp: new Date().toISOString()
+        responses: answers,
+        // NO envíes userId ni timestamp (el backend los maneja)
       };
 
-      const result = await kywardDB.saveAssessment(user.email, score, answers);
+      console.log('Enviando assessment limpio:', assessment);
+
+      const result = await kywardDB.saveAssessment(assessment);
+
       if (result.success) {
-        const updatedUser = await kywardDB.getUser(user.email);
+        console.log('Guardado OK');
+        const updatedUser = await kywardDB.getUser(); // Refresca usuario completo
         setUser(updatedUser);
         onComplete({ score, answers });
       } else {
-        setError(t.questionnaire.errors.savingError);
+        console.error('Save failed:', result.message);
+        setError(result.message || 'Failed to save assessment');
       }
     } catch (err) {
-      setError('Error al guardar la evaluación');
+      console.error('Error completo:', err);
+      setError(err.message || 'Error al guardar la evaluación');
     } finally {
       setLoading(false);
     }

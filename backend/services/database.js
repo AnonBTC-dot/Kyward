@@ -488,52 +488,110 @@ const canTakeAssessment = async (email) => {
 };
 
 // Save assessment (update to set essential_assessment_id if Essential)
-const saveAssessment = async (email, score, responses) => {
+// Save assessment - Versión corregida y completa
+const saveAssessment = async (userId, score, responses, timestamp = new Date().toISOString()) => {
   const db = initSupabase();
 
-  if (db) {
-    try {
-      const { data: user } = await db.from('users').select('id, subscription_level, essential_assessment_id').eq('email', email).single();
-
-      const { data: assessment, error } = await db
-        .from('assessments')
-        .insert([{ user_id: user.id, score, responses }])
-        .select('id')
-        .single();
-
-      if (error) throw error;
-
-      // If Essential and no prior ID, set it
-      if (user.subscription_level === 'essential' && !user.essential_assessment_id) {
-        await db.from('users').update({ essential_assessment_id: assessment.id }).eq('email', email);
-      }
-
-      // Update community stats (unchanged)
-
-      return { success: true, assessmentId: assessment.id };
-    } catch (error) {
-      console.error('Save assessment error:', error);
-      return { success: false, message: 'Failed to save assessment.' };
-    }
-  } else {
-    // Memory fallback (add essential_assessment_id logic)
-    const user = memoryDB.users[email];
-    if (!user) return { success: false, message: 'User not found' };
+  if (!db) {
+    console.warn('⚠️ Supabase no configurado - usando memory fallback');
+    
+    // Memory fallback (mantengo tu lógica original pero mejorada)
+    const user = memoryDB.users[Object.keys(memoryDB.users).find(e => memoryDB.users[e].id === userId)];
+    if (!user) return { success: false, message: 'User not found in memory' };
 
     const assessmentId = crypto.randomUUID();
-    memoryDB.assessments[assessmentId] = { userId: user.id, score, responses, createdAt: new Date().toISOString() };
+    memoryDB.assessments[assessmentId] = { 
+      userId, 
+      score, 
+      responses, 
+      createdAt: timestamp 
+    };
 
     if (user.subscriptionLevel === 'essential' && !user.essential_assessment_id) {
       user.essential_assessment_id = assessmentId;
     }
 
+    // Actualiza contador en memoria
+    user.assessments_taken = (user.assessments_taken || 0) + 1;
+    user.last_assessment_date = timestamp;
+
+    // Actualiza stats comunitarias
     memoryDB.community_stats.total_assessments++;
-    memoryDB.community_stats.average_score = Math.round((memoryDB.community_stats.average_score * (memoryDB.community_stats.total_assessments - 1) + score) / memoryDB.community_stats.total_assessments);
+    memoryDB.community_stats.average_score = Math.round(
+      (memoryDB.community_stats.average_score * (memoryDB.community_stats.total_assessments - 1) + score) / 
+      memoryDB.community_stats.total_assessments
+    );
 
     const range = score < 21 ? '0-20' : score < 41 ? '21-40' : score < 61 ? '41-60' : score < 81 ? '61-80' : '81-100';
     memoryDB.community_stats.score_distribution[range] = (memoryDB.community_stats.score_distribution[range] || 0) + 1;
 
+    console.log('Assessment guardado en memory fallback - ID:', assessmentId);
     return { success: true, assessmentId };
+  }
+
+  // Flujo real con Supabase
+  try {
+    console.log('Guardando assessment en Supabase para userId:', userId);
+
+    const { data: assessment, error: insertError } = await db
+      .from('assessments')
+      .insert([{
+        user_id: userId,           // UUID correcto
+        score,
+        responses,
+        created_at: timestamp      // Campo que coincide con tu schema
+      }])
+      .select('id')
+      .single();
+
+    if (insertError) {
+      console.error('Error al insertar assessment:', insertError.message);
+      throw insertError;
+    }
+
+    console.log('Assessment insertado con ID:', assessment.id);
+
+    // Actualizar contador y fecha en users
+    const { error: updateError } = await db
+      .from('users')
+      .update({
+        assessments_taken: db.raw('assessments_taken + 1'),
+        last_assessment_date: timestamp,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', userId);
+
+    if (updateError) {
+      console.error('Error al actualizar contador en users:', updateError.message);
+      throw updateError;
+    }
+
+    // Caso especial: Essential - guardar el ID de la primera evaluación
+    const { data: user, error: userError } = await db
+      .from('users')
+      .select('subscription_level, essential_assessment_id')
+      .eq('id', userId)
+      .single();
+
+    if (userError) {
+      console.error('Error al obtener usuario para Essential check:', userError.message);
+    } else if (user.subscription_level === 'essential' && !user.essential_assessment_id) {
+      const { error: essentialError } = await db
+        .from('users')
+        .update({ essential_assessment_id: assessment.id })
+        .eq('id', userId);
+
+      if (essentialError) {
+        console.error('Error al guardar essential_assessment_id:', essentialError.message);
+      } else {
+        console.log('essential_assessment_id guardado:', assessment.id);
+      }
+    }
+
+    return { success: true, assessmentId: assessment.id };
+  } catch (error) {
+    console.error('Error completo en saveAssessment:', error.message || error);
+    return { success: false, message: error.message || 'Failed to save assessment in Supabase' };
   }
 };
 
