@@ -3,7 +3,6 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
-const db = require('./services/database');
 
 const bitcoinService = require('./services/bitcoin');
 const emailService = require('./services/email');
