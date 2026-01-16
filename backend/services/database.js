@@ -84,8 +84,13 @@ const createUser = async (email, password) => {
           password_hash: passwordHash,
           subscription_level: 'free',
           pdf_password: pdfPassword,
-          payment_type: 'none', // New default
-          essential_assessment_id: null // New default
+          payment_type: 'none',
+          essential_assessment_id: null,
+          // ¡Valores explícitos para alertas!
+          email_hack_alerts: false,
+          email_daily_tips: false,
+          email_wallet_reviews: false,
+          consultation_count: 0
         }])
         .select()
         .single();
@@ -307,12 +312,13 @@ const sanitizeUser = (user) => {
     createdAt: user.created_at,
     lastLogin: user.last_login,
     languagePreference: user.language_preference || 'en',
-    // New fields for Essential/Sentinel tiers
     paymentType: user.payment_type || 'none',
     essentialAssessmentId: user.essential_assessment_id || null,
     emailHackAlerts: user.email_hack_alerts !== false,
     emailDailyTips: user.email_daily_tips !== false,
-    emailWalletReviews: user.email_wallet_reviews !== false
+    emailWalletReviews: user.email_wallet_reviews !== false,
+    assessmentsTaken: user.assessments_taken || 0,
+    lastAssessmentDate: user.last_assessment_date || null,
   };
 };
 
@@ -322,35 +328,66 @@ const sanitizeUser = (user) => {
 
 // Upgrade subscription
 // Plans: 'essential' (one-time $7.99), 'sentinel' ($14.99/mo), 'consultation' ($99 + $49/hr)
+// Upgrade subscription - Versión corregida, tipada y con lógica de alertas completa
 const upgradeSubscription = async (email, newLevel) => {
   const db = initSupabase();
 
   if (db) {
     try {
-      let updates = {
+      // Preparar updates base
+      const updates = {
         subscription_level: newLevel,
         subscription_start: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        // Campos que SIEMPRE actualizamos según el plan
+        payment_type: null,           // Lo seteamos según plan
+        subscription_end: null,       // Lo seteamos según plan
+        // Alertas: por default las desactivamos, activamos solo en premium
+        email_hack_alerts: false,
+        email_daily_tips: false,
+        email_wallet_reviews: false
       };
 
-      // Set payment_type and subscription_end based on tier
+      // Lógica por plan
       if (newLevel === 'essential') {
         updates.payment_type = 'one_time';
-        updates.subscription_end = null; // One-time, no end
-      } else if (newLevel === 'sentinel') {
+        updates.subscription_end = null; // One-time, sin fecha de fin
+        // Essential NO activa alertas (solo Sentinel/Consultation)
+      } 
+      else if (newLevel === 'sentinel') {
         updates.payment_type = 'subscription';
-        // Set end to 1 month from now (handle recurring in payment webhook if using Stripe)
         const endDate = new Date();
         endDate.setMonth(endDate.getMonth() + 1);
         updates.subscription_end = endDate.toISOString();
-      } else if (newLevel === 'consultation') {
-        updates.payment_type = 'subscription'; // Treat as sub for unlimited + audit
+        
+        // Activar alertas premium
+        updates.email_hack_alerts = true;
+        updates.email_daily_tips = true;
+        updates.email_wallet_reviews = true;
+      } 
+      else if (newLevel === 'consultation') {
+        updates.payment_type = 'subscription';
         const endDate = new Date();
         endDate.setMonth(endDate.getMonth() + 1);
         updates.subscription_end = endDate.toISOString();
-        updates.consultation_count = (updates.consultation_count || 0) + 1; // Increment for audit
+        
+        // Activar alertas premium + incrementar conteo de consultas
+        updates.email_hack_alerts = true;
+        updates.email_daily_tips = true;
+        updates.email_wallet_reviews = true;
+        updates.consultation_count = db.raw('consultation_count + 1');
+      } 
+      else {
+        // Si baja a 'free' o cualquier otro (por si acaso)
+        updates.payment_type = 'none';
+        updates.subscription_end = null;
+        // Desactivar alertas explícitamente
+        updates.email_hack_alerts = false;
+        updates.email_daily_tips = false;
+        updates.email_wallet_reviews = false;
       }
 
+      // Ejecutar update
       const { data, error } = await db
         .from('users')
         .update(updates)
@@ -362,11 +399,11 @@ const upgradeSubscription = async (email, newLevel) => {
 
       return { success: true, user: data };
     } catch (error) {
-      console.error('Upgrade subscription error:', error);
+      console.error('Upgrade subscription error:', error.message || error);
       return { success: false, message: 'Failed to upgrade subscription.' };
     }
   } else {
-    // Memory fallback
+    // Memory fallback - misma lógica
     const user = memoryDB.users[email];
     if (!user) return { success: false, message: 'User not found' };
 
@@ -377,12 +414,31 @@ const upgradeSubscription = async (email, newLevel) => {
     if (newLevel === 'essential') {
       user.payment_type = 'one_time';
       user.subscriptionEnd = null;
+      // Alertas OFF
+      user.email_hack_alerts = false;
+      user.email_daily_tips = false;
+      user.email_wallet_reviews = false;
     } else if (newLevel === 'sentinel' || newLevel === 'consultation') {
       user.payment_type = 'subscription';
       const endDate = new Date();
       endDate.setMonth(endDate.getMonth() + 1);
       user.subscriptionEnd = endDate.toISOString();
-      if (newLevel === 'consultation') user.consultationCount = (user.consultationCount || 0) + 1;
+      
+      // Alertas ON
+      user.email_hack_alerts = true;
+      user.email_daily_tips = true;
+      user.email_wallet_reviews = true;
+      
+      if (newLevel === 'consultation') {
+        user.consultationCount = (user.consultationCount || 0) + 1;
+      }
+    } else {
+      // Baja a free u otro
+      user.payment_type = 'none';
+      user.subscriptionEnd = null;
+      user.email_hack_alerts = false;
+      user.email_daily_tips = false;
+      user.email_wallet_reviews = false;
     }
 
     return { success: true, user };

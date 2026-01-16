@@ -242,21 +242,7 @@ app.get('/api/user', authMiddleware, async (req, res) => {
 
     res.json({
       success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        subscriptionLevel: user.subscription_level,
-        subscriptionStart: user.subscription_start,
-        subscriptionEnd: user.subscription_end,
-        pdfPassword: user.pdf_password,
-        paymentType: user.payment_type,
-        essentialAssessmentId: user.essential_assessment_id,
-        consultationCount: user.consultation_count,
-        // ¡Añade estas dos líneas clave!
-        assessmentsTaken: user.assessments_taken || 0,
-        lastAssessmentDate: user.last_assessment_date || null,
-        // ... resto de campos que necesites
-      }
+      user: sanitizeUser(user)  // ← Usa esta función corregida
     });
   } catch (error) {
     console.error('Error en /api/user:', error);

@@ -27,9 +27,9 @@ CREATE TABLE IF NOT EXISTS users (
   essential_assessment_id UUID,                            -- ID de la única evaluación Essential
   
   -- Preferencias de Email
-  email_hack_alerts BOOLEAN DEFAULT true,
-  email_daily_tips BOOLEAN DEFAULT true,
-  email_wallet_reviews BOOLEAN DEFAULT true,
+  email_hack_alerts BOOLEAN DEFAULT false,
+  email_daily_tips BOOLEAN DEFAULT false,
+  email_wallet_reviews BOOLEAN DEFAULT false,
   
   consultation_count INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
