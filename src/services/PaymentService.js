@@ -1,9 +1,9 @@
 // KYWARD PAYMENT SERVICE
 // Handles Bitcoin payment processing via backend API
 
+// Base URL - remove trailing /api if present to avoid double prefix
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-// Payment configuration
 // Payment configuration
 const PAYMENT_CONFIG = {
   prices: {
@@ -89,7 +89,7 @@ export const createPayment = async (plan, userEmail) => {
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/payments/create`, {
+    const response = await fetch(`${API_URL}/payments/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -166,7 +166,7 @@ export const refreshPaymentPrice = async (paymentId) => {
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/payments/${paymentId}/refresh-price`, {
+    const response = await fetch(`${API_URL}/payments/${paymentId}/refresh-price`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -203,7 +203,7 @@ export const checkPaymentStatus = async (paymentId) => {
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/payments/${paymentId}/status`);
+    const response = await fetch(`${API_URL}/payments/${paymentId}/status`);
 
     if (!response.ok) {
       const error = await response.json();
@@ -310,7 +310,7 @@ export const getPaymentDetails = async (paymentId) => {
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/payments/${paymentId}`);
+    const response = await fetch(`${API_URL}/payments/${paymentId}`);
 
     if (!response.ok) {
       const error = await response.json();

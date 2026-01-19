@@ -172,8 +172,8 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
               {planName}
               <span style={{ fontSize: '11px', opacity: 0.8 }}>{planType}</span>
             </span>
-            <span style={{ color: '#888', marginRight: '15px', fontSize: '14px' }}>{user.email}</span>
-            <button onClick={onLogout} style={styles.navButtonLogin}>{t.nav.logout}</button>
+            <span className="user-email" style={{ color: '#888', marginRight: '15px', fontSize: '14px' }}>{user.email}</span>
+            <button className="logout-btn" onClick={onLogout} style={styles.navButtonLogin}>{t.nav.logout}</button>
           </div>
         </div>
       </nav>
@@ -235,7 +235,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                       backgroundColor: lastScore >= 80 ? 'rgba(34,197,94,0.15)' : lastScore >= 50 ? 'rgba(247,147,26,0.15)' : 'rgba(239,68,68,0.15)',
                       color: lastScore >= 80 ? '#22c55e' : lastScore >= 50 ? '#F7931A' : '#ef4444'
                     }}>
-                      {lastScore >= 80 ? t.report.score.excellent : lastScore >= 50 ? t.report.score.good : t.report.score.needsWork}
+                      {lastScore >= 80 ? (t.report?.score?.excellent || 'Excellent') : lastScore >= 50 ? (t.report?.score?.good || 'Good') : (t.report?.score?.needsWork || 'Needs Work')}
                     </span>
                     {scoreTrend !== null && (
                       <span style={{
@@ -521,7 +521,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                           fontWeight: '600',
                           color: assessment.score >= 80 ? '#22c55e' : assessment.score >= 50 ? '#F7931A' : '#ef4444'
                         }}>
-                          {assessment.score >= 80 ? t.report.score.excellent : assessment.score >= 50 ? t.report.score.good : t.report.score.needsWork}
+                          {assessment.score >= 80 ? (t.report?.score?.excellent || 'Excellent') : assessment.score >= 50 ? (t.report?.score?.good || 'Good') : (t.report?.score?.needsWork || 'Needs Work')}
                         </div>
                       </div>
                     </div>

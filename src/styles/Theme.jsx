@@ -494,37 +494,47 @@ if (typeof document !== 'undefined') {
       }
 
       /* ============================================
-      PRICING GRID - HORIZONTAL ON ALL SCREENS
+      PRICING GRID - RESPONSIVE LAYOUT
       ============================================ */
 
-    /* Horizontal scrolling container */
-    .pricing-grid-horizontal {
-      display: flex !important;
-      flex-direction: row !important;
-      gap: 24px !important;
-      padding: 0 24px 20px !important;
-      overflow-x: auto !important;
-      overflow-y: hidden !important;
-      -webkit-overflow-scrolling: touch !important;
-      scroll-snap-type: x mandatory !important;
-      scrollbar-width: thin !important;
-      scrollbar-color: #F7931A #1a1a1a !important;
-    }
+    /* On large screens, horizontal centered */
+    @media (min-width: 769px) {
+      .pricing-grid-horizontal {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 24px !important;
+        padding: 0 24px 20px !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        scroll-snap-type: x mandatory !important;
+        scrollbar-width: thin !important;
+        scrollbar-color: #F7931A #1a1a1a !important;
+      }
 
-    /* Custom scrollbar for webkit browsers */
-    .pricing-grid-horizontal::-webkit-scrollbar {
-      height: 8px;
-    }
-    .pricing-grid-horizontal::-webkit-scrollbar-track {
-      background: #1a1a1a;
-      border-radius: 4px;
-    }
-    .pricing-grid-horizontal::-webkit-scrollbar-thumb {
-      background: #F7931A;
-      border-radius: 4px;
-    }
-    .pricing-grid-horizontal::-webkit-scrollbar-thumb:hover {
-      background: #f5a623;
+      /* Custom scrollbar for webkit browsers */
+      .pricing-grid-horizontal::-webkit-scrollbar {
+        height: 8px;
+      }
+      .pricing-grid-horizontal::-webkit-scrollbar-track {
+        background: #1a1a1a;
+        border-radius: 4px;
+      }
+      .pricing-grid-horizontal::-webkit-scrollbar-thumb {
+        background: #F7931A;
+        border-radius: 4px;
+      }
+      .pricing-grid-horizontal::-webkit-scrollbar-thumb:hover {
+        background: #f5a623;
+      }
+
+      /* Ensure cards don't shrink */
+      .pricing-grid-horizontal .pricing-card,
+      .pricing-grid-horizontal .pricing-card-featured {
+        min-width: 280px !important;
+        flex: 0 0 auto !important;
+        scroll-snap-align: start !important;
+      }
     }
 
     /* On large screens, center the cards */
@@ -535,12 +545,32 @@ if (typeof document !== 'undefined') {
       }
     }
 
-    /* Ensure cards don't shrink */
-    .pricing-grid-horizontal .pricing-card,
-    .pricing-grid-horizontal .pricing-card-featured {
-      min-width: 280px !important;
-      flex: 0 0 auto !important;
-      scroll-snap-align: start !important;
+    /* MOBILE: Stack pricing cards vertically */
+    @media (max-width: 768px) {
+      .pricing-grid-horizontal {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 20px !important;
+        padding: 0 16px 20px !important;
+        overflow-x: visible !important;
+        overflow-y: visible !important;
+        align-items: center !important;
+      }
+
+      .pricing-grid-horizontal .pricing-card,
+      .pricing-grid-horizontal .pricing-card-featured {
+        min-width: unset !important;
+        width: 100% !important;
+        max-width: 340px !important;
+        flex: 0 0 auto !important;
+        transform: none !important;
+      }
+
+      /* Reset featured card scaling on mobile */
+      .pricing-grid-horizontal .pricing-card-featured {
+        transform: none !important;
+        min-height: auto !important;
+      }
     }
 
       /* Auth Card */
@@ -576,73 +606,99 @@ if (typeof document !== 'undefined') {
        Ensures logout and full name are visible
     ============================================ */
     @media (max-width: 768px) {
-      /* Dashboard nav - two rows layout */
+      /* Dashboard nav - ensure proper wrapping */
       nav {
-        padding: 8px 0 !important;
+        padding: 10px 0 !important;
       }
 
       nav .nav-content,
-      nav > div {
+      nav > div:first-child {
         flex-wrap: wrap !important;
-        gap: 10px !important;
+        gap: 8px !important;
         padding: 8px 12px !important;
+        justify-content: space-between !important;
       }
 
-      /* Nav logo smaller */
+      /* Nav logo - stay on left */
       nav .navLogo,
       nav > div > div:first-child {
         flex: 0 0 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
       }
 
-      /* Nav buttons container - second row */
+      /* Nav buttons container - flex row wrap */
       nav .nav-buttons,
       .navButtons {
-        flex: 1 1 100% !important;
         display: flex !important;
         flex-wrap: wrap !important;
-        gap: 8px !important;
-        justify-content: space-between !important;
+        gap: 6px !important;
+        justify-content: flex-end !important;
         align-items: center !important;
-        order: 2 !important;
+        flex: 1 !important;
       }
 
-      /* User email - visible and truncated */
-      nav span[style*="color: #888"] {
-        max-width: 120px !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-        font-size: 11px !important;
-        margin-right: 0 !important;
-        order: 1 !important;
+      /* User email - hidden on mobile to save space */
+      nav span[style*="color: #888"],
+      nav .user-email {
+        display: none !important;
       }
 
-      /* Plan badge - smaller on mobile */
-      nav span[style*="borderRadius: '20px'"] {
+      /* Plan badge - compact on mobile */
+      nav span[style*="borderRadius: '20px'"],
+      nav span[style*="borderRadius: \"20px\""] {
         padding: 4px 8px !important;
         font-size: 10px !important;
         margin-right: 0 !important;
-        order: 2 !important;
+        white-space: nowrap !important;
       }
 
-      /* Logout button - ensure visibility */
-      nav button {
-        padding: 6px 12px !important;
-        font-size: 11px !important;
+      /* Hide the plan type span inside the badge */
+      nav span[style*="borderRadius: '20px'"] span,
+      nav span[style*="borderRadius: \"20px\""] span {
+        display: none !important;
+      }
+
+      /* LOGOUT BUTTON - Always visible and styled */
+      nav button,
+      nav .logout-btn {
+        padding: 8px 14px !important;
+        font-size: 12px !important;
         white-space: nowrap !important;
-        order: 3 !important;
+        background-color: #ef4444 !important;
+        border: none !important;
+        color: #fff !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        min-width: 60px !important;
+        text-align: center !important;
       }
 
       /* Logo text smaller on mobile */
       nav .navLogoText,
-      nav span[style*="fontSize: '24px'"] {
-        font-size: 16px !important;
+      nav span[style*="fontSize: '24px'"],
+      nav span[style*="fontSize: \"24px\""] {
+        font-size: 18px !important;
+      }
+
+      /* Logo image smaller */
+      nav img {
+        width: 28px !important;
+        height: 28px !important;
+      }
+
+      /* Language toggle smaller */
+      nav .language-toggle,
+      nav button[style*="backgroundColor: 'transparent'"] {
+        padding: 4px 8px !important;
+        font-size: 11px !important;
       }
 
       /* Dashboard content padding */
       .dashboard-content {
         padding: 20px 12px !important;
-        padding-top: 100px !important;
+        padding-top: 110px !important;
       }
 
       /* Dashboard header */
@@ -673,29 +729,44 @@ if (typeof document !== 'undefined') {
       }
     }
 
-    /* Extra small screens */
+    /* Extra small screens - 480px and below */
     @media (max-width: 480px) {
-      nav > div {
-        flex-direction: row !important;
-        flex-wrap: wrap !important;
+      nav .nav-content,
+      nav > div:first-child {
+        padding: 6px 10px !important;
+        gap: 6px !important;
       }
 
-      /* Show email but smaller */
-      nav span[style*="color: #888"] {
-        max-width: 100px !important;
-        font-size: 10px !important;
+      /* Even smaller logo */
+      nav .navLogoText,
+      nav span[style*="fontSize: '24px'"],
+      nav span[style*="fontSize: \"24px\""] {
+        font-size: 16px !important;
+      }
+
+      nav img {
+        width: 24px !important;
+        height: 24px !important;
       }
 
       /* Plan badge more compact */
-      nav span[style*="borderRadius: '20px'"] {
+      nav span[style*="borderRadius: '20px'"],
+      nav span[style*="borderRadius: \"20px\""] {
         padding: 3px 6px !important;
         font-size: 9px !important;
       }
 
-      /* Logout button smaller */
-      nav button {
-        padding: 5px 10px !important;
-        font-size: 10px !important;
+      /* Logout button - ensure it stays visible */
+      nav button,
+      nav .logout-btn {
+        padding: 6px 10px !important;
+        font-size: 11px !important;
+        min-width: 50px !important;
+      }
+
+      /* Dashboard content even more padding top for wrapped nav */
+      .dashboard-content {
+        padding-top: 100px !important;
       }
     }
 

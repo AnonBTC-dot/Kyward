@@ -8,7 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 // Send email via backend API
 const sendViaBackend = async (toEmail, pdfPassword, htmlContent) => {
   try {
-    const response = await fetch(`${API_URL}/api/email/send-plan`, {
+    const response = await fetch(`${API_URL}/email/send-plan`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
