@@ -316,12 +316,12 @@ const LandingPage = ({ onLogin, onSignup }) => {
       {/* Free */}
       <div className="pricing-card" style={{...styles.pricingCard, minWidth: '280px', flex: '0 0 auto', scrollSnapAlign: 'start'}}>
         <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBg}}>
-          <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowFree}} />
+          <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowFree, top: '-10%'}} />
           <div style={styles.pricingBadge}>{t.landing.plans.free.badge}</div>
           <h3 style={styles.pricingTitle}>{t.landing.plans.free.name}</h3>
-          <div style={styles.pricingPrice}>
+          <div style={{...styles.pricingPrice, fontSize: '44px'}}>
             {t.landing.plans.free.price}
-            <span style={styles.pricingPeriod}>{t.landing.plans.free.period}</span>
+            <span style={{...styles.pricingPeriod, fontSize: '15px'}}>{t.landing.plans.free.period}</span>
           </div>
         </div>
         <div style={styles.pricingCardBody}>
@@ -345,24 +345,32 @@ const LandingPage = ({ onLogin, onSignup }) => {
         style={{
           ...styles.pricingCard,
           ...styles.pricingCardFeatured,
-          minWidth: '280px',
+          minWidth: '300px',
+          minHeight: '520px',
           flex: '0 0 auto',
           scrollSnapAlign: 'start',
-          transform: 'scale(1.04)',
+          transform: 'scale(1.06)',
           zIndex: 2,
-          boxShadow: '0 20px 60px rgba(247,147,26,0.35)'
+          boxShadow: '0 25px 70px rgba(247,147,26,0.4)'
         }}
       >
-        <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBgFeatured}}>
-          <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowFeatured}} />
+        <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBgFeatured, minHeight: '200px'}}>
+          <div className="glow-element" style={{
+            ...styles.pricingCardGlow,
+            ...styles.pricingCardGlowFeatured,
+            top: '-20%',
+            right: '10%',
+            width: '200px',
+            height: '200px'
+          }} />
           <div style={styles.pricingBadge}>{t.landing.plans.essential.badge}</div>
           <h3 style={styles.pricingTitle}>{t.landing.plans.essential.name}</h3>
-          <div style={{...styles.pricingPrice, ...styles.pricingPriceFeatured}}>
+          <div style={{...styles.pricingPrice, ...styles.pricingPriceFeatured, fontSize: '52px'}}>
             {t.landing.plans.essential.price}
-            <span style={styles.pricingPeriod}>{t.landing.plans.essential.period}</span>
+            <span style={{...styles.pricingPeriod, fontSize: '16px'}}>{t.landing.plans.essential.period}</span>
           </div>
         </div>
-        <div style={styles.pricingCardBody}>
+        <div style={{...styles.pricingCardBody, padding: '28px'}}>
           <ul style={styles.pricingFeatures}>
             {t.landing.plans.essential.features.map((feature, idx) => (
               <li key={idx} style={styles.pricingFeature}>
@@ -371,7 +379,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
               </li>
             ))}
           </ul>
-          <button onClick={onSignup} style={styles.pricingButtonFeatured}>
+          <button onClick={onSignup} style={{...styles.pricingButtonFeatured, padding: '16px 32px', fontSize: '16px'}}>
             {t.landing.plans.essential.cta.split(' ($')[0] || t.landing.plans.essential.cta}
           </button>
         </div>
@@ -386,7 +394,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
           <div className="glow-element" style={{
             ...styles.pricingCardGlow,
             backgroundColor: 'rgba(34,197,94,0.5)',
-            top: '10%',
+            top: '-10%',
             right: '20%',
             width: '180px',
             height: '180px'
@@ -395,9 +403,9 @@ const LandingPage = ({ onLogin, onSignup }) => {
           <h3 style={{ ...styles.pricingTitle, color: '#22c55e' }}>
             {t.landing.plans.sentinel.name}
           </h3>
-          <div style={{ ...styles.pricingPrice, color: '#a5f3fc' }}>
+          <div style={{ ...styles.pricingPrice, color: '#a5f3fc', fontSize: '44px' }}>
             {t.landing.plans.sentinel.price}
-            <span style={styles.pricingPeriod}>{t.landing.plans.sentinel.period}</span>
+            <span style={{...styles.pricingPeriod, fontSize: '15px'}}>{t.landing.plans.sentinel.period}</span>
           </div>
         </div>
         <div style={styles.pricingCardBody}>
@@ -430,14 +438,14 @@ const LandingPage = ({ onLogin, onSignup }) => {
       {/* Consultation */}
       <div className="pricing-card" style={{...styles.pricingCard, ...styles.pricingCardPro, minWidth: '280px', flex: '0 0 auto', scrollSnapAlign: 'start'}}>
         <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBgPro}}>
-          <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowPro}} />
+          <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowPro, top: '-10%'}} />
           <div style={{...styles.pricingBadge, ...styles.pricingBadgePro}}>
             {t.landing.plans.consultation.badge}
           </div>
           <h3 style={styles.pricingTitle}>{t.landing.plans.consultation.name}</h3>
-          <div style={{...styles.pricingPrice, ...styles.pricingPricePro}}>
+          <div style={{...styles.pricingPrice, ...styles.pricingPricePro, fontSize: '44px'}}>
             {t.landing.plans.consultation.price}
-            <span style={styles.pricingPeriod}>{t.landing.plans.consultation.period}</span>
+            <span style={{...styles.pricingPeriod, fontSize: '15px'}}>{t.landing.plans.consultation.period}</span>
           </div>
         </div>
         <div style={styles.pricingCardBody}>

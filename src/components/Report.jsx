@@ -646,65 +646,57 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
               position: 'relative',
               overflow: 'hidden'
             }}>
+              {/* Header without lock emoji */}
               <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '20px',
+                textAlign: 'center',
                 marginBottom: '24px'
               }}>
-                {/* Extra large lock icon for premium content - visible on all screens */}
-                <span className="lock-icon" style={{
-                  fontSize: '64px',
-                  filter: 'drop-shadow(0 6px 16px rgba(247,147,26,0.5))',
-                  lineHeight: 1,
-                  flexShrink: 0
-                }}>🔒</span>
-                <div>
-                  <h3 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', margin: 0 }}>
-                    {lockedTips.length > 0 ? `${lockedTips.length} ` : ''}{t.report.recommendations.locked}
-                  </h3>
-                  <p style={{ color: '#9ca3af', fontSize: '14px', margin: '6px 0 0 0' }}>
-                    {t.report.recommendations.lockedDesc}
-                  </p>
-                </div>
+                <h3 style={{ color: '#fff', fontSize: '24px', fontWeight: '700', margin: '0 0 8px 0' }}>
+                  {lockedTips.length > 0 ? `+${lockedTips.length} ` : ''}{t.report.recommendations.locked}
+                </h3>
+                <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0 }}>
+                  {t.report.recommendations.lockedDesc}
+                </p>
               </div>
 
-              {/* Premium Locked Tips with Telegram Blur */}
+              {/* Premium Locked Tips with LARGER Telegram Blur */}
               <TelegramBlur
                 isRevealed={false}
                 showLockIcon={true}
                 showStars={true}
                 accentColor="#F7931A"
                 revealText={`${t.report.recommendations.unlock} ${lockedTips.length} ${t.report.recommendations.recommendations}`}
+                height="450px"
               >
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '12px',
-                  padding: '8px'
+                  gap: '16px',
+                  padding: '16px',
+                  minHeight: '420px'
                 }}>
-                  {lockedTips.slice(0, 5).map((tip, index) => (
+                  {lockedTips.slice(0, 6).map((tip, index) => (
                     <div key={tip.id} style={{
                       background: '#1a1a1a',
                       border: '1px solid #2a2a2a',
                       borderRadius: '12px',
-                      padding: '16px'
+                      padding: '20px'
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
                         <span style={{
-                          padding: '4px 10px',
+                          padding: '5px 12px',
                           borderRadius: '6px',
-                          fontSize: '11px',
+                          fontSize: '12px',
                           fontWeight: '700',
                           backgroundColor: `${getPriorityColor(tip.priority)}20`,
                           color: getPriorityColor(tip.priority)
                         }}>
                           {getPriorityLabel(tip.priority)}
                         </span>
-                        <span style={{ color: '#6b7280', fontSize: '12px' }}>{tip.category}</span>
+                        <span style={{ color: '#6b7280', fontSize: '13px' }}>{tip.category}</span>
                       </div>
-                      <span style={{ color: '#fff', fontWeight: '600', fontSize: '15px' }}>{tip.title}</span>
-                      <p style={{ color: '#9ca3af', fontSize: '13px', margin: '8px 0 0 0', lineHeight: '1.4' }}>
+                      <span style={{ color: '#fff', fontWeight: '600', fontSize: '16px' }}>{tip.title}</span>
+                      <p style={{ color: '#9ca3af', fontSize: '14px', margin: '10px 0 0 0', lineHeight: '1.5' }}>
                         {tip.shortTip}
                       </p>
                     </div>

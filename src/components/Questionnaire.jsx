@@ -277,17 +277,18 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
                 >
                   <div style={{
                     ...styles.optionGlow,
-                    ...(selected ? styles.optionGlowActive : {})
+                    ...(selected ? styles.optionGlowActive : {}),
+                    pointerEvents: 'none'
                   }} />
 
-                  <label style={styles.optionLabel} onClick={e => e.stopPropagation()}>
+                  <label style={{...styles.optionLabel, pointerEvents: 'none'}}>
                     <input
                       type={currentQ.type}
                       name={currentQ.id}
                       value={option.value}
                       checked={selected}
-                      onChange={() => {}}
-                      style={styles.optionInput}
+                      onChange={() => handleAnswerChange(currentQ.id, option.value, currentQ.type === 'checkbox')}
+                      style={{...styles.optionInput, pointerEvents: 'none'}}
                     />
 
                     {currentQ.type === 'radio' ? (

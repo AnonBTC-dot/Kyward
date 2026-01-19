@@ -357,8 +357,7 @@ const sanitizeUser = (user) => {
     emailHackAlerts: user.email_hack_alerts !== false,
     emailDailyTips: user.email_daily_tips !== false,
     emailWalletReviews: user.email_wallet_reviews !== false,
-    assessmentsTaken: user.assessments_taken ?? 0,           // snake_case → camelCase
-    assessments_count: user.assessments_taken ?? 0,          // también enviamos snake_case por si acaso
+    assessmentsTaken: user.assessments_taken ?? 0,           
     lastAssessmentDate: user.last_assessment_date || null,
   };
 };

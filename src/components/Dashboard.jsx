@@ -285,89 +285,6 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
             </div>
           </div>
 
-          {/* Quick Actions - Premium Upgrade Buttons */}
-          {isFree && (
-            <div style={{
-              marginBottom: '32px',
-              padding: '24px',
-              background: 'linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%)',
-              border: '1px solid #2a2a2a',
-              borderRadius: '20px'
-            }}>
-              <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>
-                {t.dashboard.quickActions?.title || 'Quick Actions'}
-              </h3>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                <button
-                  onClick={() => onUpgrade('essential')}
-                  style={{
-                    flex: '1',
-                    minWidth: '200px',
-                    padding: '14px 20px',
-                    background: 'linear-gradient(135deg, #F7931A 0%, #f5a623 100%)',
-                    border: 'none',
-                    borderRadius: '12px',
-                    color: '#000',
-                    fontSize: '14px',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  <span>🔓 {t.landing.plans.essential?.name || 'Essential'}</span>
-                  <span style={{ fontSize: '12px', opacity: 0.8 }}>$7.99 {t.common.oneTime || 'one-time'}</span>
-                </button>
-                <button
-                  onClick={() => onUpgrade('sentinel')}
-                  style={{
-                    flex: '1',
-                    minWidth: '200px',
-                    padding: '14px 20px',
-                    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-                    border: 'none',
-                    borderRadius: '12px',
-                    color: '#000',
-                    fontSize: '14px',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  <span>♾️ {t.landing.plans.sentinel?.name || 'Sentinel'}</span>
-                  <span style={{ fontSize: '12px', opacity: 0.8 }}>$14.99/{t.common.month || 'month'}</span>
-                </button>
-                <button
-                  onClick={() => onUpgrade('consultation')}
-                  style={{
-                    flex: '1',
-                    minWidth: '200px',
-                    padding: '14px 20px',
-                    background: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',
-                    border: 'none',
-                    borderRadius: '12px',
-                    color: '#fff',
-                    fontSize: '14px',
-                    fontWeight: '700',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  <span>👨‍💻 {t.landing.plans.consultation?.name || 'Consultation'}</span>
-                  <span style={{ fontSize: '12px', opacity: 0.8 }}>$99/{t.common.session || 'session'}</span>
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* CTA Card - Start Assessment (aquí usamos canTakeNew) */}
           <div className="dash-cta-card" style={{
             ...styles.dashCtaCard,
@@ -519,7 +436,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
             </div>
           )}
 
-          {/* Assessment History */}
+          {/* Assessment History - Enhanced with PDF download */}
           {user.assessments && user.assessments.length > 0 && (
             <div style={styles.dashHistorySection}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -544,39 +461,175 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                 {(showAllHistory ? user.assessments : user.assessments.slice(-3)).reverse().map((assessment, index) => (
                   <div key={index} className="dash-history-card" style={{
                     ...styles.dashHistoryCard,
-                    cursor: isPremium ? 'pointer' : 'default'
-                  }}
-                  onClick={() => isPremium && onViewReport && onViewReport(assessment)}
-                  >
-                    <div style={styles.dashHistoryScore}>
-                      <span style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                    padding: '20px'
+                  }}>
+                    {/* Top row: Score + Date */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{
+                        ...styles.dashHistoryScore,
+                        fontSize: '32px',
+                        fontWeight: '800',
                         color: assessment.score >= 80 ? '#22c55e' : assessment.score >= 50 ? '#F7931A' : '#ef4444'
                       }}>
                         {assessment.score}
-                      </span>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ color: '#9ca3af', fontSize: '13px' }}>
+                          {new Date(assessment.timestamp || assessment.created_at).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </div>
+                        <div style={{
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          color: assessment.score >= 80 ? '#22c55e' : assessment.score >= 50 ? '#F7931A' : '#ef4444'
+                        }}>
+                          {assessment.score >= 80 ? t.report.score.excellent : assessment.score >= 50 ? t.report.score.good : t.report.score.needsWork}
+                        </div>
+                      </div>
                     </div>
-                    <div style={styles.dashHistoryInfo}>
-                      <div style={styles.dashHistoryDate}>
-                        {new Date(assessment.timestamp).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </div>
-                      <div style={{
-                        ...styles.dashHistoryStatus,
-                        color: assessment.score >= 80 ? '#22c55e' : assessment.score >= 50 ? '#F7931A' : '#ef4444'
-                      }}>
-                        {assessment.score >= 80 ? t.report.score.excellent : assessment.score >= 50 ? t.report.score.good : t.report.score.needsWork}
-                      </div>
+
+                    {/* Action buttons */}
+                    <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onViewReport && onViewReport(assessment); }}
+                        style={{
+                          flex: 1,
+                          padding: '10px 12px',
+                          background: 'rgba(247,147,26,0.15)',
+                          border: '1px solid rgba(247,147,26,0.3)',
+                          borderRadius: '8px',
+                          color: '#F7931A',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <span>📊</span> {t.dashboard.history.viewReport || 'View'}
+                      </button>
+                      {isPremium && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openPdfPreview(assessment.score, assessment.responses, user);
+                          }}
+                          style={{
+                            flex: 1,
+                            padding: '10px 12px',
+                            background: 'rgba(59,130,246,0.15)',
+                            border: '1px solid rgba(59,130,246,0.3)',
+                            borderRadius: '8px',
+                            color: '#3b82f6',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px'
+                          }}
+                        >
+                          <span>📄</span> PDF
+                        </button>
+                      )}
                     </div>
-                    {isPremium && (
-                      <div style={{ color: '#6b7280', fontSize: '12px' }}>
-                        {t.dashboard.history.viewReport} →
-                      </div>
-                    )}
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quick Actions - Subtle upgrade section for Free users (moved below history) */}
+          {isFree && (
+            <div style={{
+              marginTop: '32px',
+              padding: '24px',
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid #2a2a2a',
+              borderRadius: '16px'
+            }}>
+              <h3 style={{ color: '#9ca3af', fontSize: '14px', fontWeight: '600', marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {t.dashboard.quickActions?.title || 'Upgrade Options'}
+              </h3>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => onUpgrade('essential')}
+                  style={{
+                    flex: '1',
+                    minWidth: '160px',
+                    padding: '14px 16px',
+                    background: 'transparent',
+                    border: '1px solid rgba(247,147,26,0.4)',
+                    borderRadius: '10px',
+                    color: '#F7931A',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '4px',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <span>{t.landing?.plans?.essential?.name || 'Essential'}</span>
+                  <span style={{ fontSize: '11px', color: '#6b7280' }}>$7.99 one-time</span>
+                </button>
+                <button
+                  onClick={() => onUpgrade('sentinel')}
+                  style={{
+                    flex: '1',
+                    minWidth: '160px',
+                    padding: '14px 16px',
+                    background: 'transparent',
+                    border: '1px solid rgba(34,197,94,0.4)',
+                    borderRadius: '10px',
+                    color: '#22c55e',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '4px',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <span>{t.landing?.plans?.sentinel?.name || 'Sentinel'}</span>
+                  <span style={{ fontSize: '11px', color: '#6b7280' }}>$14.99/month</span>
+                </button>
+                <button
+                  onClick={() => onUpgrade('consultation')}
+                  style={{
+                    flex: '1',
+                    minWidth: '160px',
+                    padding: '14px 16px',
+                    background: 'transparent',
+                    border: '1px solid rgba(168,85,247,0.4)',
+                    borderRadius: '10px',
+                    color: '#a855f7',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '4px',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <span>{t.landing?.plans?.consultation?.name || 'Consultation'}</span>
+                  <span style={{ fontSize: '11px', color: '#6b7280' }}>$99/session</span>
+                </button>
               </div>
             </div>
           )}
