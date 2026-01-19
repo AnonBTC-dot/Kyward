@@ -24,10 +24,15 @@ const KywardApp = () => {
     setPaymentModal({ plan: level });
   };
 
-  const handlePaymentSuccess = (pdfPassword) => {
-    // Refresh user data
-    const updatedUser = kywardDB.getUser(user.email);
-    setUser(updatedUser);
+  const handlePaymentSuccess = async (pdfPassword) => {
+    // Refresh user data (force refresh from API)
+    const updatedUser = await kywardDB.getUser(true);
+    if (updatedUser) {
+      // Also load user's assessments
+      const assessments = await kywardDB.getUserAssessments();
+      updatedUser.assessments = assessments;
+      setUser(updatedUser);
+    }
     setPaymentModal(null);
 
     // Show success message

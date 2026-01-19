@@ -27,7 +27,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
   const [showPassword, setShowPassword] = useState(false);
   const [canTakeNew, setCanTakeNew] = useState(false); // Nuevo estado para gating
 
-  // Combined refresh: user data + permission check in one effect to ensure sync
+  // Combined refresh: user data + assessments + permission check in one effect to ensure sync
   useEffect(() => {
     const refreshUserAndPermission = async () => {
       try {
@@ -38,9 +38,14 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
         // Force fresh user data from API
         const freshUser = await kywardDB.getUser(true);
         if (freshUser) {
+          // Also load user's assessments history
+          const assessments = await kywardDB.getUserAssessments();
+          freshUser.assessments = assessments;
+
           setUser(freshUser);
           console.log('Dashboard - User refreshed:', {
             assessments_taken: freshUser.assessments_taken,
+            assessments_count: assessments?.length || 0,
             subscription: freshUser.subscriptionLevel || freshUser.subscription
           });
         }

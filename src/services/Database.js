@@ -79,7 +79,9 @@ class KywardDatabase {
 
     if (result.success && result.token) {
       this.setToken(result.token);
-      this.setCachedUser(result.user);
+      const normalizedUser = this.normalizeUser(result.user);
+      this.setCachedUser(normalizedUser);
+      result.user = normalizedUser;
     }
 
     return result;
@@ -93,7 +95,9 @@ class KywardDatabase {
 
     if (result.success && result.token) {
       this.setToken(result.token);
-      this.setCachedUser(result.user);
+      const normalizedUser = this.normalizeUser(result.user);
+      this.setCachedUser(normalizedUser);
+      result.user = normalizedUser;
     }
 
     return result;
@@ -105,8 +109,9 @@ class KywardDatabase {
 
     const result = await this.apiRequest('/auth/validate');
     if (result.success && result.user) {
-      this.setCachedUser(result.user);
-      return result.user;
+      const normalizedUser = this.normalizeUser(result.user);
+      this.setCachedUser(normalizedUser);
+      return normalizedUser;
     }
 
     this.setToken(null);
@@ -124,34 +129,88 @@ class KywardDatabase {
   // USER & SUBSCRIPTION
   // ============================================
 
+  // Normalize user object to ensure consistent field names across the app
+  normalizeUser(user) {
+    if (!user) return null;
+
+    // Map API camelCase to expected field names and ensure both formats exist
+    const normalized = {
+      ...user,
+      // Assessment count - support both formats
+      assessments_taken: user.assessments_taken ?? user.assessmentsTaken ?? 0,
+      assessmentsTaken: user.assessmentsTaken ?? user.assessments_taken ?? 0,
+      // Subscription level - support multiple field names
+      subscriptionLevel: user.subscriptionLevel || user.subscription || user.paymentType || 'free',
+      subscription: user.subscription || user.subscriptionLevel || user.paymentType || 'free',
+      // Last assessment date - support both formats
+      lastAssessmentDate: user.lastAssessmentDate || user.last_assessment_date || null,
+      last_assessment_date: user.last_assessment_date || user.lastAssessmentDate || null,
+      // PDF password
+      pdfPassword: user.pdfPassword || user.pdf_password || null,
+      // Essential assessment ID
+      essentialAssessmentId: user.essentialAssessmentId || user.essential_assessment_id || null,
+      essential_assessment_id: user.essential_assessment_id || user.essentialAssessmentId || null,
+      // Consultation count
+      consultationCount: user.consultationCount ?? user.consultation_count ?? 0,
+      consultation_count: user.consultation_count ?? user.consultationCount ?? 0,
+      // Created at
+      createdAt: user.createdAt || user.created_at || null,
+      created_at: user.created_at || user.createdAt || null,
+    };
+
+    console.log('User normalized:', {
+      assessments_taken: normalized.assessments_taken,
+      subscriptionLevel: normalized.subscriptionLevel
+    });
+
+    return normalized;
+  }
+
+  // Normalize assessment object (from backend)
+  normalizeAssessment(assessment) {
+    if (!assessment) return null;
+    return {
+      ...assessment,
+      // Timestamp field - backend uses created_at, frontend uses timestamp
+      timestamp: assessment.timestamp || assessment.created_at || assessment.createdAt || null,
+      created_at: assessment.created_at || assessment.timestamp || assessment.createdAt || null,
+      createdAt: assessment.createdAt || assessment.created_at || assessment.timestamp || null,
+      // User ID
+      userId: assessment.userId || assessment.user_id || null,
+      user_id: assessment.user_id || assessment.userId || null,
+    };
+  }
+
   async getUser(forceRefresh = false) {
-  // Siempre limpia cache si se fuerza refresh
-  if (forceRefresh) {
-    this.setCachedUser(null);
-    localStorage.removeItem(this.USER_CACHE_KEY); // Limpieza total
-  }
-
-  // Intenta cache solo si NO es forceRefresh
-  if (!forceRefresh) {
-    const cached = this.getCachedUser();
-    if (cached) {
-      console.log('Usuario desde cache:', cached);
-      return cached;
+    // Siempre limpia cache si se fuerza refresh
+    if (forceRefresh) {
+      this.setCachedUser(null);
+      localStorage.removeItem(this.USER_CACHE_KEY); // Limpieza total
+      sessionStorage.removeItem(this.USER_CACHE_KEY); // Also clear session storage
     }
-  }
 
-  // Fetch real
-  const result = await this.apiRequest('/user');
-  if (result.success && result.user) {
-    // Guarda cache fresco
-    this.setCachedUser(result.user);
-    console.log('Usuario fresco obtenido y cacheado:', result.user);
-    return result.user;
-  }
+    // Intenta cache solo si NO es forceRefresh
+    if (!forceRefresh) {
+      const cached = this.getCachedUser();
+      if (cached) {
+        console.log('Usuario desde cache:', cached);
+        return this.normalizeUser(cached);
+      }
+    }
 
-  console.error('Error obteniendo usuario fresco:', result.message);
-  return null;
-}
+    // Fetch real from API
+    const result = await this.apiRequest('/user');
+    if (result.success && result.user) {
+      const normalizedUser = this.normalizeUser(result.user);
+      // Guarda cache fresco
+      this.setCachedUser(normalizedUser);
+      console.log('Usuario fresco obtenido y cacheado:', normalizedUser);
+      return normalizedUser;
+    }
+
+    console.error('Error obteniendo usuario fresco:', result.message);
+    return null;
+  }
 
   // Get current subscription level
   async getSubscriptionLevel() {
@@ -184,7 +243,9 @@ class KywardDatabase {
     });
 
     if (result.success && result.user) {
-      this.setCachedUser(result.user);
+      const normalizedUser = this.normalizeUser(result.user);
+      this.setCachedUser(normalizedUser);
+      result.user = normalizedUser;
     }
 
     return result;
@@ -211,7 +272,11 @@ class KywardDatabase {
 
   async getUserAssessments() {
     const result = await this.apiRequest('/assessments');
-    return result.success ? result.assessments : [];
+    if (result.success && result.assessments) {
+      // Normalize each assessment to ensure consistent field names
+      return result.assessments.map(a => this.normalizeAssessment(a));
+    }
+    return [];
   }
 
   // ============================================

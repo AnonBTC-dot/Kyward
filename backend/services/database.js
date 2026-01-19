@@ -150,6 +150,17 @@ const loginUser = async (email, password) => {
         return { success: false, message: 'Incorrect password. Please try again.' };
       }
 
+      // Get actual assessment count from assessments table
+      const { count: actualCount, error: countError } = await db
+        .from('assessments')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      if (!countError && actualCount !== null) {
+        user.assessments_taken = actualCount;
+        console.log(`Login - User ${email} has ${actualCount} assessments`);
+      }
+
       // Create session
       const token = generateSessionToken();
       const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
@@ -215,7 +226,21 @@ const validateSession = async (token) => {
         return null;
       }
 
-      return sanitizeUser(session.users);
+      const userData = session.users;
+
+      // Get actual assessment count from assessments table
+      if (userData && userData.id) {
+        const { count: actualCount, error: countError } = await db
+          .from('assessments')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userData.id);
+
+        if (!countError && actualCount !== null) {
+          userData.assessments_taken = actualCount;
+        }
+      }
+
+      return sanitizeUser(userData);
     } catch (error) {
       return null;
     }
@@ -243,7 +268,7 @@ const logout = async (token) => {
   }
 };
 
-// Get user by email
+// Get user by email (with actual assessment count from assessments table)
 const getUserByEmail = async (email) => {
   const db = initSupabase();
 
@@ -256,8 +281,23 @@ const getUserByEmail = async (email) => {
         .single();
 
       if (error) return null;
+
+      // IMPORTANT: Get actual assessment count from assessments table as fallback
+      // This ensures accuracy even if the assessments_taken field wasn't updated
+      const { count: actualCount, error: countError } = await db
+        .from('assessments')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', data.id);
+
+      if (!countError && actualCount !== null) {
+        // Use the actual count from assessments table
+        data.assessments_taken = actualCount;
+        console.log(`User ${email} - Actual assessment count from DB: ${actualCount}`);
+      }
+
       return sanitizeUser(data);
     } catch (error) {
+      console.error('getUserByEmail error:', error);
       return null;
     }
   } else {
@@ -531,15 +571,56 @@ const canTakeNewAssessment = async (email) => {
 
 // Can take assessment
 const canTakeAssessment = async (email) => {
+  const db = initSupabase();
   const user = await getUserByEmail(email);
   if (!user) return { canTake: false, remaining: 0 };
 
-  const isPremium = await hasPremiumAccess(email);
-  if (isPremium) {
-    return { canTake: true, remaining: Infinity, isPremium: true };
+  // Sentinel/Consultation with active subscription: unlimited
+  if (user.subscriptionLevel === 'sentinel' || user.subscriptionLevel === 'consultation') {
+    const isPremium = await hasPremiumAccess(email);
+    if (isPremium) {
+      return { canTake: true, remaining: Infinity, isPremium: true };
+    }
   }
 
-  // Free users: 1 per month (simplified for now)
+  // Essential: can only take if they haven't used their one assessment
+  if (user.subscriptionLevel === 'essential') {
+    return {
+      canTake: !user.essentialAssessmentId,
+      remaining: user.essentialAssessmentId ? 0 : 1,
+      isPremium: false,
+      reason: user.essentialAssessmentId ? 'Essential assessment already used. Repurchase to take another.' : null
+    };
+  }
+
+  // Free users: 1 per 30 days
+  if (db) {
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const { count, error } = await db
+        .from('assessments')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('created_at', thirtyDaysAgo.toISOString());
+
+      if (!error) {
+        const canTake = count === 0;
+        console.log(`Free user ${email} - assessments in last 30 days: ${count}, canTake: ${canTake}`);
+        return {
+          canTake,
+          remaining: canTake ? 1 : 0,
+          isPremium: false,
+          reason: !canTake ? 'Free users can take 1 assessment per month. Upgrade for more.' : null
+        };
+      }
+    } catch (error) {
+      console.error('canTakeAssessment error:', error);
+    }
+  }
+
+  // Fallback: allow
   return { canTake: true, remaining: 1, isPremium: false };
 };
 
