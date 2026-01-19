@@ -576,77 +576,100 @@ if (typeof document !== 'undefined') {
        Ensures logout and full name are visible
     ============================================ */
     @media (max-width: 768px) {
-      /* Dashboard nav - stack items properly */
+      /* Dashboard nav - two rows layout */
+      nav {
+        padding: 8px 0 !important;
+      }
+
       nav .nav-content,
       nav > div {
         flex-wrap: wrap !important;
-        gap: 8px !important;
-        padding: 12px 16px !important;
+        gap: 10px !important;
+        padding: 8px 12px !important;
       }
 
-      /* Nav buttons container - make it wrap */
+      /* Nav logo smaller */
+      nav .navLogo,
+      nav > div > div:first-child {
+        flex: 0 0 auto !important;
+      }
+
+      /* Nav buttons container - second row */
       nav .nav-buttons,
       .navButtons {
+        flex: 1 1 100% !important;
+        display: flex !important;
         flex-wrap: wrap !important;
         gap: 8px !important;
-        justify-content: flex-end !important;
-        flex: 1 !important;
-        min-width: 0 !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        order: 2 !important;
       }
 
-      /* User email - truncate but keep visible */
+      /* User email - visible and truncated */
       nav span[style*="color: #888"] {
-        max-width: 150px !important;
+        max-width: 120px !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
         white-space: nowrap !important;
-        font-size: 12px !important;
-        margin-right: 8px !important;
+        font-size: 11px !important;
+        margin-right: 0 !important;
+        order: 1 !important;
       }
 
       /* Plan badge - smaller on mobile */
       nav span[style*="borderRadius: '20px'"] {
-        padding: 4px 10px !important;
-        font-size: 11px !important;
-        margin-right: 8px !important;
+        padding: 4px 8px !important;
+        font-size: 10px !important;
+        margin-right: 0 !important;
+        order: 2 !important;
       }
 
       /* Logout button - ensure visibility */
       nav button {
-        padding: 8px 14px !important;
-        font-size: 12px !important;
+        padding: 6px 12px !important;
+        font-size: 11px !important;
         white-space: nowrap !important;
+        order: 3 !important;
       }
 
       /* Logo text smaller on mobile */
       nav .navLogoText,
       nav span[style*="fontSize: '24px'"] {
-        font-size: 18px !important;
+        font-size: 16px !important;
       }
 
       /* Dashboard content padding */
       .dashboard-content {
-        padding: 40px 16px !important;
+        padding: 20px 12px !important;
+        padding-top: 100px !important;
       }
 
       /* Dashboard header */
       .dashboard-header {
-        margin-bottom: 32px !important;
+        margin-bottom: 24px !important;
       }
 
       .dashboard-title {
-        font-size: 28px !important;
+        font-size: 24px !important;
       }
 
       /* Stats grid - single column on mobile */
       .stats-grid {
         grid-template-columns: 1fr !important;
-        gap: 16px !important;
+        gap: 12px !important;
       }
 
       /* History grid - single column */
       .history-grid {
         grid-template-columns: 1fr !important;
+      }
+
+      /* CTA Card - stack vertically */
+      .dash-cta-button {
+        width: 100% !important;
+        margin-top: 16px !important;
+        justify-content: center !important;
       }
     }
 
@@ -654,24 +677,107 @@ if (typeof document !== 'undefined') {
     @media (max-width: 480px) {
       nav > div {
         flex-direction: row !important;
-        justify-content: space-between !important;
+        flex-wrap: wrap !important;
       }
 
-      nav .nav-buttons,
-      .navButtons {
-        flex-direction: row !important;
-        align-items: center !important;
-      }
-
-      /* Hide email on very small screens, show only logout */
+      /* Show email but smaller */
       nav span[style*="color: #888"] {
-        display: none !important;
+        max-width: 100px !important;
+        font-size: 10px !important;
       }
 
       /* Plan badge more compact */
       nav span[style*="borderRadius: '20px'"] {
-        padding: 4px 8px !important;
+        padding: 3px 6px !important;
+        font-size: 9px !important;
+      }
+
+      /* Logout button smaller */
+      nav button {
+        padding: 5px 10px !important;
         font-size: 10px !important;
+      }
+    }
+
+    /* ============================================
+       REPORT PAGE - Mobile Score Alignment Fix
+    ============================================ */
+    @media (max-width: 768px) {
+      /* Score card responsive */
+      .score-card {
+        padding: 24px 16px !important;
+      }
+
+      /* Score visual - centered */
+      .score-visual {
+        width: 140px !important;
+        height: 140px !important;
+        margin: 0 auto 20px !important;
+      }
+
+      .score-visual svg {
+        width: 140px !important;
+        height: 140px !important;
+      }
+
+      /* Score number - properly centered */
+      .score-number {
+        font-size: 42px !important;
+        line-height: 1 !important;
+      }
+
+      /* Comparison stats grid */
+      .comparison-stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+
+      .comparison-stat-card {
+        padding: 16px !important;
+      }
+
+      .comparison-stat-number {
+        font-size: 36px !important;
+      }
+
+      /* Distribution bar */
+      .distribution-bar {
+        height: 80px !important;
+      }
+
+      /* Benefits grid */
+      .benefits-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Upgrade pricing grid */
+      .upgrade-pricing-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      .upgrade-pricing-card {
+        max-width: 100% !important;
+      }
+
+      /* Trust badges - wrap */
+      .trust-badges {
+        gap: 16px !important;
+      }
+
+      /* Tip cards */
+      .tip-card,
+      .report-tip-card {
+        padding: 16px !important;
+      }
+
+      /* Report title */
+      .report-title {
+        font-size: 28px !important;
+      }
+
+      /* Recs title */
+      .recs-title {
+        font-size: 22px !important;
       }
     }
   `;

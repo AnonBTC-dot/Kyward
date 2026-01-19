@@ -146,8 +146,15 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
       <div style={styles.reportScoreSection}>
         <div className="score-card" style={styles.reportScoreCard}>
           <div style={styles.reportScoreCardGlow} />
-          <div className="score-visual" style={styles.reportScoreVisual}>
-            <svg width="180" height="180" viewBox="0 0 180 180">
+          <div className="score-visual" style={{
+            ...styles.reportScoreVisual,
+            position: 'relative',
+            width: '180px',
+            height: '180px',
+            maxWidth: '100%',
+            margin: '0 auto 24px'
+          }}>
+            <svg width="100%" height="100%" viewBox="0 0 180 180" style={{ display: 'block' }}>
               <circle cx="90" cy="90" r="80" fill="none" stroke="#2a2a2a" strokeWidth="12"/>
               <circle
                 cx="90" cy="90" r="80"
@@ -160,9 +167,19 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                 style={{ transform: 'rotate(-90deg)', transformOrigin: '90px 90px', transition: 'stroke-dashoffset 1.5s ease-out' }}
               />
             </svg>
-            <div style={styles.reportScoreInner}>
-              <div className="score-number" style={{...styles.reportScoreNumber, color: getScoreColor(score)}}>{score}</div>
-              <div style={styles.reportScoreOf}>/100</div>
+            <div className="score-inner" style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <div className="score-number" style={{ fontSize: '56px', fontWeight: '800', color: getScoreColor(score), lineHeight: '1' }}>{score}</div>
+              <div style={{ fontSize: '18px', color: '#6b7280', fontWeight: '600', marginTop: '4px' }}>/100</div>
             </div>
           </div>
           <div style={{...styles.reportScoreLabel, color: getScoreColor(score)}}>
@@ -632,16 +649,21 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '16px',
+                gap: '20px',
                 marginBottom: '24px'
               }}>
-                {/* Large lock icon for premium content */}
-                <span style={{ fontSize: '48px', filter: 'drop-shadow(0 4px 12px rgba(247,147,26,0.4))' }}>🔒</span>
+                {/* Extra large lock icon for premium content - visible on all screens */}
+                <span className="lock-icon" style={{
+                  fontSize: '64px',
+                  filter: 'drop-shadow(0 6px 16px rgba(247,147,26,0.5))',
+                  lineHeight: 1,
+                  flexShrink: 0
+                }}>🔒</span>
                 <div>
-                  <h3 style={{ color: '#fff', fontSize: '20px', fontWeight: '700', margin: 0 }}>
+                  <h3 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', margin: 0 }}>
                     {lockedTips.length > 0 ? `${lockedTips.length} ` : ''}{t.report.recommendations.locked}
                   </h3>
-                  <p style={{ color: '#9ca3af', fontSize: '14px', margin: '4px 0 0 0' }}>
+                  <p style={{ color: '#9ca3af', fontSize: '14px', margin: '6px 0 0 0' }}>
                     {t.report.recommendations.lockedDesc}
                   </p>
                 </div>

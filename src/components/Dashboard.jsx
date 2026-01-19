@@ -290,7 +290,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
               borderRadius: '20px'
             }}>
               <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>
-                {t.dashboard.quickActions || 'Quick Actions'}
+                {t.dashboard.quickActions?.title || 'Quick Actions'}
               </h3>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <button
@@ -335,7 +335,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                   }}
                 >
                   <span>♾️ {t.landing.plans.sentinel?.name || 'Sentinel'}</span>
-                  <span style={{ fontSize: '12px', opacity: 0.8 }}>$5.99/{t.common.month || 'month'}</span>
+                  <span style={{ fontSize: '12px', opacity: 0.8 }}>$14.99/{t.common.month || 'month'}</span>
                 </button>
                 <button
                   onClick={() => onUpgrade('consultation')}
@@ -364,30 +364,39 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
           )}
 
           {/* CTA Card - Start Assessment (aquí usamos canTakeNew) */}
-          <div style={styles.dashCtaCard}>
+          <div className="dash-cta-card" style={{
+            ...styles.dashCtaCard,
+            flexDirection: 'column',
+            alignItems: 'stretch',
+            gap: '20px'
+          }}>
             <div style={styles.dashCtaCardGlow} />
-            <div style={styles.dashCtaContent}>
+            <div style={{...styles.dashCtaContent, flexDirection: 'column', alignItems: 'center', textAlign: 'center'}}>
               <div style={styles.dashCtaIcon}>
                 <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
                   <circle cx="24" cy="24" r="20" fill="rgba(247,147,26,0.15)" stroke="#F7931A" strokeWidth="2"/>
                   <path d="M24 14V24L30 30" stroke="#F7931A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <div style={styles.dashCtaInfo}>
-                <h2 style={styles.dashCtaTitle}>
+              <div style={{...styles.dashCtaInfo, textAlign: 'center'}}>
+                <h2 style={{...styles.dashCtaTitle, fontSize: '20px'}}>
                   {lastAssessment ? t.dashboard.cta.newAssessment : t.dashboard.cta.firstAssessment}
                 </h2>
-                <p style={styles.dashCtaText}>
+                <p style={{...styles.dashCtaText, fontSize: '14px'}}>
                   {lastAssessment ? t.dashboard.cta.newDesc : t.dashboard.cta.firstDesc}
                 </p>
               </div>
             </div>
 
             {canTakeNew ? (
-              <button 
-                onClick={onStartAssessment} 
-                className="dash-cta-button" 
-                style={styles.dashCtaButton}
+              <button
+                onClick={onStartAssessment}
+                className="dash-cta-button"
+                style={{
+                  ...styles.dashCtaButton,
+                  width: '100%',
+                  justifyContent: 'center'
+                }}
               >
                 <span>{lastAssessment ? t.dashboard.cta.startNewButton : t.dashboard.cta.startButton}</span>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

@@ -377,8 +377,8 @@ const LandingPage = ({ onLogin, onSignup }) => {
         </div>
       </div>
 
-      {/* Sentinel - color lindo que ya te gusta */}
-      <div className="pricing-card" style={{...styles.pricingCard, minWidth: '280px', flex: '0 0 auto', scrollSnapAlign: 'start'}}>
+      {/* Sentinel - with green border like Consultation has purple */}
+      <div className="pricing-card" style={{...styles.pricingCard, minWidth: '280px', flex: '0 0 auto', scrollSnapAlign: 'start', border: '2px solid #22c55e'}}>
         <div style={{
           ...styles.pricingCardHeader,
           background: 'linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(59,130,246,0.12) 100%)',
