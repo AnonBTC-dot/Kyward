@@ -295,22 +295,26 @@ const LandingPage = ({ onLogin, onSignup }) => {
     <h2 className="section-title" style={styles.sectionTitle}>{t.landing.pricingTitle}</h2>
     <p className="section-subtitle" style={styles.sectionSubtitle}>{t.landing.pricingSubtitle}</p>
 
-    <div 
-      className="pricing-grid"
+    {/* Horizontal scrolling container for ALL screen sizes */}
+    <div
+      className="pricing-grid-horizontal"
       style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr) !important', // ← FUERZA 4 columnas SIEMPRE en desktop
-        gap: '28px !important',
-        maxWidth: '1440px !important',
-        margin: '48px auto 0 !important',
-        padding: '0 24px',
-        justifyContent: 'center',
-        alignItems: 'stretch',
-        ...styles.pricingGrid // mantiene tus estilos base
+        display: 'flex',
+        flexDirection: 'row',
+        gap: '24px',
+        maxWidth: '100%',
+        margin: '48px auto 0',
+        padding: '0 24px 20px',
+        overflowX: 'auto',
+        overflowY: 'hidden',
+        WebkitOverflowScrolling: 'touch',
+        scrollSnapType: 'x mandatory',
+        scrollbarWidth: 'thin',
+        scrollbarColor: '#F7931A #1a1a1a'
       }}
     >
       {/* Free */}
-      <div className="pricing-card" style={styles.pricingCard}>
+      <div className="pricing-card" style={{...styles.pricingCard, minWidth: '280px', flex: '0 0 auto', scrollSnapAlign: 'start'}}>
         <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBg}}>
           <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowFree}} />
           <div style={styles.pricingBadge}>{t.landing.plans.free.badge}</div>
@@ -336,11 +340,14 @@ const LandingPage = ({ onLogin, onSignup }) => {
       </div>
 
       {/* Essential - destacada */}
-      <div 
-        className="pricing-card-featured" 
+      <div
+        className="pricing-card-featured"
         style={{
           ...styles.pricingCard,
           ...styles.pricingCardFeatured,
+          minWidth: '280px',
+          flex: '0 0 auto',
+          scrollSnapAlign: 'start',
           transform: 'scale(1.04)',
           zIndex: 2,
           boxShadow: '0 20px 60px rgba(247,147,26,0.35)'
@@ -371,7 +378,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
       </div>
 
       {/* Sentinel - color lindo que ya te gusta */}
-      <div className="pricing-card" style={styles.pricingCard}>
+      <div className="pricing-card" style={{...styles.pricingCard, minWidth: '280px', flex: '0 0 auto', scrollSnapAlign: 'start'}}>
         <div style={{
           ...styles.pricingCardHeader,
           background: 'linear-gradient(135deg, rgba(34,197,94,0.15) 0%, rgba(59,130,246,0.12) 100%)',
@@ -421,7 +428,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
       </div>
 
       {/* Consultation */}
-      <div className="pricing-card" style={{...styles.pricingCard, ...styles.pricingCardPro}}>
+      <div className="pricing-card" style={{...styles.pricingCard, ...styles.pricingCardPro, minWidth: '280px', flex: '0 0 auto', scrollSnapAlign: 'start'}}>
         <div style={{...styles.pricingCardHeader, ...styles.pricingCardHeaderBgPro}}>
           <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowPro}} />
           <div style={{...styles.pricingBadge, ...styles.pricingBadgePro}}>

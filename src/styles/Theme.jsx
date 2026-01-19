@@ -494,56 +494,53 @@ if (typeof document !== 'undefined') {
       }
 
       /* ============================================
-      PRICING GRID - 4 CARDS FORZADAS EN HORIZONTAL
+      PRICING GRID - HORIZONTAL ON ALL SCREENS
       ============================================ */
 
-    .pricing-grid {
-      display: grid !important;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
-      gap: 28px !important;
-      max-width: 1440px !important;
-      margin: 48px auto 0 !important;
-      padding: 0 24px !important;
-      justify-content: center !important;
-      align-items: stretch !important;
+    /* Horizontal scrolling container */
+    .pricing-grid-horizontal {
+      display: flex !important;
+      flex-direction: row !important;
+      gap: 24px !important;
+      padding: 0 24px 20px !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      -webkit-overflow-scrolling: touch !important;
+      scroll-snap-type: x mandatory !important;
+      scrollbar-width: thin !important;
+      scrollbar-color: #F7931A #1a1a1a !important;
     }
 
-    /* FORZAR 4 columnas en desktop (esto gana a cualquier override) */
-    @media (min-width: 1024px) {
-      .pricing-grid {
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: 32px !important;
-      }
-      
-      .pricing-card-featured {
-        transform: scale(1.05) !important;
-        z-index: 2 !important;
-        box-shadow: 0 20px 60px rgba(247,147,26,0.35) !important;
+    /* Custom scrollbar for webkit browsers */
+    .pricing-grid-horizontal::-webkit-scrollbar {
+      height: 8px;
+    }
+    .pricing-grid-horizontal::-webkit-scrollbar-track {
+      background: #1a1a1a;
+      border-radius: 4px;
+    }
+    .pricing-grid-horizontal::-webkit-scrollbar-thumb {
+      background: #F7931A;
+      border-radius: 4px;
+    }
+    .pricing-grid-horizontal::-webkit-scrollbar-thumb:hover {
+      background: #f5a623;
+    }
+
+    /* On large screens, center the cards */
+    @media (min-width: 1200px) {
+      .pricing-grid-horizontal {
+        justify-content: center !important;
+        overflow-x: visible !important;
       }
     }
 
-    /* Tablet: 2 columnas */
-    @media (min-width: 640px) and (max-width: 1023px) {
-      .pricing-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 28px !important;
-      }
-    }
-
-    /* Mobile: 1 columna */
-    @media (max-width: 639px) {
-      .pricing-grid {
-        grid-template-columns: 1fr !important;
-        gap: 24px !important;
-        padding: 0 16px !important;
-      }
-      
-      .pricing-card,
-      .pricing-card-featured {
-        transform: none !important;
-        max-width: 380px !important;
-        margin: 0 auto !important;
-      }
+    /* Ensure cards don't shrink */
+    .pricing-grid-horizontal .pricing-card,
+    .pricing-grid-horizontal .pricing-card-featured {
+      min-width: 280px !important;
+      flex: 0 0 auto !important;
+      scroll-snap-align: start !important;
     }
 
       /* Auth Card */
@@ -571,6 +568,110 @@ if (typeof document !== 'undefined') {
         flex-direction: column !important;
         align-items: flex-start !important;
         gap: 32px !important;
+      }
+    }
+
+    /* ============================================
+       MOBILE HEADER FIX - Dashboard Navigation
+       Ensures logout and full name are visible
+    ============================================ */
+    @media (max-width: 768px) {
+      /* Dashboard nav - stack items properly */
+      nav .nav-content,
+      nav > div {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        padding: 12px 16px !important;
+      }
+
+      /* Nav buttons container - make it wrap */
+      nav .nav-buttons,
+      .navButtons {
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        justify-content: flex-end !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+      }
+
+      /* User email - truncate but keep visible */
+      nav span[style*="color: #888"] {
+        max-width: 150px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        font-size: 12px !important;
+        margin-right: 8px !important;
+      }
+
+      /* Plan badge - smaller on mobile */
+      nav span[style*="borderRadius: '20px'"] {
+        padding: 4px 10px !important;
+        font-size: 11px !important;
+        margin-right: 8px !important;
+      }
+
+      /* Logout button - ensure visibility */
+      nav button {
+        padding: 8px 14px !important;
+        font-size: 12px !important;
+        white-space: nowrap !important;
+      }
+
+      /* Logo text smaller on mobile */
+      nav .navLogoText,
+      nav span[style*="fontSize: '24px'"] {
+        font-size: 18px !important;
+      }
+
+      /* Dashboard content padding */
+      .dashboard-content {
+        padding: 40px 16px !important;
+      }
+
+      /* Dashboard header */
+      .dashboard-header {
+        margin-bottom: 32px !important;
+      }
+
+      .dashboard-title {
+        font-size: 28px !important;
+      }
+
+      /* Stats grid - single column on mobile */
+      .stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+
+      /* History grid - single column */
+      .history-grid {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    /* Extra small screens */
+    @media (max-width: 480px) {
+      nav > div {
+        flex-direction: row !important;
+        justify-content: space-between !important;
+      }
+
+      nav .nav-buttons,
+      .navButtons {
+        flex-direction: row !important;
+        align-items: center !important;
+      }
+
+      /* Hide email on very small screens, show only logout */
+      nav span[style*="color: #888"] {
+        display: none !important;
+      }
+
+      /* Plan badge more compact */
+      nav span[style*="borderRadius: '20px'"] {
+        padding: 4px 8px !important;
+        font-size: 10px !important;
       }
     }
   `;

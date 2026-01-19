@@ -27,41 +27,41 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
   const [showPassword, setShowPassword] = useState(false);
   const [canTakeNew, setCanTakeNew] = useState(false); // Nuevo estado para gating
 
+  // Combined refresh: user data + permission check in one effect to ensure sync
   useEffect(() => {
-  const refreshUser = async () => {
-    try {
-      // Limpieza agresiva
-      localStorage.removeItem('kyward_user_cache');
-      
-      const freshUser = await kywardDB.getUser(true);
-      if (freshUser) {
-        setUser(freshUser);
-        console.log('Dashboard - Usuario refrescado (cache limpiado):', freshUser.assessments_taken);
-      }
-    } catch (err) {
-      console.error('Error refrescando usuario en Dashboard:', err);
-    }
-  };
-
-  refreshUser();
-}, [setUser, user?.id]); // Dependencias correctas
-
-  // Verificar permiso para nueva evaluación (async)
-  useEffect(() => {
-    const checkPermission = async () => {
+    const refreshUserAndPermission = async () => {
       try {
-        const can = await kywardDB.canTakeNewAssessment();
-        setCanTakeNew(can);
+        // Aggressive cache clearing for desktop/mobile consistency
+        localStorage.removeItem('kyward_user_cache');
+        sessionStorage.removeItem('kyward_user_cache');
+
+        // Force fresh user data from API
+        const freshUser = await kywardDB.getUser(true);
+        if (freshUser) {
+          setUser(freshUser);
+          console.log('Dashboard - User refreshed:', {
+            assessments_taken: freshUser.assessments_taken,
+            subscription: freshUser.subscriptionLevel || freshUser.subscription
+          });
+        }
+
+        // Check permission immediately after user refresh
+        const canTake = await kywardDB.canTakeNewAssessment();
+        setCanTakeNew(canTake);
+        console.log('Dashboard - Can take new assessment:', canTake);
       } catch (err) {
-        console.error('Error checking assessment permission:', err);
+        console.error('Error refreshing user/permission in Dashboard:', err);
         setCanTakeNew(false);
       }
     };
 
-    if (user?.email) {
-      checkPermission();
-    }
-  }, [user?.email]);
+    refreshUserAndPermission();
+
+    // Also refresh on window focus (user returns to tab)
+    const handleFocus = () => refreshUserAndPermission();
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [setUser, user?.id]);
 
   const subscriptionLevel = user.subscriptionLevel || user.subscription || 'free';
   const isEssential = subscriptionLevel === 'essential';
@@ -280,7 +280,88 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
             </div>
           </div>
 
-          {/* ... (el resto del código de comparación, quick actions, PDF password, daily tip, history, etc. queda igual) ... */}
+          {/* Quick Actions - Premium Upgrade Buttons */}
+          {isFree && (
+            <div style={{
+              marginBottom: '32px',
+              padding: '24px',
+              background: 'linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%)',
+              border: '1px solid #2a2a2a',
+              borderRadius: '20px'
+            }}>
+              <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>
+                {t.dashboard.quickActions || 'Quick Actions'}
+              </h3>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => onUpgrade('essential')}
+                  style={{
+                    flex: '1',
+                    minWidth: '200px',
+                    padding: '14px 20px',
+                    background: 'linear-gradient(135deg, #F7931A 0%, #f5a623 100%)',
+                    border: 'none',
+                    borderRadius: '12px',
+                    color: '#000',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span>🔓 {t.landing.plans.essential?.name || 'Essential'}</span>
+                  <span style={{ fontSize: '12px', opacity: 0.8 }}>$7.99 {t.common.oneTime || 'one-time'}</span>
+                </button>
+                <button
+                  onClick={() => onUpgrade('sentinel')}
+                  style={{
+                    flex: '1',
+                    minWidth: '200px',
+                    padding: '14px 20px',
+                    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                    border: 'none',
+                    borderRadius: '12px',
+                    color: '#000',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span>♾️ {t.landing.plans.sentinel?.name || 'Sentinel'}</span>
+                  <span style={{ fontSize: '12px', opacity: 0.8 }}>$5.99/{t.common.month || 'month'}</span>
+                </button>
+                <button
+                  onClick={() => onUpgrade('consultation')}
+                  style={{
+                    flex: '1',
+                    minWidth: '200px',
+                    padding: '14px 20px',
+                    background: 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)',
+                    border: 'none',
+                    borderRadius: '12px',
+                    color: '#fff',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <span>👨‍💻 {t.landing.plans.consultation?.name || 'Consultation'}</span>
+                  <span style={{ fontSize: '12px', opacity: 0.8 }}>$99/{t.common.session || 'session'}</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* CTA Card - Start Assessment (aquí usamos canTakeNew) */}
           <div style={styles.dashCtaCard}>
