@@ -133,18 +133,27 @@ class KywardDatabase {
   normalizeUser(user) {
     if (!user) return null;
 
+    // Calcula assessments_taken: Prioriza valor explícito, fallback a length del array, luego 0
+    const assessmentsCount = user.assessments_taken ?? user.assessmentsTaken ?? user.assessments?.length ?? 0;
+
+    // Mapea subscription: Si es 'none'/undefined/null, fallback a 'free'
+    let subLevel = user.subscriptionLevel || user.subscription || user.paymentType;
+    if (['none', undefined, null].includes(subLevel)) {
+      subLevel = 'free';
+    }
+
     // Map API camelCase to expected field names and ensure both formats exist
     const normalized = {
       ...user,
-      // Assessment count - support both formats
-      assessments_taken: user.assessments_taken ?? user.assessmentsTaken ?? 0,
-      assessmentsTaken: user.assessmentsTaken ?? user.assessments_taken ?? 0,
-      // Subscription level - support multiple field names
-      subscriptionLevel: user.subscriptionLevel || user.subscription || user.paymentType || 'free',
-      subscription: user.subscription || user.subscriptionLevel || user.paymentType || 'free',
-      // Last assessment date - support both formats
-      lastAssessmentDate: user.lastAssessmentDate || user.last_assessment_date || null,
-      last_assessment_date: user.last_assessment_date || user.lastAssessmentDate || null,
+      // Assessment count - support both formats and compute from array if needed
+      assessments_taken: assessmentsCount,
+      assessmentsTaken: assessmentsCount,
+      // Subscription level - normalized to avoid 'none'
+      subscriptionLevel: subLevel,
+      subscription: subLevel,
+      // Last assessment date - support both formats (agrega lógica si el último assessment está en el array)
+      lastAssessmentDate: user.lastAssessmentDate || user.last_assessment_date || (user.assessments?.[0]?.created_at ?? null),
+      last_assessment_date: user.last_assessment_date || user.lastAssessmentDate || (user.assessments?.[0]?.created_at ?? null),
       // PDF password
       pdfPassword: user.pdfPassword || user.pdf_password || null,
       // Essential assessment ID
@@ -160,7 +169,8 @@ class KywardDatabase {
 
     console.log('User normalized:', {
       assessments_taken: normalized.assessments_taken,
-      subscriptionLevel: normalized.subscriptionLevel
+      subscriptionLevel: normalized.subscriptionLevel,
+      assessmentsLength: user.assessments?.length // Para debug
     });
 
     return normalized;
@@ -202,15 +212,22 @@ class KywardDatabase {
     const result = await this.apiRequest('/user');
     if (result.success && result.user) {
       const normalizedUser = this.normalizeUser(result.user);
-      // Guarda cache fresco
-      this.setCachedUser(normalizedUser);
-      console.log('Usuario fresco obtenido y cacheado:', normalizedUser);
-      return normalizedUser;
-    }
 
-    console.error('Error obteniendo usuario fresco:', result.message);
-    return null;
-  }
+  // Validación extra: Si assessments.length > assessments_taken, ajusta (por si backend bug)
+        if (result.user.assessments?.length > normalizedUser.assessments_taken) {
+          normalizedUser.assessments_taken = result.user.assessments.length;
+          normalizedUser.assessmentsTaken = result.user.assessments.length;
+          console.warn('Ajustado assessments_taken basado en array length');
+        }
+
+        this.setCachedUser(normalizedUser);
+        console.log('Usuario fresco obtenido y cacheado:', normalizedUser);
+        return normalizedUser;
+      }
+
+      console.error('Error obteniendo usuario fresco:', result.message);
+      return null;
+    }
 
   // Get current subscription level
   async getSubscriptionLevel() {
