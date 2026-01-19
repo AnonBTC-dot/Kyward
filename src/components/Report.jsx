@@ -17,6 +17,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
   const [comparison, setComparison] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [copiedPassword, setCopiedPassword] = useState(false);
+  const [canTakeNew, setCanTakeNew] = useState(false);
 
   // Plan detection - más preciso para los 4 tiers
   const subscriptionLevel = user?.subscriptionLevel || user?.subscription || 'free';
@@ -32,7 +33,25 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
   const showFullReport = isPremium;                          // Full tips + recomendaciones
   const showPdfButton = isPremium;                           // PDF solo premium
   const showEmailButton = isPremium;                         // Email solo premium
-  const showNewAssessmentButton = (isSentinel || isConsultation || kywardDB.canTakeNewAssessment?.(user?.email)) ?? false;
+
+  // Check assessment permission asynchronously
+  useEffect(() => {
+    const checkPermission = async () => {
+      if (isSentinel || isConsultation) {
+        setCanTakeNew(true);
+      } else {
+        try {
+          const can = await kywardDB.canTakeNewAssessment();
+          setCanTakeNew(can);
+        } catch {
+          setCanTakeNew(false);
+        }
+      }
+    };
+    checkPermission();
+  }, [isSentinel, isConsultation]);
+
+  const showNewAssessmentButton = canTakeNew;
 
   const handleCopyPassword = () => {
     if (user?.pdfPassword) {
@@ -483,9 +502,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
           </h3>
 
           <p style={{ color: '#9ca3af', marginBottom: '24px' }}>
-            {t.report.upgrade.freeLimitedTo} {freeTips.length} {t.report.upgrade.tipsOnly}
+            {t.report.upgrade.freeLimitedDesc || 'You have limited access to recommendations'}
           </p>
 
+          {/* Acquire full plan with these buttons */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '400px', margin: '0 auto' }}>
             <button
               onClick={() => onUpgrade('essential')}
@@ -612,13 +632,14 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
+                gap: '16px',
                 marginBottom: '24px'
               }}>
-                <span style={{ fontSize: '24px' }}>🔒</span>
+                {/* Large lock icon for premium content */}
+                <span style={{ fontSize: '48px', filter: 'drop-shadow(0 4px 12px rgba(247,147,26,0.4))' }}>🔒</span>
                 <div>
-                  <h3 style={{ color: '#fff', fontSize: '18px', fontWeight: '700', margin: 0 }}>
-                    {lockedTips.length} {t.report.recommendations.locked}
+                  <h3 style={{ color: '#fff', fontSize: '20px', fontWeight: '700', margin: 0 }}>
+                    {lockedTips.length > 0 ? `${lockedTips.length} ` : ''}{t.report.recommendations.locked}
                   </h3>
                   <p style={{ color: '#9ca3af', fontSize: '14px', margin: '4px 0 0 0' }}>
                     {t.report.recommendations.lockedDesc}
