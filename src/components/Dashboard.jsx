@@ -29,7 +29,14 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
 
   // Combined refresh: user data + assessments + permission check in one effect to ensure sync
   useEffect(() => {
+    let isMounted = true;
+    let isRefreshing = false;
+
     const refreshUserAndPermission = async () => {
+      // Prevent concurrent refreshes
+      if (isRefreshing) return;
+      isRefreshing = true;
+
       try {
         // Aggressive cache clearing for desktop/mobile consistency
         localStorage.removeItem('kyward_user_cache');
@@ -37,35 +44,60 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
 
         // Force fresh user data from API
         const freshUser = await kywardDB.getUser(true);
+        if (!isMounted) return;
+
         if (freshUser) {
           // Also load user's assessments history
           const assessments = await kywardDB.getUserAssessments();
+          if (!isMounted) return;
+
           freshUser.assessments = assessments;
+
+          // CRITICAL: Sync assessments_taken with actual assessments array length
+          // This fixes the race condition where API returns stale count
+          const actualCount = assessments?.length || 0;
+          if (actualCount > 0) {
+            freshUser.assessments_taken = actualCount;
+            freshUser.assessmentsTaken = actualCount;
+          }
 
           setUser(freshUser);
           console.log('Dashboard - User refreshed:', {
             assessments_taken: freshUser.assessments_taken,
-            assessments_count: assessments?.length || 0,
+            assessments_count: actualCount,
             subscription: freshUser.subscriptionLevel || freshUser.subscription
           });
-        }
 
-        // Check permission immediately after user refresh
-        const canTake = await kywardDB.canTakeNewAssessment();
-        setCanTakeNew(canTake);
-        console.log('Dashboard - Can take new assessment:', canTake);
+          // Check permission based on actual data
+          const canTake = await kywardDB.canTakeNewAssessment();
+          if (isMounted) {
+            setCanTakeNew(canTake);
+            console.log('Dashboard - Can take new assessment:', canTake);
+          }
+        }
       } catch (err) {
         console.error('Error refreshing user/permission in Dashboard:', err);
-        setCanTakeNew(false);
+        if (isMounted) setCanTakeNew(false);
+      } finally {
+        isRefreshing = false;
       }
     };
 
     refreshUserAndPermission();
 
-    // Also refresh on window focus (user returns to tab)
-    const handleFocus = () => refreshUserAndPermission();
+    // Debounced focus handler to prevent rapid refreshes
+    let focusTimeout;
+    const handleFocus = () => {
+      clearTimeout(focusTimeout);
+      focusTimeout = setTimeout(refreshUserAndPermission, 500);
+    };
     window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('focus', handleFocus);
+      clearTimeout(focusTimeout);
+    };
   }, [setUser, user?.id]);
 
   const subscriptionLevel = user.subscriptionLevel || user.subscription || 'free';
