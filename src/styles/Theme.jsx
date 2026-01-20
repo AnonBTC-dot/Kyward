@@ -393,8 +393,9 @@ if (typeof document !== 'undefined') {
     .floating-element { animation: float 4s ease-in-out infinite; }
     .floating-element-slow { animation: floatSlow 5s ease-in-out infinite; }
     .glow-element { animation: glowPulse 3s ease-in-out infinite; }
-    .option-item:hover { border-color: rgba(247,147,26,0.5); background-color: #111; }
-    .option-item.selected { border-color: #F7931A; background-color: rgba(247,147,26,0.1); box-shadow: 0 0 20px rgba(247,147,26,0.15); }
+    .option-item { background-color: #0a0a0a; transition: all 0.2s ease; }
+    .option-item:hover:not(.selected) { border-color: rgba(247,147,26,0.5); background-color: #111; }
+    .option-item.selected { border-color: #F7931A !important; background-color: rgba(247,147,26,0.1) !important; box-shadow: 0 0 20px rgba(247,147,26,0.15); }
     .prev-button:hover { border-color: #3a3a3a; background-color: rgba(255,255,255,0.05); }
     .cancel-button:hover { border-color: #3a3a3a; color: #9ca3af; }
     button:hover:not(:disabled) { transform: translateY(-2px); }
@@ -660,8 +661,7 @@ if (typeof document !== 'undefined') {
         display: none !important;
       }
 
-      /* LOGOUT BUTTON - Always visible and styled */
-      nav button,
+      /* LOGOUT BUTTON - Only logout button gets red styling */
       nav .logout-btn {
         padding: 8px 14px !important;
         font-size: 12px !important;
@@ -673,6 +673,14 @@ if (typeof document !== 'undefined') {
         font-weight: 600 !important;
         min-width: 60px !important;
         text-align: center !important;
+      }
+
+      /* Other nav buttons (login, signup) - keep original styling */
+      nav button:not(.logout-btn) {
+        padding: 8px 14px !important;
+        font-size: 12px !important;
+        white-space: nowrap !important;
+        min-width: auto !important;
       }
 
       /* Logo text smaller on mobile */

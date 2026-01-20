@@ -408,15 +408,8 @@ app.post('/api/payments/create', async (req, res) => {
       return res.status(400).json({ error: 'Invalid plan' });
     }
 
-    // For Essential, check if user can take new (i.e., repurchase allowed only if no assessment or explicit)
-    if (plan === 'essential') {
-      const canTakeResult = await db.canTakeNewAssessment(email);
-      if (!canTakeResult) {
-        return res.status(403).json({ 
-          error: 'Ya tienes una evaluación Essential activa. Para realizar una nueva evaluación debes comprar otra vez Essential ($7.99).' 
-        });
-      }
-    }
+    // Note: Essential repurchase is always allowed - users can buy Essential again
+    // after using their one-time assessment to get another assessment
 
     const usdAmount = PRICES[plan];
 

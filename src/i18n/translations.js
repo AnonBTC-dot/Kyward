@@ -210,7 +210,15 @@ export const translations = {
         accountCreated: 'Account created! Logging you in...',
         passwordReset: 'Password reset successfully! You can now login.',
         emailVerified: 'Email verified! Create your new password.'
+      },
+
+      footer: 'Free tier included. Upgrade later to unlock full reports, unlimited assessments & more.',
+
+      statement: {
+        part1: 'Start Free – No credit card required.',
+        part2: 'All users start on Free tier. Upgrade anytime to Essential ($7.99 one-time), Sentinel ($14.99/month) or Consultation.',
       }
+
     },
 
     // Dashboard
@@ -937,6 +945,13 @@ export const translations = {
         accountCreated: '¡Cuenta creada! Iniciando sesión...',
         passwordReset: '¡Contraseña restablecida! Ya puedes iniciar sesión.',
         emailVerified: '¡Email verificado! Crea tu nueva contraseña.'
+      },
+
+      footer: 'Nivel gratuito incluido. Mejora más tarde para desbloquear reportes completos, evaluaciones ilimitadas y más.',
+
+      statement: {
+        part1: 'Comienza Gratis – No se requiere tarjeta de crédito.',
+        part2: 'Todos los usuarios comienzan en el nivel gratuito. Mejora en cualquier momento a Essential ($7.99 pago único), Sentinel ($14.99/mes) o Consulta.',
       }
     },
 
