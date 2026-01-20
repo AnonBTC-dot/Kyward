@@ -6,14 +6,30 @@ const nodemailer = require('nodemailer');
 // Create transporter based on environment
 let transporter = null;
 
+// Log SMTP configuration status at startup
+function logSmtpConfig() {
+  console.log('\n📧 SMTP Configuration:');
+  console.log('  SMTP_HOST:', process.env.SMTP_HOST || '(not set)');
+  console.log('  SMTP_PORT:', process.env.SMTP_PORT || '587 (default)');
+  console.log('  SMTP_USER:', process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 3)}...` : '(not set)');
+  console.log('  SMTP_PASS:', process.env.SMTP_PASS ? '****** (set)' : '(not set)');
+  console.log('  SMTP_FROM:', process.env.SMTP_FROM || 'Kyward <noreply@kyward.io> (default)');
+  console.log('  SMTP_SECURE:', process.env.SMTP_SECURE || 'false (default)');
+}
+
+// Call on module load
+logSmtpConfig();
+
 function getTransporter() {
   if (transporter) return transporter;
 
   // Check if SMTP is configured
   if (!process.env.SMTP_HOST) {
-    console.warn('SMTP not configured - emails will be logged to console');
+    console.warn('⚠️ SMTP not configured - emails will be logged to console');
     return null;
   }
+
+  console.log('📧 Creating SMTP transporter...');
 
   transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -22,10 +38,31 @@ function getTransporter() {
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS
-    }
+    },
+    // Add timeout and debug options
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000
   });
 
   return transporter;
+}
+
+// Verify SMTP connection
+async function verifySmtpConnection() {
+  const transport = getTransporter();
+  if (!transport) {
+    return { success: false, error: 'SMTP not configured' };
+  }
+
+  try {
+    await transport.verify();
+    console.log('✅ SMTP connection verified successfully');
+    return { success: true, message: 'SMTP connection verified' };
+  } catch (error) {
+    console.error('❌ SMTP verification failed:', error.message);
+    return { success: false, error: error.message };
+  }
 }
 
 /**
@@ -198,5 +235,7 @@ async function sendEmail(to, subject, html) {
 module.exports = {
   sendPaymentConfirmation,
   sendSecurityPlan,
-  sendEmail
+  sendEmail,
+  verifySmtpConnection,
+  logSmtpConfig
 };
