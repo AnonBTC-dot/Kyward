@@ -645,13 +645,23 @@ app.post('/api/payments/:paymentId/simulate', async (req, res) => {
 // Check email configuration status
 app.get('/api/email/status', async (req, res) => {
   try {
+    const provider = process.env.RESEND_API_KEY ? 'resend' :
+                     process.env.SMTP_HOST ? 'smtp' : 'none';
+
     const status = {
-      configured: !!process.env.SMTP_HOST,
-      host: process.env.SMTP_HOST ? `${process.env.SMTP_HOST.substring(0, 10)}...` : null,
-      port: process.env.SMTP_PORT || '587',
-      user: process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 5)}...` : null,
-      from: process.env.SMTP_FROM || 'default'
+      provider,
+      configured: provider !== 'none'
     };
+
+    if (provider === 'resend') {
+      status.apiKey = process.env.RESEND_API_KEY ? `${process.env.RESEND_API_KEY.substring(0, 8)}...` : null;
+      status.from = process.env.EMAIL_FROM || process.env.SMTP_FROM || 'default';
+    } else if (provider === 'smtp') {
+      status.host = process.env.SMTP_HOST ? `${process.env.SMTP_HOST.substring(0, 10)}...` : null;
+      status.port = process.env.SMTP_PORT || '587';
+      status.user = process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 5)}...` : null;
+      status.from = process.env.SMTP_FROM || 'default';
+    }
 
     if (status.configured) {
       const verifyResult = await emailService.verifySmtpConnection();

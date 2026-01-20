@@ -1,31 +1,84 @@
 // KYWARD EMAIL SERVICE
-// Handles sending emails via SMTP
+// Handles sending emails via SMTP or Resend API
 
 const nodemailer = require('nodemailer');
 
 // Create transporter based on environment
 let transporter = null;
 
-// Log SMTP configuration status at startup
+// Detect which email provider to use
+const EMAIL_PROVIDER = process.env.RESEND_API_KEY ? 'resend' :
+                       process.env.SMTP_HOST ? 'smtp' : 'none';
+
+// Log email configuration status at startup
 function logSmtpConfig() {
-  console.log('\n📧 SMTP Configuration:');
-  console.log('  SMTP_HOST:', process.env.SMTP_HOST || '(not set)');
-  console.log('  SMTP_PORT:', process.env.SMTP_PORT || '587 (default)');
-  console.log('  SMTP_USER:', process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 3)}...` : '(not set)');
-  console.log('  SMTP_PASS:', process.env.SMTP_PASS ? '****** (set)' : '(not set)');
-  console.log('  SMTP_FROM:', process.env.SMTP_FROM || 'Kyward <noreply@kyward.io> (default)');
-  console.log('  SMTP_SECURE:', process.env.SMTP_SECURE || 'false (default)');
+  console.log('\n📧 Email Configuration:');
+  console.log('  Provider:', EMAIL_PROVIDER.toUpperCase());
+
+  if (EMAIL_PROVIDER === 'resend') {
+    console.log('  RESEND_API_KEY:', process.env.RESEND_API_KEY ? `${process.env.RESEND_API_KEY.substring(0, 8)}... (set)` : '(not set)');
+    console.log('  EMAIL_FROM:', process.env.EMAIL_FROM || process.env.SMTP_FROM || 'Kyward <noreply@kyward.io> (default)');
+  } else if (EMAIL_PROVIDER === 'smtp') {
+    console.log('  SMTP_HOST:', process.env.SMTP_HOST || '(not set)');
+    console.log('  SMTP_PORT:', process.env.SMTP_PORT || '587 (default)');
+    console.log('  SMTP_USER:', process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 3)}...` : '(not set)');
+    console.log('  SMTP_PASS:', process.env.SMTP_PASS ? '****** (set)' : '(not set)');
+    console.log('  SMTP_FROM:', process.env.SMTP_FROM || 'Kyward <noreply@kyward.io> (default)');
+    console.log('  SMTP_SECURE:', process.env.SMTP_SECURE || 'false (default)');
+  } else {
+    console.log('  ⚠️ No email provider configured - emails will be logged to console');
+  }
 }
 
 // Call on module load
 logSmtpConfig();
 
+// ============================================
+// RESEND API (HTTP-based, more reliable on cloud)
+// ============================================
+async function sendViaResend(to, subject, html) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM || process.env.SMTP_FROM || 'Kyward <noreply@kyward.io>';
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from,
+        to,
+        subject,
+        html
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('❌ Resend API error:', data);
+      return { success: false, error: data.message || 'Resend API error' };
+    }
+
+    console.log('✅ Email sent via Resend:', data.id);
+    return { success: true, messageId: data.id };
+
+  } catch (error) {
+    console.error('❌ Resend error:', error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+// ============================================
+// SMTP (traditional)
+// ============================================
 function getTransporter() {
   if (transporter) return transporter;
 
   // Check if SMTP is configured
   if (!process.env.SMTP_HOST) {
-    console.warn('⚠️ SMTP not configured - emails will be logged to console');
     return null;
   }
 
@@ -48,21 +101,41 @@ function getTransporter() {
   return transporter;
 }
 
-// Verify SMTP connection
+// Verify connection (SMTP or Resend)
 async function verifySmtpConnection() {
-  const transport = getTransporter();
-  if (!transport) {
-    return { success: false, error: 'SMTP not configured' };
+  if (EMAIL_PROVIDER === 'resend') {
+    // Test Resend by checking API key validity
+    try {
+      const response = await fetch('https://api.resend.com/domains', {
+        headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}` }
+      });
+      if (response.ok) {
+        console.log('✅ Resend API connection verified');
+        return { success: true, message: 'Resend API verified' };
+      }
+      return { success: false, error: 'Invalid Resend API key' };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
   }
 
-  try {
-    await transport.verify();
-    console.log('✅ SMTP connection verified successfully');
-    return { success: true, message: 'SMTP connection verified' };
-  } catch (error) {
-    console.error('❌ SMTP verification failed:', error.message);
-    return { success: false, error: error.message };
+  if (EMAIL_PROVIDER === 'smtp') {
+    const transport = getTransporter();
+    if (!transport) {
+      return { success: false, error: 'SMTP not configured' };
+    }
+
+    try {
+      await transport.verify();
+      console.log('✅ SMTP connection verified successfully');
+      return { success: true, message: 'SMTP connection verified' };
+    } catch (error) {
+      console.error('❌ SMTP verification failed:', error.message);
+      return { success: false, error: error.message };
+    }
   }
+
+  return { success: false, error: 'No email provider configured' };
 }
 
 /**
@@ -199,37 +272,43 @@ async function sendSecurityPlan(toEmail, pdfPassword, htmlContent) {
  */
 async function sendEmail(to, subject, html) {
   console.log('📧 Attempting to send email to:', to);
-  console.log('📧 SMTP_HOST configured:', !!process.env.SMTP_HOST);
+  console.log('📧 Email provider:', EMAIL_PROVIDER);
 
-  const transport = getTransporter();
-
-  // If no SMTP configured, log to console
-  if (!transport) {
-    console.log('\n========== EMAIL (not sent - SMTP not configured) ==========');
-    console.log('To:', to);
-    console.log('Subject:', subject);
-    console.log('Configure SMTP_HOST, SMTP_USER, SMTP_PASS in .env to enable emails');
-    console.log('=============================================================\n');
-    return { success: true, demo: true, message: 'SMTP not configured' };
+  // Use Resend if configured (preferred for cloud platforms)
+  if (EMAIL_PROVIDER === 'resend') {
+    return await sendViaResend(to, subject, html);
   }
 
-  try {
-    console.log('📧 Sending via SMTP:', process.env.SMTP_HOST);
-    const result = await transport.sendMail({
-      from: process.env.SMTP_FROM || 'Kyward <noreply@kyward.io>',
-      to,
-      subject,
-      html
-    });
+  // Use SMTP if configured
+  if (EMAIL_PROVIDER === 'smtp') {
+    const transport = getTransporter();
 
-    console.log('✅ Email sent successfully:', result.messageId);
-    return { success: true, messageId: result.messageId };
+    try {
+      console.log('📧 Sending via SMTP:', process.env.SMTP_HOST);
+      const result = await transport.sendMail({
+        from: process.env.SMTP_FROM || 'Kyward <noreply@kyward.io>',
+        to,
+        subject,
+        html
+      });
 
-  } catch (error) {
-    console.error('❌ Email error:', error.message);
-    console.error('Full error:', error);
-    return { success: false, error: error.message };
+      console.log('✅ Email sent successfully:', result.messageId);
+      return { success: true, messageId: result.messageId };
+
+    } catch (error) {
+      console.error('❌ SMTP error:', error.message);
+      console.error('Full error:', error);
+      return { success: false, error: error.message };
+    }
   }
+
+  // No provider configured - log to console
+  console.log('\n========== EMAIL (not sent - no provider configured) ==========');
+  console.log('To:', to);
+  console.log('Subject:', subject);
+  console.log('Configure RESEND_API_KEY or SMTP_HOST in environment to enable emails');
+  console.log('================================================================\n');
+  return { success: true, demo: true, message: 'No email provider configured' };
 }
 
 module.exports = {
