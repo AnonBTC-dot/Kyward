@@ -160,7 +160,7 @@ const Footer = () => {
             <div style={footerStyles.socialIcons}>
               {/* Instagram - PUT YOUR LINK HERE */}
               <a
-                href="#" // TODO: Add your Instagram link here
+                href="https://www.instagram.com/kywardb?igsh=MTF1Z2t5OHV6ZGV1aQ=="
                 target="_blank"
                 rel="noopener noreferrer"
                 style={footerStyles.socialLink}
@@ -176,7 +176,7 @@ const Footer = () => {
 
               {/* X (Twitter) - PUT YOUR LINK HERE */}
               <a
-                href="#" // TODO: Add your X (Twitter) link here
+                href="https://x.com/kywardb"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={footerStyles.socialLink}

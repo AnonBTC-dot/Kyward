@@ -103,7 +103,7 @@ const KywardApp = () => {
         return (
           <Report
             score={lastResults?.score}
-            answers={lastResults?.responses}
+            answers={lastResults?.answers || lastResults?.responses}
             user={user}
             setUser={setUser}
             onBackToDashboard={() => setCurrentPage('dashboard')}

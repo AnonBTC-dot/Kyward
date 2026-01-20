@@ -339,10 +339,10 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
                 textAlign: 'center'
               }}>
                 <p style={{ color: '#22c55e', fontSize: '15px', margin: '0 0 8px 0', fontWeight: '600' }}>
-                  Start Free – No credit card required
+                  {t.auth.statement.part1}
                 </p>
                 <p style={{ color: '#9ca3af', fontSize: '13px', margin: 0 }}>
-                  All users start on Free tier. Upgrade anytime to Essential ($7.99 one-time), Sentinel ($14.99/month) or Consultation.
+                  {t.auth.statement.part2}
                 </p>
               </div>
             )}
@@ -438,7 +438,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
                 </p>
               )}
               <p style={{ marginTop: '12px', color: '#6b7280', fontSize: '13px' }}>
-                Free tier included. Upgrade later to unlock full reports, unlimited assessments & more.
+                  {t.auth.footer}
               </p>
             </div>
           </>
