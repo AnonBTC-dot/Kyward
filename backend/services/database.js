@@ -213,35 +213,47 @@ const validateSession = async (token) => {
 
   if (db) {
     try {
-      const { data: session, error } = await db
+      // First, validate the session token
+      const { data: session, error: sessionError } = await db
         .from('session_tokens')
-        .select('*, users(*)')
+        .select('user_id, expires_at')
         .eq('token', token)
         .single();
 
-      if (error || !session) return null;
+      if (sessionError || !session) return null;
 
       if (new Date(session.expires_at) < new Date()) {
-        await db.from('session_tokens').delete().eq('id', session.id);
+        await db.from('session_tokens').delete().eq('token', token);
         return null;
       }
 
-      const userData = session.users;
+      // Then, get FRESH user data directly from users table (not from JOIN cache)
+      const { data: userData, error: userError } = await db
+        .from('users')
+        .select('*')
+        .eq('id', session.user_id)
+        .single();
+
+      if (userError || !userData) return null;
 
       // Get actual assessment count from assessments table
-      if (userData && userData.id) {
-        const { count: actualCount, error: countError } = await db
-          .from('assessments')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userData.id);
+      const { count: actualCount, error: countError } = await db
+        .from('assessments')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userData.id);
 
-        if (!countError && actualCount !== null) {
-          userData.assessments_taken = actualCount;
-        }
+      if (!countError && actualCount !== null) {
+        userData.assessments_taken = actualCount;
       }
+
+      console.log('validateSession - Fresh user data:', {
+        email: userData.email,
+        subscription_level: userData.subscription_level
+      });
 
       return sanitizeUser(userData);
     } catch (error) {
+      console.error('validateSession error:', error);
       return null;
     }
   } else {

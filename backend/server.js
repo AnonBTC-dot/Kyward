@@ -235,14 +235,16 @@ app.post('/api/auth/reset-password', async (req, res) => {
 // Get current user
 app.get('/api/user', authMiddleware, async (req, res) => {
   try {
+    console.log('/api/user - Fetching user:', req.user.email);
     const user = await db.getUserByEmail(req.user.email);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    console.log('/api/user - Returning user with subscription:', user.subscriptionLevel);
     res.json({
       success: true,
-      user: db.sanitizeUser(user)  // ← Usa esta función corregida
+      user
     });
   } catch (error) {
     console.error('Error en /api/user:', error);

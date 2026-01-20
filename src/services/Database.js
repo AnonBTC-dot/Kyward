@@ -108,6 +108,7 @@ class KywardDatabase {
     if (!token) return null;
 
     const result = await this.apiRequest('/auth/validate');
+    console.log('validateSession API response:', result?.user?.subscriptionLevel);
     if (result.success && result.user) {
       const normalizedUser = this.normalizeUser(result.user);
       this.setCachedUser(normalizedUser);
@@ -210,6 +211,7 @@ class KywardDatabase {
 
     // Fetch real from API
     const result = await this.apiRequest('/user');
+    console.log('getUser API response:', result?.user?.subscriptionLevel);
     if (result.success && result.user) {
       const normalizedUser = this.normalizeUser(result.user);
 
