@@ -19,22 +19,6 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
   const [copiedPassword, setCopiedPassword] = useState(false);
   const [canTakeNew, setCanTakeNew] = useState(false);
 
-  // Guard: Wait for translations to load
-  if (!t?.report) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#0a0a0a',
-        color: '#F7931A'
-      }}>
-        Loading...
-      </div>
-    );
-  }
-
   // Plan detection - más preciso para los 4 tiers
   const subscriptionLevel = user?.subscriptionLevel || user?.subscription || 'free';
 
@@ -89,6 +73,22 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
       setComparison(comparisonData);
     }
   }, [answers, score]);
+
+  // Guard: Wait for translations to load (MUST be after all hooks)
+  if (!t?.report?.score || !t?.report?.distribution || !t?.report?.comparison) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#0a0a0a',
+        color: '#F7931A'
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   const getScoreColor = (s) => {
     if (s >= 80) return '#22c55e';
@@ -361,7 +361,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
               padding: '24px'
             }}>
               <div style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '16px', textAlign: 'center' }}>
-                {t.report.distribution.title}
+                {t.report?.distribution?.title || 'SCORE DISTRIBUTION'}
               </div>
 
               {/* Bar Chart */}
@@ -372,7 +372,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                     width: '100%',
                     background: score < 50 ? '#ef4444' : 'rgba(239,68,68,0.3)',
                     borderRadius: '8px 8px 0 0',
-                    height: `${Math.max(20, comparison.distribution.needsWork)}%`,
+                    height: `${Math.max(20, comparison?.distribution?.needsWork || 33)}%`,
                     transition: 'height 1s ease',
                     position: 'relative'
                   }}>
@@ -390,7 +390,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                         fontWeight: '700',
                         whiteSpace: 'nowrap'
                       }}>
-                        {t.report.distribution.youAreHere}
+                        {t.report?.distribution?.youAreHere || "You're here"}
                       </div>
                     )}
                   </div>
@@ -402,7 +402,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                     width: '100%',
                     background: score >= 50 && score < 80 ? '#F7931A' : 'rgba(247,147,26,0.3)',
                     borderRadius: '8px 8px 0 0',
-                    height: `${Math.max(20, comparison.distribution.moderate)}%`,
+                    height: `${Math.max(20, comparison?.distribution?.moderate || 34)}%`,
                     transition: 'height 1s ease',
                     position: 'relative'
                   }}>
@@ -420,7 +420,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                         fontWeight: '700',
                         whiteSpace: 'nowrap'
                       }}>
-                        {t.report.distribution.youAreHere}
+                        {t.report?.distribution?.youAreHere || "You're here"}
                       </div>
                     )}
                   </div>
@@ -432,7 +432,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                     width: '100%',
                     background: score >= 80 ? '#22c55e' : 'rgba(34,197,94,0.3)',
                     borderRadius: '8px 8px 0 0',
-                    height: `${Math.max(20, comparison.distribution.excellent)}%`,
+                    height: `${Math.max(20, comparison?.distribution?.excellent || 33)}%`,
                     transition: 'height 1s ease',
                     position: 'relative'
                   }}>
@@ -450,7 +450,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                         fontWeight: '700',
                         whiteSpace: 'nowrap'
                       }}>
-                        {t.report.distribution.youAreHere}
+                        {t.report?.distribution?.youAreHere || "You're here"}
                       </div>
                     )}
                   </div>
@@ -460,24 +460,24 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
               {/* Labels */}
               <div style={{ display: 'flex', gap: '16px' }}>
                 <div style={{ flex: 1, textAlign: 'center' }}>
-                  <div style={{ color: '#ef4444', fontSize: '12px', fontWeight: '600' }}>{t.report.distribution.needsWork}</div>
+                  <div style={{ color: '#ef4444', fontSize: '12px', fontWeight: '600' }}>{t.report?.distribution?.needsWork || 'Needs Work'}</div>
                   <div style={{ color: '#6b7280', fontSize: '11px' }}>0-49 pts</div>
                   <div style={{ color: '#9ca3af', fontSize: '13px', fontWeight: '600', marginTop: '4px' }}>
-                    {comparison.distribution.needsWork}%
+                    {comparison?.distribution?.needsWork || 0}%
                   </div>
                 </div>
                 <div style={{ flex: 1, textAlign: 'center' }}>
-                  <div style={{ color: '#F7931A', fontSize: '12px', fontWeight: '600' }}>{t.report.distribution.average}</div>
+                  <div style={{ color: '#F7931A', fontSize: '12px', fontWeight: '600' }}>{t.report?.distribution?.average || 'Average'}</div>
                   <div style={{ color: '#6b7280', fontSize: '11px' }}>50-79 pts</div>
                   <div style={{ color: '#9ca3af', fontSize: '13px', fontWeight: '600', marginTop: '4px' }}>
-                    {comparison.distribution.moderate}%
+                    {comparison?.distribution?.moderate || 0}%
                   </div>
                 </div>
                 <div style={{ flex: 1, textAlign: 'center' }}>
-                  <div style={{ color: '#22c55e', fontSize: '12px', fontWeight: '600' }}>{t.report.distribution.excellent}</div>
+                  <div style={{ color: '#22c55e', fontSize: '12px', fontWeight: '600' }}>{t.report?.distribution?.excellent || 'Excellent'}</div>
                   <div style={{ color: '#6b7280', fontSize: '11px' }}>80-100 pts</div>
                   <div style={{ color: '#9ca3af', fontSize: '13px', fontWeight: '600', marginTop: '4px' }}>
-                    {comparison.distribution.excellent}%
+                    {comparison?.distribution?.excellent || 0}%
                   </div>
                 </div>
               </div>
