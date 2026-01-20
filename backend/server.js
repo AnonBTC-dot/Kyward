@@ -642,6 +642,30 @@ app.post('/api/payments/:paymentId/simulate', async (req, res) => {
 // EMAIL ENDPOINTS
 // ============================================
 
+// Check email configuration status
+app.get('/api/email/status', async (req, res) => {
+  try {
+    const status = {
+      configured: !!process.env.SMTP_HOST,
+      host: process.env.SMTP_HOST ? `${process.env.SMTP_HOST.substring(0, 10)}...` : null,
+      port: process.env.SMTP_PORT || '587',
+      user: process.env.SMTP_USER ? `${process.env.SMTP_USER.substring(0, 5)}...` : null,
+      from: process.env.SMTP_FROM || 'default'
+    };
+
+    if (status.configured) {
+      const verifyResult = await emailService.verifySmtpConnection();
+      status.verified = verifyResult.success;
+      status.verifyError = verifyResult.error || null;
+    }
+
+    res.json(status);
+  } catch (error) {
+    console.error('Email status error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Send security plan email
 app.post('/api/email/send-plan', authMiddleware, async (req, res) => {
   try {

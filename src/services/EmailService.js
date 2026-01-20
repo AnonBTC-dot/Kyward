@@ -2,16 +2,20 @@
 // Handles sending PDF reports via email using backend API
 
 import { generatePdfContent } from './PdfGenerator';
+import { kywardDB } from './Database';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 // Send email via backend API
 const sendViaBackend = async (toEmail, pdfPassword, htmlContent) => {
   try {
-    const response = await fetch(`${API_URL}/email/send-plan`, {
+    const token = kywardDB.getToken();
+
+    const response = await fetch(`${API_URL}/api/email/send-plan`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` })
       },
       body: JSON.stringify({
         email: toEmail,

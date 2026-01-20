@@ -3,7 +3,7 @@ import { styles } from '../styles/Theme';
 import { kywardDB } from '../services/Database';
 import { generateRecommendations, getFreeTips, getLockedTipsPreview, generateInheritancePlan } from '../services/Recommendations';
 import { openPdfPreview, downloadHtmlReport } from '../services/PdfGenerator';
-import { previewEmail, sendSecurityPlanEmail } from '../services/EmailService';
+import { sendSecurityPlanEmail } from '../services/EmailService';
 import TelegramBlur from './TelegramBlur';
 import Footer from './Footer';
 import { useLanguage, LanguageToggle } from '../i18n';
@@ -18,6 +18,9 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
   const [showPassword, setShowPassword] = useState(false);
   const [copiedPassword, setCopiedPassword] = useState(false);
   const [canTakeNew, setCanTakeNew] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState(null);
 
   // Plan detection - más preciso para los 4 tiers
   const subscriptionLevel = user?.subscriptionLevel || user?.subscription || 'free';
@@ -61,6 +64,26 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
     }
   };
 
+  const handleSendEmail = async () => {
+    setSendingEmail(true);
+    setEmailError(null);
+    try {
+      const result = await sendSecurityPlanEmail(user, score, answers);
+      if (result.success) {
+        setEmailSent(true);
+        setTimeout(() => setEmailSent(false), 5000);
+      } else {
+        setEmailError(result.error || 'Failed to send email');
+        setTimeout(() => setEmailError(null), 5000);
+      }
+    } catch (error) {
+      setEmailError(error.message || 'Failed to send email');
+      setTimeout(() => setEmailError(null), 5000);
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   useEffect(() => {
     if (answers && score !== undefined) {
       const recs = generateRecommendations(answers, score);
@@ -68,9 +91,27 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
       setFreeTips(getFreeTips(recs));
       setLockedTips(getLockedTipsPreview(recs));
 
-      // Get comparison with global average
-      const comparisonData = kywardDB.compareToAverage(score);
-      setComparison(comparisonData);
+      // Get comparison with global average (async)
+      const fetchComparison = async () => {
+        try {
+          const comparisonData = await kywardDB.compareToAverage(score);
+          setComparison(comparisonData);
+        } catch (error) {
+          console.error('Failed to fetch comparison:', error);
+          // Fallback data
+          setComparison({
+            userScore: score,
+            averageScore: 50,
+            difference: score - 50,
+            percentile: Math.min(99, Math.max(1, Math.round(score * 0.9))),
+            isAboveAverage: score > 50,
+            isBelowAverage: score < 50,
+            comparison: score > 60 ? 'above' : score > 40 ? 'at' : 'below',
+            distribution: { excellent: 33, moderate: 34, needsWork: 33 }
+          });
+        }
+      };
+      fetchComparison();
     }
   }, [answers, score]);
 
@@ -1238,10 +1279,20 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                 {t.report.premium.emailNote} <strong>{user?.email}</strong> {t.report.premium.withPassword}
               </p>
               <button
-                style={{...styles.reportPdfBtn, marginTop: '16px', backgroundColor: '#3b82f6'}}
-                onClick={() => previewEmail(user, score, answers)}
+                style={{
+                  ...styles.reportPdfBtn,
+                  marginTop: '16px',
+                  backgroundColor: emailSent ? '#22c55e' : emailError ? '#ef4444' : '#3b82f6',
+                  opacity: sendingEmail ? 0.7 : 1,
+                  cursor: sendingEmail ? 'not-allowed' : 'pointer'
+                }}
+                onClick={handleSendEmail}
+                disabled={sendingEmail}
               >
-                {t.report.premium.previewEmail}
+                {sendingEmail ? (t.report.premium.sendingEmail || 'Sending...') :
+                 emailSent ? (t.report.premium.emailSent || 'Email Sent!') :
+                 emailError ? emailError :
+                 (t.report.premium.sendEmail || 'Send Report via Email')}
               </button>
             </div>
           </div>
