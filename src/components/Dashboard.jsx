@@ -25,7 +25,14 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
   const [copiedPassword, setCopiedPassword] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [canTakeNew, setCanTakeNew] = useState(false); // Nuevo estado para gating
+  const [canTakeNew, setCanTakeNew] = useState(false);
+  const [savingPrefs, setSavingPrefs] = useState(false);
+  const [prefsSaved, setPrefsSaved] = useState(false);
+  const [emailPrefs, setEmailPrefs] = useState({
+    dailyTips: user?.emailDailyTips ?? true,
+    securityAlerts: user?.emailHackAlerts ?? true,
+    monthlyReviews: user?.emailWalletReviews ?? false
+  });
 
   // Combined refresh: user data + assessments + permission check in one effect to ensure sync
   useEffect(() => {
@@ -123,6 +130,23 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
       navigator.clipboard.writeText(user.pdfPassword);
       setCopiedPassword(true);
       setTimeout(() => setCopiedPassword(false), 2000);
+    }
+  };
+
+  const handleSavePreferences = async () => {
+    setSavingPrefs(true);
+    setPrefsSaved(false);
+    try {
+      const result = await kywardDB.updateEmailPreferences(emailPrefs);
+      if (result.success) {
+        setUser(result.user);
+        setPrefsSaved(true);
+        setTimeout(() => setPrefsSaved(false), 3000);
+      }
+    } catch (error) {
+      console.error('Failed to save preferences:', error);
+    } finally {
+      setSavingPrefs(false);
     }
   };
 
@@ -442,31 +466,56 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                 {t.dashboard.emailPreferences || 'Email Preferences'}
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9ca3af' }}>
-                  <input type="checkbox" defaultChecked style={{ accentColor: '#22c55e' }} />
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9ca3af', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={emailPrefs.dailyTips}
+                    onChange={(e) => setEmailPrefs(p => ({ ...p, dailyTips: e.target.checked }))}
+                    style={{ accentColor: '#22c55e', cursor: 'pointer' }}
+                  />
                   {t.dashboard.dailyTips || 'Daily security tips'}
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9ca3af' }}>
-                  <input type="checkbox" defaultChecked style={{ accentColor: '#22c55e' }} />
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9ca3af', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={emailPrefs.securityAlerts}
+                    onChange={(e) => setEmailPrefs(p => ({ ...p, securityAlerts: e.target.checked }))}
+                    style={{ accentColor: '#22c55e', cursor: 'pointer' }}
+                  />
                   {t.dashboard.securityAlerts || 'Security alerts & hack notifications'}
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9ca3af' }}>
-                  <input type="checkbox" style={{ accentColor: '#22c55e' }} />
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9ca3af', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={emailPrefs.monthlyReviews}
+                    onChange={(e) => setEmailPrefs(p => ({ ...p, monthlyReviews: e.target.checked }))}
+                    style={{ accentColor: '#22c55e', cursor: 'pointer' }}
+                  />
                   {t.dashboard.monthlyReviews || 'Monthly wallet review reminders'}
                 </label>
               </div>
-              <button style={{
-                marginTop: '16px',
-                padding: '10px 20px',
-                background: '#22c55e',
-                color: '#000',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}>
-                {t.common.saveChanges || 'Save Preferences'}
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
+                <button
+                  onClick={handleSavePreferences}
+                  disabled={savingPrefs}
+                  style={{
+                    padding: '10px 20px',
+                    background: savingPrefs ? '#6b7280' : '#22c55e',
+                    color: '#000',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontWeight: '600',
+                    cursor: savingPrefs ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {savingPrefs ? (t.common.saving || 'Saving...') : (t.common.saveChanges || 'Save Preferences')}
+                </button>
+                {prefsSaved && (
+                  <span style={{ color: '#22c55e', fontSize: '14px', fontWeight: '600' }}>
+                    ✓ {t.common.saved || 'Saved!'}
+                  </span>
+                )}
+              </div>
             </div>
           )}
 
@@ -554,7 +603,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            openPdfPreview(assessment.score, assessment.responses, user);
+                            openPdfPreview(user, assessment.score, assessment.responses);
                           }}
                           style={{
                             flex: 1,

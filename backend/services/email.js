@@ -161,6 +161,9 @@ async function sendSecurityPlan(toEmail, pdfPassword, htmlContent) {
  * Core email sending function
  */
 async function sendEmail(to, subject, html) {
+  console.log('📧 Attempting to send email to:', to);
+  console.log('📧 SMTP_HOST configured:', !!process.env.SMTP_HOST);
+
   const transport = getTransporter();
 
   // If no SMTP configured, log to console
@@ -168,11 +171,13 @@ async function sendEmail(to, subject, html) {
     console.log('\n========== EMAIL (not sent - SMTP not configured) ==========');
     console.log('To:', to);
     console.log('Subject:', subject);
+    console.log('Configure SMTP_HOST, SMTP_USER, SMTP_PASS in .env to enable emails');
     console.log('=============================================================\n');
-    return { success: true, demo: true };
+    return { success: true, demo: true, message: 'SMTP not configured' };
   }
 
   try {
+    console.log('📧 Sending via SMTP:', process.env.SMTP_HOST);
     const result = await transport.sendMail({
       from: process.env.SMTP_FROM || 'Kyward <noreply@kyward.io>',
       to,
@@ -180,11 +185,12 @@ async function sendEmail(to, subject, html) {
       html
     });
 
-    console.log('Email sent:', result.messageId);
+    console.log('✅ Email sent successfully:', result.messageId);
     return { success: true, messageId: result.messageId };
 
   } catch (error) {
-    console.error('Email error:', error);
+    console.error('❌ Email error:', error.message);
+    console.error('Full error:', error);
     return { success: false, error: error.message };
   }
 }

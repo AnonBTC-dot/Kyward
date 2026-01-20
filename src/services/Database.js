@@ -237,6 +237,22 @@ class KywardDatabase {
     return user?.subscriptionLevel || user?.subscription || 'free';
   }
 
+  // Update email preferences
+  async updateEmailPreferences(preferences) {
+    const result = await this.apiRequest('/user/preferences', {
+      method: 'POST',
+      body: JSON.stringify(preferences)
+    });
+
+    if (result.success && result.user) {
+      const normalizedUser = this.normalizeUser(result.user);
+      this.setCachedUser(normalizedUser);
+      return { success: true, user: normalizedUser };
+    }
+
+    return result;
+  }
+
   // Check if user has premium access (Essential, Sentinel, Consultation)
   async hasPremiumAccess() {
     const level = await this.getSubscriptionLevel();

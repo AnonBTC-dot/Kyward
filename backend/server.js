@@ -262,6 +262,28 @@ app.get('/api/user/usage', authMiddleware, async (req, res) => {
   }
 });
 
+// Update email preferences
+app.post('/api/user/preferences', authMiddleware, async (req, res) => {
+  try {
+    const { dailyTips, securityAlerts, monthlyReviews } = req.body;
+
+    const result = await db.updateEmailPreferences(req.user.email, {
+      dailyTips,
+      securityAlerts,
+      monthlyReviews
+    });
+
+    if (result.success) {
+      res.json({ success: true, user: result.user });
+    } else {
+      res.status(400).json({ error: result.message });
+    }
+  } catch (error) {
+    console.error('Update preferences error:', error);
+    res.status(500).json({ error: 'Failed to update preferences' });
+  }
+});
+
 // Check premium access
 app.get('/api/user/premium', authMiddleware, async (req, res) => {
   try {

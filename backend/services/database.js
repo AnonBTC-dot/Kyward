@@ -497,6 +497,43 @@ const upgradeSubscription = async (email, newLevel) => {
   }
 };
 
+// Update email preferences
+const updateEmailPreferences = async (email, preferences) => {
+  const db = initSupabase();
+
+  if (db) {
+    try {
+      const { data, error } = await db
+        .from('users')
+        .update({
+          email_daily_tips: preferences.dailyTips ?? false,
+          email_hack_alerts: preferences.securityAlerts ?? false,
+          email_wallet_reviews: preferences.monthlyReviews ?? false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('email', email)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, user: sanitizeUser(data) };
+    } catch (error) {
+      console.error('Update preferences error:', error);
+      return { success: false, message: 'Failed to update preferences' };
+    }
+  } else {
+    // Memory fallback
+    const user = memoryDB.users[email];
+    if (!user) return { success: false, message: 'User not found' };
+
+    user.email_daily_tips = preferences.dailyTips ?? false;
+    user.email_hack_alerts = preferences.securityAlerts ?? false;
+    user.email_wallet_reviews = preferences.monthlyReviews ?? false;
+
+    return { success: true, user: sanitizeUser(user) };
+  }
+};
+
 // Check premium access (can download PDF, see all tips)
 // Returns true for: essential (with purchase), sentinel (active), consultation
 // Has premium access
@@ -855,6 +892,7 @@ module.exports = {
   userExists,
   resetPassword,
   upgradeSubscription,
+  updateEmailPreferences,
   hasPremiumAccess,
   canTakeAssessment,
   saveAssessment,
