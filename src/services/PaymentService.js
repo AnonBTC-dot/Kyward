@@ -303,7 +303,7 @@ export const getPaymentDetails = async (paymentId) => {
       demo: true,
       payment: {
         id: paymentId,
-        plan: 'complete',
+        plan: 'essential',
         status: 'pending'
       }
     };

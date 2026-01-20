@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LandingPage from './components/LandingPage';
 import AuthForm from './components/AuthForm';
 import Dashboard from './components/Dashboard';
@@ -12,7 +12,35 @@ const KywardApp = () => {
   const [currentPage, setCurrentPage] = useState('landing');
   const [user, setUser] = useState(null);
   const [lastResults, setLastResults] = useState(null);
-  const [paymentModal, setPaymentModal] = useState(null); // { plan: 'complete' | 'consultation' }
+  const [paymentModal, setPaymentModal] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check for existing session on app load
+  useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        // Force refresh from API to get latest subscription data
+        const existingUser = await kywardDB.validateSession();
+        if (existingUser) {
+          // Get fresh user data with assessments
+          const freshUser = await kywardDB.getUser(true);
+          if (freshUser) {
+            const assessments = await kywardDB.getUserAssessments();
+            freshUser.assessments = assessments;
+            setUser(freshUser);
+            setCurrentPage('dashboard');
+            console.log('Session restored:', freshUser.subscriptionLevel);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to restore session:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    restoreSession();
+  }, []);
 
   const handleAssessmentComplete = (results) => {
     setLastResults(results);
@@ -39,7 +67,8 @@ const KywardApp = () => {
     alert(`Upgrade successful!\n\nYour PDF password is: ${pdfPassword}\n\nYou can now download your complete security plan.`);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await kywardDB.logout();
     setUser(null);
     setLastResults(null);
     setCurrentPage('landing');
@@ -116,6 +145,23 @@ const KywardApp = () => {
         return <LandingPage onLogin={() => setCurrentPage('login')} onSignup={() => setCurrentPage('signup')} />;
     }
   };
+
+  // Show loading while checking session
+  if (isLoading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#0a0a0a',
+        color: '#F7931A',
+        fontSize: '18px'
+      }}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <LanguageProvider>

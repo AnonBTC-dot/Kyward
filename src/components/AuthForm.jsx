@@ -140,9 +140,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
 
       if (result.success) {
         setSuccess(
-          t.auth.signupSuccess || 
-          'Account created successfully! Welcome to the Free tier. You can upgrade to Essential, Sentinel or Consultation anytime from your Dashboard.'
-        );
+          t.auth.signupSuccess);
         // Auto-login después de 2.5 segundos
         setTimeout(() => {
           onAuthSuccess(result.user, result.token);

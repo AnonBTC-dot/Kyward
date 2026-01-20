@@ -112,8 +112,9 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
   const planColor = isSentinel || isConsultation ? '#22c55e' : isEssential ? '#F7931A' : '#6b7280';
   const planType = isEssential ? '(One-time)' : isSentinel ? '(Monthly)' : '(Free)';
 
+  // Assessments are sorted newest first from API, so [0] is the most recent
   const lastAssessment = user.assessments?.length > 0
-    ? user.assessments[user.assessments.length - 1]
+    ? user.assessments[0]
     : null;
   const lastScore = lastAssessment?.score ?? null;
 
@@ -136,9 +137,10 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
   };
 
   const getScoreTrend = () => {
+    // Assessments sorted newest first: [0] = current, [1] = previous
     if (!user.assessments || user.assessments.length < 2) return null;
-    const current = user.assessments[user.assessments.length - 1].score;
-    const previous = user.assessments[user.assessments.length - 2].score;
+    const current = user.assessments[0].score;
+    const previous = user.assessments[1].score;
     return current - previous;
   };
 
