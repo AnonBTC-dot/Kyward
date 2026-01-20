@@ -677,7 +677,7 @@ app.get('/api/email/status', async (req, res) => {
 });
 
 // Send security plan email
-app.post('/email/send-plan', authMiddleware, async (req, res) => {
+app.post('/api/email/send-plan', authMiddleware, async (req, res) => {
   try {
     const { htmlContent } = req.body;
 
