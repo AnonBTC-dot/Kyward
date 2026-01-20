@@ -752,7 +752,7 @@ export const translations = {
     // Landing Page
     landing: {
       // Hero Section
-      heroBadge: '₿ITCOIN SEGURIDAD SIMPLIFICADA',
+      heroBadge: 'SEGURIDAD ₿ITCOIN SIMPLIFICADA',
       heroLine1: 'Deja de Adivinar.',
       heroLine2: 'Asegura Tus Sats',
       heroLine3: 'De la Forma Correcta.',

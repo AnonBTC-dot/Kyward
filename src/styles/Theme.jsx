@@ -91,7 +91,7 @@ export const styles = {
   benefitIcon: { fontSize: '32px' },
   benefitItemTitle: { fontSize: '18px', fontWeight: '700', color: '#fff', marginBottom: '6px' },
   benefitItemText: { fontSize: '14px', color: '#9ca3af' },
-  pricingSection: { padding: '100px 0', backgroundColor: '#000', position: 'relative', overflow: 'hidden' },
+  pricingSection: { padding: '100px 0', backgroundColor: '#000', position: 'relative', overflow: 'visible' },
   pricingSectionGlow: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '900px', height: '900px', background: 'radial-gradient(circle, rgba(247,147,26,0.06) 0%, transparent 70%)', pointerEvents: 'none' },
   pricingGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', maxWidth: '1100px', margin: '0 auto', position: 'relative' },
   pricingCard: { background: 'linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%)', border: '1px solid #2a2a2a', borderRadius: '24px', padding: '0', overflow: 'hidden', position: 'relative', transition: 'all 0.4s ease' },

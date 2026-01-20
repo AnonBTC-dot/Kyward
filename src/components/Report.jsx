@@ -19,6 +19,22 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
   const [copiedPassword, setCopiedPassword] = useState(false);
   const [canTakeNew, setCanTakeNew] = useState(false);
 
+  // Guard: Wait for translations to load
+  if (!t?.report) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#0a0a0a',
+        color: '#F7931A'
+      }}>
+        Loading...
+      </div>
+    );
+  }
+
   // Plan detection - más preciso para los 4 tiers
   const subscriptionLevel = user?.subscriptionLevel || user?.subscription || 'free';
 
@@ -81,9 +97,9 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
   };
 
   const getScoreLabel = (s) => {
-    if (s >= 80) return t.report.score.excellent;
-    if (s >= 50) return t.report.score.good;
-    return t.report.score.needsWork;
+    if (s >= 80) return t.report?.score?.excellent || 'Excellent';
+    if (s >= 50) return t.report?.score?.good || 'Good';
+    return t.report?.score?.needsWork || 'Needs Work';
   };
 
   const getPriorityColor = (priority) => {
@@ -98,10 +114,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
 
   const getPriorityLabel = (priority) => {
     switch (priority) {
-      case 'critical': return t.report.recommendations.priority.critical;
-      case 'high': return t.report.recommendations.priority.high;
-      case 'medium': return t.report.recommendations.priority.medium;
-      case 'low': return t.report.recommendations.priority.low;
+      case 'critical': return t.report?.recommendations?.priority?.critical || 'CRITICAL';
+      case 'high': return t.report?.recommendations?.priority?.high || 'HIGH';
+      case 'medium': return t.report?.recommendations?.priority?.medium || 'MEDIUM';
+      case 'low': return t.report?.recommendations?.priority?.low || 'LOW';
       default: return 'INFO';
     }
   };
@@ -206,9 +222,9 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
             )}
           </div>
           <p style={styles.reportScoreDesc}>
-            {score >= 80 ? t.report.score.excellentDesc :
-             score >= 50 ? t.report.score.goodDesc :
-             t.report.score.needsWorkDesc}
+            {score >= 80 ? (t.report?.score?.excellentDesc || 'Excellent security posture. Keep up the great work!') :
+             score >= 50 ? (t.report?.score?.goodDesc || 'Good foundation, but there\'s room for improvement.') :
+             (t.report?.score?.needsWorkDesc || 'Your Bitcoin is at significant risk. Follow the recommendations below.')}
           </p>
         </div>
       </div>
