@@ -218,7 +218,95 @@ async function sendPaymentConfirmation(toEmail, plan, pdfPassword) {
 }
 
 /**
- * Send security plan email with PDF
+ * Send security plan email with PDF attachment
+ */
+async function sendSecurityPlanWithPdf(toEmail, pdfPassword, score, recommendations) {
+  const pdfService = require('./pdf');
+
+  const subject = 'Your Kyward Security & Inheritance Plan';
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 40px; }
+    .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; }
+    .header { background: #F7931A; padding: 30px; text-align: center; }
+    .header h1 { color: #000; margin: 0; }
+    .body { padding: 40px; }
+    .password-box { background: #fff7ed; border: 2px solid #F7931A; border-radius: 12px; padding: 24px; text-align: center; margin: 24px 0; }
+    .password { font-family: monospace; font-size: 28px; color: #F7931A; font-weight: bold; letter-spacing: 3px; }
+    .warning { background: #fee; border: 1px solid #fcc; border-radius: 8px; padding: 16px; margin: 24px 0; }
+    .warning p { color: #c00; margin: 0; font-size: 14px; }
+    .footer { background: #f8f8f8; padding: 24px; text-align: center; color: #888; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>KYWARD</h1>
+    </div>
+    <div class="body">
+      <h2>Your Security Plan is Attached</h2>
+      <p>Your complete Bitcoin Security & Inheritance Plan (Score: ${score}/100) is attached to this email as a password-protected PDF.</p>
+
+      <div class="password-box">
+        <p style="margin: 0 0 12px 0; color: #666;">PDF Password:</p>
+        <div class="password">${pdfPassword}</div>
+        <p style="margin: 12px 0 0 0; color: #888; font-size: 13px;">You need this password to open the PDF</p>
+      </div>
+
+      <div class="warning">
+        <p><strong>Important:</strong> Store this password separately from the PDF. Never share your seed phrase with anyone.</p>
+      </div>
+
+      <p>The attached PDF includes:</p>
+      <ul style="color: #666;">
+        <li>Your security score and analysis</li>
+        <li>Personalized recommendations</li>
+        <li>Sparrow Wallet setup guide</li>
+        <li>Multi-signature configuration</li>
+        <li>Liana inheritance strategy</li>
+        <li>Security checklist</li>
+      </ul>
+    </div>
+    <div class="footer">
+      <p>KYWARD - Bitcoin Security Made Simple</p>
+      <p>This email was sent to ${toEmail}</p>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+
+  try {
+    // Generate password-protected PDF
+    console.log('📄 Generating PDF for', toEmail);
+    const pdfBuffer = await pdfService.generateSecurityPlanPdf(
+      { email: toEmail },
+      score,
+      recommendations,
+      pdfPassword
+    );
+    console.log('📄 PDF generated, size:', pdfBuffer.length, 'bytes');
+
+    // Send with attachment
+    return await sendEmailWithAttachment(toEmail, subject, html, {
+      filename: `kyward-security-plan-${new Date().toISOString().split('T')[0]}.pdf`,
+      content: pdfBuffer,
+      contentType: 'application/pdf'
+    });
+
+  } catch (error) {
+    console.error('❌ Failed to generate/send PDF:', error);
+    // Fallback: send without PDF
+    return await sendEmail(toEmail, subject, html);
+  }
+}
+
+/**
+ * Send security plan email without PDF (legacy)
  */
 async function sendSecurityPlan(toEmail, pdfPassword, htmlContent) {
   const subject = 'Your Kyward Security & Inheritance Plan';
@@ -311,10 +399,96 @@ async function sendEmail(to, subject, html) {
   return { success: true, demo: true, message: 'No email provider configured' };
 }
 
+/**
+ * Send email with PDF attachment
+ */
+async function sendEmailWithAttachment(to, subject, html, attachment) {
+  console.log('📧 Attempting to send email with attachment to:', to);
+  console.log('📧 Email provider:', EMAIL_PROVIDER);
+  console.log('📎 Attachment:', attachment.filename, '(', attachment.content.length, 'bytes)');
+
+  // Use Resend if configured
+  if (EMAIL_PROVIDER === 'resend') {
+    const apiKey = process.env.RESEND_API_KEY;
+    const from = process.env.EMAIL_FROM || process.env.SMTP_FROM || 'Kyward <noreply@kyward.io>';
+
+    try {
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from,
+          to,
+          subject,
+          html,
+          attachments: [{
+            filename: attachment.filename,
+            content: attachment.content.toString('base64')
+          }]
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error('❌ Resend API error:', data);
+        return { success: false, error: data.message || 'Resend API error' };
+      }
+
+      console.log('✅ Email with attachment sent via Resend:', data.id);
+      return { success: true, messageId: data.id };
+
+    } catch (error) {
+      console.error('❌ Resend error:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Use SMTP if configured
+  if (EMAIL_PROVIDER === 'smtp') {
+    const transport = getTransporter();
+
+    try {
+      console.log('📧 Sending with attachment via SMTP:', process.env.SMTP_HOST);
+      const result = await transport.sendMail({
+        from: process.env.SMTP_FROM || 'Kyward <noreply@kyward.io>',
+        to,
+        subject,
+        html,
+        attachments: [{
+          filename: attachment.filename,
+          content: attachment.content,
+          contentType: attachment.contentType || 'application/pdf'
+        }]
+      });
+
+      console.log('✅ Email with attachment sent successfully:', result.messageId);
+      return { success: true, messageId: result.messageId };
+
+    } catch (error) {
+      console.error('❌ SMTP error:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // No provider configured
+  console.log('\n========== EMAIL WITH ATTACHMENT (not sent) ==========');
+  console.log('To:', to);
+  console.log('Subject:', subject);
+  console.log('Attachment:', attachment.filename);
+  console.log('======================================================\n');
+  return { success: true, demo: true, message: 'No email provider configured' };
+}
+
 module.exports = {
   sendPaymentConfirmation,
   sendSecurityPlan,
+  sendSecurityPlanWithPdf,
   sendEmail,
+  sendEmailWithAttachment,
   verifySmtpConnection,
   logSmtpConfig
 };

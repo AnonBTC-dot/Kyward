@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dir /s \"c:\\\\Users\\\\Leonardo\\\\Desktop\\\\Kyward\")"
+      "Bash(dir /s \"c:\\\\Users\\\\Leonardo\\\\Desktop\\\\Kyward\")",
+      "Bash(npm install)"
     ]
   }
 }
