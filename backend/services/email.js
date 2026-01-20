@@ -32,7 +32,12 @@ function getTransporter() {
  * Send payment confirmation email
  */
 async function sendPaymentConfirmation(toEmail, plan, pdfPassword) {
-  const planName = plan === 'complete' ? 'Complete Plan' : 'Consultation';
+  const planNames = {
+    essential: 'Essential Plan',
+    sentinel: 'Sentinel Plan',
+    consultation: 'Consultation'
+  };
+  const planName = planNames[plan] || 'Premium Plan';
 
   const subject = `Kyward - Your ${planName} is Ready!`;
 

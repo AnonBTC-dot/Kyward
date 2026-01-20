@@ -732,9 +732,9 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                 </p>
               )}
 
-              {/* Upgrade Button */}
+              {/* Upgrade Button - Essential plan ($7.99 one-time) */}
               <button
-                onClick={() => onUpgrade && onUpgrade('complete')}
+                onClick={() => onUpgrade && onUpgrade('essential')}
                 style={{
                   width: '100%',
                   marginTop: '20px',
@@ -755,7 +755,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
                 </svg>
-                {t.report.recommendations.unlock} {t.report.recommendations.recommendations} - $7.99/mo
+                {t.report.recommendations.unlock} {t.report.recommendations.recommendations} - $7.99
               </button>
             </div>
 
@@ -986,7 +986,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                     <li style={{ marginBottom: '8px' }}>✓ Email delivery with password</li>
                   </ul>
                   <button
-                    onClick={() => onUpgrade && onUpgrade('complete')}
+                    onClick={() => onUpgrade && onUpgrade('sentinel')}
                     style={{
                       width: '100%',
                       padding: '16px',
@@ -999,7 +999,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                       cursor: 'pointer'
                     }}
                   >
-                    Subscribe Now
+                    Subscribe Now - $14.99/mo
                   </button>
                 </div>
 
