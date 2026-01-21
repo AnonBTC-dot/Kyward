@@ -3,7 +3,6 @@
 
 // All available recommendations organized by category
 export const allRecommendations = {
-  // HARDWARE WALLET
   hardware_wallet: {
     id: 'hardware_wallet',
     category: 'Storage',
@@ -26,7 +25,6 @@ export const allRecommendations = {
     trigger: (answers) => answers.q1 === 'no'
   },
 
-  // SEED BACKUP
   seed_backup_metal: {
     id: 'seed_backup_metal',
     category: 'Backup',
@@ -50,7 +48,6 @@ export const allRecommendations = {
     trigger: (answers) => !answers.q3?.includes('metal')
   },
 
-  // MULTIPLE BACKUP LOCATIONS
   multiple_backups: {
     id: 'multiple_backups',
     category: 'Backup',
@@ -67,13 +64,11 @@ export const allRecommendations = {
 
 **Security Considerations:**
 - Each location should be secure independently
-- Consider using Shamir Secret Sharing (split into parts)
 - Document locations securely for inheritance
 - Avoid obvious locations (filing cabinets, desk drawers)`,
     trigger: (answers) => answers.q2 === 'single' || answers.q2 === 'none'
   },
 
-  // PASSPHRASE (25TH WORD)
   passphrase_setup: {
     id: 'passphrase_setup',
     category: 'Security',
@@ -93,17 +88,16 @@ export const allRecommendations = {
 2. Go to File > New Wallet
 3. Select your hardware wallet
 4. Enable "Use Passphrase" option
-5. Enter your passphrase (memorize it!)
+5. Enter your passphrase (write it down securely!)
 6. Verify the new addresses are different
 
 **Critical Warning:**
 - If you forget the passphrase, funds are LOST FOREVER
-- Store passphrase separately from seed phrase
-- Consider a simpler passphrase you can memorize`,
+- Store written copy separately from seed phrase
+- Use dice method for generation`,
     trigger: (answers) => answers.q4 === 'no'
   },
 
-  // RECOVERY TEST
   recovery_test: {
     id: 'recovery_test',
     category: 'Backup',
@@ -125,7 +119,6 @@ export const allRecommendations = {
     trigger: (answers) => answers.q5 === 'no'
   },
 
-  // MULTISIG SETUP
   multisig_setup: {
     id: 'multisig_setup',
     category: 'Security',
@@ -142,7 +135,6 @@ export const allRecommendations = {
 **Software Options:**
 - **Sparrow Wallet** - Best for self-custody multisig
 - **Liana** - Time-locked recovery built-in
-- **Caravan (Unchained)** - Collaborative custody option
 
 **Setting Up with Sparrow:**
 1. Create 3 separate hardware wallet keystores
@@ -159,7 +151,6 @@ export const allRecommendations = {
     trigger: (answers) => answers.q6 === 'no' || answers.q6 === 'considering'
   },
 
-  // ADDRESS VERIFICATION
   address_verification: {
     id: 'address_verification',
     category: 'Security',
@@ -182,7 +173,6 @@ export const allRecommendations = {
     trigger: (answers) => answers.q7 === 'copy_paste' || answers.q7 === 'dont_verify'
   },
 
-  // COLD STORAGE RATIO
   cold_storage: {
     id: 'cold_storage',
     category: 'Storage',
@@ -206,7 +196,6 @@ export const allRecommendations = {
     trigger: (answers) => answers.q8 === 'some' || answers.q8 === 'none'
   },
 
-  // ADDRESS REUSE
   address_reuse: {
     id: 'address_reuse',
     category: 'Privacy',
@@ -227,7 +216,6 @@ export const allRecommendations = {
     trigger: (answers) => answers.q7 === 'often'
   },
 
-  // SOFTWARE UPDATES
   verify_updates: {
     id: 'verify_updates',
     category: 'Security',
@@ -251,7 +239,6 @@ export const allRecommendations = {
     trigger: (answers) => answers.q10 === 'auto_update' || answers.q10 === 'rarely_update'
   },
 
-  // SEED SHARING
   seed_security: {
     id: 'seed_security',
     category: 'Security',
@@ -275,7 +262,6 @@ export const allRecommendations = {
     trigger: (answers) => answers.q11 === 'multiple' || answers.q11 === 'online'
   },
 
-  // DEDICATED DEVICE
   dedicated_device: {
     id: 'dedicated_device',
     category: 'Security',
@@ -299,7 +285,6 @@ export const allRecommendations = {
     trigger: (answers) => answers.q12 === 'main_device'
   },
 
-  // INHERITANCE PLANNING
   inheritance_plan: {
     id: 'inheritance_plan',
     category: 'Inheritance',
@@ -313,7 +298,7 @@ export const allRecommendations = {
 **Option 1: Letter of Instruction + Multisig**
 - 2-of-3 multisig with one key held by heir
 - Sealed letter with instructions in safe
-- Lawyer holds information about setup
+- Trusted contact holds information about setup
 
 **Option 2: Liana Wallet (Time-locked Recovery)**
 - Primary key: Your hardware wallet
@@ -334,7 +319,6 @@ export const allRecommendations = {
     trigger: (answers) => answers.q13 === 'no_plan' || answers.q13 === 'not_considered'
   },
 
-  // UTXO MANAGEMENT
   utxo_management: {
     id: 'utxo_management',
     category: 'Privacy',
@@ -362,7 +346,6 @@ export const allRecommendations = {
     trigger: (answers) => answers.q14 === 'unfamiliar' || answers.q14 === 'heard'
   },
 
-  // REGULAR REVIEW
   security_review: {
     id: 'security_review',
     category: 'Maintenance',
@@ -406,7 +389,6 @@ export const generateRecommendations = (answers, score) => {
     }
   });
 
-  // Sort by priority
   const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
   recommendations.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
@@ -449,8 +431,8 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
     multisigPlan: {},
     backupStrategy: {},
     inheritanceStrategy: {},
-    actionPlan: [],
-    timeline: []
+    actionPlanSparrow: [],
+    actionPlanLiana: []
   };
 
   // Analyze current setup
@@ -516,7 +498,7 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
     };
   }
 
-  // Liana recommendation for inheritance
+  // Liana recommendation
   plan.inheritanceStrategy = {
     recommended: 'Liana Wallet',
     description: 'Liana is a Bitcoin wallet with built-in inheritance through time-locked recovery paths. If you don\'t move your coins for a specified period, a recovery key can access them.',
@@ -537,7 +519,7 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
     ]
   };
 
-  // Backup Strategy
+  // Backup Strategy (ya actualizada previamente)
   plan.backupStrategy = {
     passphraseGeneration: {
       method: 'Dice-based Passphrase Creation',
@@ -554,14 +536,14 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
     seedPhrases: {
       storage: 'Metal backup plates or paper (as preferred)',
       model: '2-of-3 Recovery Model (Split Knowledge)',
-      modelDescription: 'Distribute your seed phrase and passphrase across 3 locations. No single location contains both the seed phrase and its passphrase. This way, if one location is compromised, the attacker cannot access your funds. To recover, combine information from any two locations. For example: If Location 1 is lost, use Location 2 (seed) + Location 3 (passphrase). If Location 2 is lost, use Location 1 (passphrase) + Location 3 (seed). If Location 3 is lost, use Location 1 + Location 2.',
+      modelDescription: 'Distribute your seed phrase and passphrase across 3 locations. No single location contains both the seed phrase and its passphrase. This way, if one location is compromised, the attacker cannot access your funds. To recover, combine information from any two locations.',
       security: 'Use tamper-evident bags that must be damaged to open. This alerts you if backups have been accessed.',
       locations: [
         'Location 1: Home safe - Store seed phrase for Wallet 1 + passphrase copy for Wallet 2',
         'Location 2: Bank or office - Store seed phrase for Wallet 2 + passphrase copy for Wallet 3',
-        'Location 3: Family home or partners house - Store seed phrase for Wallet 3 + passphrase copy for Wallet 1'
+        'Location 3: Family home or partner\'s house - Store seed phrase for Wallet 3 + passphrase copy for Wallet 1'
       ],
-      passphraseStorage: 'Written on paper + encrypted digital backup'
+      passphraseStorage: 'Written on paper and stored separately from seed phrases in each location'
     },
     documentation: {
       items: [
@@ -571,15 +553,15 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
         'Derivation paths (BIP84 for native SegWit)',
         'Approximate holdings (for estate planning)'
       ],
-      storage: 'Sealed envelope with family or trusted friend + encrypted digital copy (use VeraCrypt or similar)'
+      storage: 'Sealed envelope with family or trusted friend/lawyer'
     }
   };
 
-  // Action Plan with priorities
-  plan.actionPlan = [];
+  // Action Plan dinámico con tus if originales
+  let tempActionPlan = [];
 
   if (!plan.currentSetup.hasHardwareWallet) {
-    plan.actionPlan.push({
+    tempActionPlan.push({
       priority: 1,
       action: 'Purchase hardware wallet from official manufacturer',
       timeframe: 'This week',
@@ -588,34 +570,34 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
   }
 
   if (!plan.currentSetup.hasMetalBackup) {
-    plan.actionPlan.push({
+    tempActionPlan.push({
       priority: 2,
-      action: 'Create metal seed backup',
+      action: 'Create metal seed backup (or paper if preferred)',
       timeframe: 'Within 2 weeks',
       cost: '$30-100'
     });
   }
 
   if (!plan.currentSetup.hasPassphrase) {
-    plan.actionPlan.push({
+    tempActionPlan.push({
       priority: 3,
-      action: 'Add passphrase to wallet',
+      action: 'Generate and add passphrase using dice method',
       timeframe: 'Within 1 month',
       cost: 'Free'
     });
   }
 
   if (!plan.currentSetup.hasMultisig) {
-    plan.actionPlan.push({
+    tempActionPlan.push({
       priority: 4,
-      action: 'Set up 2-of-3 multisig with Sparrow',
+      action: 'Set up 2-of-3 multisig with Sparrow Wallet',
       timeframe: 'Within 2 months',
       cost: '$300-500 (additional hardware)'
     });
   }
 
   if (!plan.currentSetup.hasInheritancePlan) {
-    plan.actionPlan.push({
+    tempActionPlan.push({
       priority: 5,
       action: 'Implement Liana wallet for inheritance',
       timeframe: 'Within 3 months',
@@ -623,11 +605,26 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
     });
   }
 
-  plan.actionPlan.push({
-    priority: plan.actionPlan.length + 1,
-    action: 'Document everything and inform heirs',
+  tempActionPlan.push({
+    priority: tempActionPlan.length + 1,
+    action: 'Document everything and inform heirs (without revealing secrets)',
     timeframe: 'Ongoing',
     cost: 'Free'
+  });
+
+  // Crear los dos caminos siempre
+  plan.actionPlanSparrow = tempActionPlan.map(item => ({ ...item }));
+
+  plan.actionPlanLiana = tempActionPlan.map(item => {
+    let newItem = { ...item };
+    if (newItem.action.includes('multisig')) {
+      newItem.action = 'Set up Liana wallet with time-locked recovery (primary + recovery key)';
+      newItem.cost = 'Free';
+    }
+    if (newItem.action.includes('Liana wallet for inheritance')) {
+      newItem.action = 'Define timelock period and test recovery simulation';
+    }
+    return newItem;
   });
 
   return plan;

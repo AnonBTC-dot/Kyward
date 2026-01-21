@@ -3,8 +3,6 @@
 
 import { generateInheritancePlan, generateRecommendations } from './Recommendations';
 
-// Since we can't use jsPDF directly without npm install, we'll create a
-// printable HTML version that can be saved as PDF from the browser
 export const generatePdfContent = (user, score, answers) => {
   const plan = generateInheritancePlan(answers, score, user.email);
   const recommendations = generateRecommendations(answers, score);
@@ -26,7 +24,6 @@ export const generatePdfContent = (user, score, answers) => {
     }
     .container { max-width: 800px; margin: 0 auto; }
 
-    /* Header */
     .header {
       text-align: center;
       padding-bottom: 30px;
@@ -48,7 +45,6 @@ export const generatePdfContent = (user, score, answers) => {
       border: 1px solid rgba(239,68,68,0.3);
     }
 
-    /* Score Section */
     .score-section {
       background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
       border: 1px solid #2a2a2a;
@@ -72,7 +68,6 @@ export const generatePdfContent = (user, score, answers) => {
     .score-label { font-size: 18px; color: #fff; font-weight: 600; }
     .score-desc { color: #9ca3af; font-size: 14px; margin-top: 8px; }
 
-    /* Section Headers */
     .section { margin-bottom: 40px; page-break-inside: avoid; }
     .section h2 {
       font-size: 22px;
@@ -82,14 +77,13 @@ export const generatePdfContent = (user, score, answers) => {
       margin-bottom: 20px;
     }
     .section h3 { font-size: 18px; color: #fff; margin: 20px 0 12px; }
+    .section h4 { font-size: 16px; color: #F7931A; margin: 16px 0 8px; }
     .section p { color: #d1d5db; margin-bottom: 12px; }
 
-    /* Lists */
     ul, ol { margin-left: 24px; margin-bottom: 16px; }
     li { margin-bottom: 8px; color: #d1d5db; }
     li strong { color: #F7931A; }
 
-    /* Recommendation Cards */
     .rec-card {
       background: linear-gradient(180deg, #1a1a1a 0%, #141414 100%);
       border-left: 4px solid #F7931A;
@@ -117,7 +111,6 @@ export const generatePdfContent = (user, score, answers) => {
     .priority-high { background: rgba(247,147,26,0.15); color: #F7931A; }
     .priority-medium { background: rgba(59,130,246,0.15); color: #3b82f6; }
 
-    /* Wallet Guide Box */
     .wallet-box {
       background: linear-gradient(135deg, rgba(247,147,26,0.1) 0%, rgba(247,147,26,0.05) 100%);
       border: 2px solid rgba(247,147,26,0.4);
@@ -137,13 +130,11 @@ export const generatePdfContent = (user, score, answers) => {
     }
     .wallet-path h4 { color: #F7931A; }
 
-    /* Action Plan Table */
     table { width: 100%; border-collapse: collapse; margin: 16px 0; }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #2a2a2a; color: #d1d5db; }
     th { background: #1a1a1a; font-weight: 600; color: #F7931A; }
     tr:hover { background: rgba(247,147,26,0.05); }
 
-    /* Footer */
     .footer {
       margin-top: 60px;
       padding-top: 20px;
@@ -154,21 +145,14 @@ export const generatePdfContent = (user, score, answers) => {
     }
     .footer strong { color: #F7931A; }
 
-    /* Print Styles */
     @media print {
-      body {
-        padding: 20px;
-        background: #0a0a0a !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
+      body { padding: 20px; background: #0a0a0a !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
       .section { page-break-inside: avoid; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <div class="header">
       <div class="logo">KYWARD</div>
       <h1>Bitcoin Security & Inheritance Plan</h1>
@@ -177,7 +161,6 @@ export const generatePdfContent = (user, score, answers) => {
       <div class="confidential">CONFIDENTIAL - STORE SECURELY</div>
     </div>
 
-    <!-- Score Section -->
     <div class="score-section">
       <div class="score-circle">
         <span class="score-number">${score}</span>
@@ -188,7 +171,6 @@ export const generatePdfContent = (user, score, answers) => {
       <p class="score-desc">${plan.executiveSummary}</p>
     </div>
 
-    <!-- Executive Summary -->
     <div class="section">
       <h2>Executive Summary</h2>
       <p>${plan.executiveSummary}</p>
@@ -197,14 +179,13 @@ export const generatePdfContent = (user, score, answers) => {
       <ul>
         <li><strong>Hardware Wallet:</strong> ${plan.currentSetup.hasHardwareWallet ? 'Yes' : 'No - Critical Risk'}</li>
         <li><strong>Metal Backup:</strong> ${plan.currentSetup.hasMetalBackup ? 'Yes' : 'No - Recommended'}</li>
-        <li><strong>Passphrase (25th word):</strong> ${plan.currentSetup.hasPassphrase ? 'Yes' : 'No'}</li>
+        <li><strong>Passphrase:</strong> ${plan.currentSetup.hasPassphrase ? 'Yes' : 'No'}</li>
         <li><strong>Multi-signature:</strong> ${plan.currentSetup.hasMultisig ? 'Yes' : 'No'}</li>
         <li><strong>Cold Storage:</strong> ~${plan.currentSetup.coldStoragePercent}% of holdings</li>
         <li><strong>Inheritance Plan:</strong> ${plan.currentSetup.hasInheritancePlan ? 'Documented' : 'Not Documented - Critical'}</li>
       </ul>
     </div>
 
-    <!-- Priority Recommendations -->
     <div class="section">
       <h2>Priority Recommendations</h2>
       ${recommendations.map(rec => `
@@ -216,7 +197,6 @@ export const generatePdfContent = (user, score, answers) => {
       `).join('')}
     </div>
 
-    <!-- Wallet Setup Guide -->
     <div class="section">
       <h2>Recommended Wallet Setup</h2>
 
@@ -235,52 +215,32 @@ export const generatePdfContent = (user, score, answers) => {
         </ol>
       </div>
 
-      <!-- Nueva sección: Cold Storage Wallet Options -->
       <div class="wallet-box">
         <h3>Cold Storage Wallet Options (Bitcoin Mainnet)</h3>
         <p>For long-term cold storage (minimal interaction, maximum security), consider these mobile/desktop wallets designed specifically for Bitcoin mainnet use:</p>
-        
         <ul>
           <li><strong>BlueWallet</strong> - Mobile-first, supports watch-only mode, Lightning + on-chain, easy to use for cold storage with air-gapped signing via PSBT export/import.</li>
           <li><strong>Blockstream Jade</strong> - Hardware wallet with strong cold storage capabilities (air-gapped via QR codes), fully open-source, integrates well with Green wallet or Sparrow for offline signing.</li>
           <li><strong>Bull Bitcoin Wallet</strong> - Focused on non-KYC Bitcoin privacy, supports cold storage setups with strong emphasis on self-custody and Canadian-friendly features (good for geographic diversification).</li>
         </ul>
-
-        <p><strong>Best Practice for Cold Storage:</strong> Use these wallets in watch-only mode on your online device, sign transactions offline/air-gapped, and never expose private keys online.</p>
+        <p><strong>Best Practice:</strong> Use in watch-only mode on online device, sign offline/air-gapped, never expose private keys online.</p>
       </div>
 
       ${!plan.currentSetup.hasMultisig ? `
       <div class="wallet-box">
         <h3>Choose Your Security & Inheritance Path</h3>
-        <p>You have two strong options depending on your needs: active management with multisig (Sparrow) or automated trustless inheritance (Liana). Choose based on your priorities.</p>
+        <p>You have two strong options depending on your needs: active management with multisig (Sparrow) or automated trustless inheritance (Liana). Both paths are detailed below so you can compare them.</p>
 
-        <!-- Path 1: Sparrow Multisig -->
         <div class="wallet-path">
           <h4>Path 1: Multisig with Sparrow (Best for Active Management)</h4>
           <p>Use Sparrow to create a 2-of-3 multisig setup for maximum security against loss or theft while maintaining full control.</p>
 
           <h5>Recommended Hardware:</h5>
           <table>
-            <tr>
-              <th>Device</th>
-              <th>Purpose</th>
-              <th>Location Suggestion</th>
-            </tr>
-            <tr>
-              <td>Coldcard Mk4</td>
-              <td>Primary signing device</td>
-              <td>With you (home safe)</td>
-            </tr>
-            <tr>
-              <td>BitBox02</td>
-              <td>Secondary device</td>
-              <td>Bank safety deposit box</td>
-            </tr>
-            <tr>
-              <td>Jade Wallet</td>
-              <td>Inheritance / backup device</td>
-              <td>Trusted heir or lawyer</td>
-            </tr>
+            <tr><th>Device</th><th>Purpose</th><th>Location Suggestion</th></tr>
+            <tr><td>Coldcard Mk4</td><td>Primary signing device</td><td>With you (home safe)</td></tr>
+            <tr><td>BitBox02</td><td>Secondary device</td><td>Bank safety deposit box</td></tr>
+            <tr><td>Jade Wallet</td><td>Inheritance / backup device</td><td>Trusted heir or lawyer</td></tr>
           </table>
 
           <h5>Setup Steps in Sparrow:</h5>
@@ -297,7 +257,6 @@ export const generatePdfContent = (user, score, answers) => {
           <p><strong>Best for:</strong> Users who want full control, frequent transactions, and strong protection against single-point failures.</p>
         </div>
 
-        <!-- Path 2: Liana Time-lock -->
         <div class="wallet-path">
           <h4>Path 2: Time-locked Inheritance with Liana (Best for Hands-off Inheritance)</h4>
           <p>Liana adds automatic inheritance via time-locks — if you don't move funds for a set period, a recovery key (held by your heir) can access them. No third party required.</p>
@@ -305,8 +264,8 @@ export const generatePdfContent = (user, score, answers) => {
 
           <h5>How It Works:</h5>
           <ol>
-            <li>Set up your primary key (your hardware wallet)</li>
-            <li>Set up a recovery key (heir's hardware wallet)</li>
+            <li>Set up primary key (your hardware wallet)</li>
+            <li>Set up recovery key (heir's hardware wallet)</li>
             <li>Define a timelock (e.g., 365 days of inactivity)</li>
             <li>After timelock expires, recovery key can spend</li>
             <li>Your regular transactions automatically reset the timer</li>
@@ -331,7 +290,7 @@ export const generatePdfContent = (user, score, answers) => {
     <div class="section">
       <h2>Inheritance Strategy</h2>
 
-      <p>Choose between the two paths above (Sparrow multisig or Liana time-lock) based on whether you prefer active control or automated inheritance protection.</p>
+      <p>Both paths (Sparrow multisig or Liana time-lock) are valid and secure. Choose based on whether you prefer active control or automated inheritance protection.</p>
 
       <h3>Documentation for Heirs</h3>
       <p>Prepare the following documents and store them securely:</p>
@@ -348,54 +307,75 @@ export const generatePdfContent = (user, score, answers) => {
     <div class="section">
       <h2>Backup Strategy</h2>
 
-      <h3>Passphrase Generation</h3>
-      <p>${plan.backupStrategy.passphraseGeneration.description}</p>
+      <h3>Passphrase Generation (Most Secure Method)</h3>
+      <p>Use physical dice for true randomness — never generate digitally.</p>
       <ol>
-        ${plan.backupStrategy.passphraseGeneration.steps.map(step => `<li>${step}</li>`).join('')}
+        <li>Get 5 standard six-sided dice</li>
+        <li>Roll all dice and note the numbers in order</li>
+        <li>Concatenate into a 5-digit number (e.g., 14263)</li>
+        <li>Find the matching word in the official BIP39 English wordlist (print it offline)</li>
+        <li>Repeat 3–5 times to create your passphrase (e.g., "apple zebra moon river stone")</li>
+        <li>Write it on paper and store securely in separate locations</li>
       </ol>
 
       <h3>Seed Phrase Storage</h3>
       <ul>
-        <li><strong>Format:</strong> ${plan.backupStrategy.seedPhrases.storage}</li>
-        <li><strong>Model:</strong> ${plan.backupStrategy.seedPhrases.model}</li>
-        <li><strong>Description:</strong> ${plan.backupStrategy.seedPhrases.modelDescription}</li>
-        <li><strong>Security:</strong> ${plan.backupStrategy.seedPhrases.security}</li>
-        <li><strong>Locations:</strong></li>
+        <li><strong>Format:</strong> Metal backup plates or paper (choose what you prefer)</li>
+        <li><strong>Model:</strong> 2-of-3 Recovery Model (Split Knowledge)</li>
+        <li><strong>Description:</strong> Distribute across 3 locations. No single location has both seed phrase AND passphrase. If one is lost, use the other two to recover. Example setups shown in locations below.</li>
+        <li><strong>Security:</strong> Use tamper-evident security bags (bolsas selladas que se dañan al abrirse). If damaged, create new backups immediately.</li>
+        <li><strong>Locations (examples - mix and match):</strong></li>
         <ul>
-          ${plan.backupStrategy.seedPhrases.locations.map(loc => `<li>${loc}</li>`).join('')}
+          <li>Home safe or hidden home spot</li>
+          <li>Bank safety deposit box or custodian bank</li>
+          <li>Trusted close family member’s house (different city if possible)</li>
+          <li>Your office or work safe (if secure)</li>
+          <li>Partner/spouse’s house or trusted friend’s place</li>
+          <li>Another personal property or secondary home</li>
         </ul>
       </ul>
 
       <h3>Passphrase Storage</h3>
       <ul>
-        <li>${plan.backupStrategy.seedPhrases.passphraseStorage}</li>
+        <li>Written on paper (never memorized only)</li>
+        <li>Store encrypted backup separately from seed phrase (never in same location)</li>
+        <li>Never store passphrase with seed phrase in any location</li>
       </ul>
 
       <h3>Documentation Storage</h3>
       <ul>
-        <li>${plan.backupStrategy.documentation.storage}</li>
+        <li>Physical copy in sealed envelope in a secure place of your choice</li>
+        <li>Encrypted digital copy (use VeraCrypt or similar)</li>
+        <li>Update annually or when setup changes</li>
       </ul>
     </div>
 
-    <!-- Action Plan -->
+    <!-- Action Plan - AMBOS CAMINOS SIEMPRE VISIBLES -->
     <div class="section">
       <h2>Your Action Plan</h2>
-      <table>
-        <tr>
-          <th>#</th>
-          <th>Action</th>
-          <th>Timeframe</th>
-          <th>Cost</th>
-        </tr>
-        ${plan.actionPlan.map((action, i) => `
-          <tr>
-            <td>${i + 1}</td>
-            <td>${action.action}</td>
-            <td>${action.timeframe}</td>
-            <td>${action.cost}</td>
-          </tr>
-        `).join('')}
-      </table>
+      <p>Below are the detailed action plans for both paths. You can follow the one that best matches your preference (or compare them).</p>
+
+      <!-- Camino Sparrow -->
+      <div class="wallet-box">
+        <h3>Path 1: Sparrow Multisig Action Plan (Active Control)</h3>
+        <p>Steps if you choose multisig management with Sparrow Wallet.</p>
+        <ol>
+          ${plan.actionPlanSparrow.map(item => `
+            <li>${item.action} (${item.timeframe}, ${item.cost})</li>
+          `).join('')}
+        </ol>
+      </div>
+
+      <!-- Camino Liana -->
+      <div class="wallet-box">
+        <h3>Path 2: Liana Time-lock Action Plan (Automated Inheritance)</h3>
+        <p>Steps if you choose time-locked inheritance with Liana Wallet.</p>
+        <ol>
+          ${plan.actionPlanLiana.map(item => `
+            <li>${item.action} (${item.timeframe}, ${item.cost})</li>
+          `).join('')}
+        </ol>
+      </div>
     </div>
 
     <!-- Security Checklist -->
@@ -441,7 +421,6 @@ export const openPdfPreview = (user, score, answers) => {
   printWindow.document.write(html);
   printWindow.document.close();
 
-  // Auto-trigger print dialog after a short delay
   setTimeout(() => {
     printWindow.print();
   }, 500);
