@@ -9,53 +9,78 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 /**
  * Generate PDF from HTML content and return as base64
+ * Uses an iframe to properly render the full HTML document with styles
  */
 async function generatePdfBase64(htmlContent) {
   return new Promise((resolve, reject) => {
-    // Create a temporary container
-    const container = document.createElement('div');
-    container.innerHTML = htmlContent;
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
-    container.style.top = '-9999px';
-    document.body.appendChild(container);
+    // Create an iframe to properly render the full HTML document
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'absolute';
+    iframe.style.left = '-9999px';
+    iframe.style.top = '-9999px';
+    iframe.style.width = '816px'; // Letter width at 96dpi
+    iframe.style.height = '1056px'; // Letter height at 96dpi
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
 
-    const opt = {
-      margin: 0,
-      filename: 'kyward-security-plan.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#0a0a0a'
-      },
-      jsPDF: {
-        unit: 'in',
-        format: 'letter',
-        orientation: 'portrait'
-      }
+    // Write the HTML content to the iframe
+    iframe.contentDocument.open();
+    iframe.contentDocument.write(htmlContent);
+    iframe.contentDocument.close();
+
+    // Wait for iframe to fully load and render
+    iframe.onload = () => {
+      // Give extra time for styles and fonts to load
+      setTimeout(() => {
+        const iframeBody = iframe.contentDocument.body;
+
+        const opt = {
+          margin: 0,
+          filename: 'kyward-security-plan.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#0a0a0a',
+            logging: false,
+            windowWidth: 816,
+            windowHeight: 1056
+          },
+          jsPDF: {
+            unit: 'in',
+            format: 'letter',
+            orientation: 'portrait'
+          }
+        };
+
+        html2pdf()
+          .set(opt)
+          .from(iframeBody)
+          .outputPdf('arraybuffer')
+          .then((pdfArrayBuffer) => {
+            document.body.removeChild(iframe);
+
+            // Convert ArrayBuffer to base64
+            const uint8Array = new Uint8Array(pdfArrayBuffer);
+            let binary = '';
+            for (let i = 0; i < uint8Array.length; i++) {
+              binary += String.fromCharCode(uint8Array[i]);
+            }
+            const base64 = btoa(binary);
+            resolve(base64);
+          })
+          .catch((error) => {
+            document.body.removeChild(iframe);
+            reject(error);
+          });
+      }, 500); // Wait 500ms for styles to fully apply
     };
 
-    html2pdf()
-      .set(opt)
-      .from(container)
-      .outputPdf('arraybuffer')
-      .then((pdfArrayBuffer) => {
-        document.body.removeChild(container);
-
-        // Convert ArrayBuffer to base64
-        const uint8Array = new Uint8Array(pdfArrayBuffer);
-        let binary = '';
-        for (let i = 0; i < uint8Array.length; i++) {
-          binary += String.fromCharCode(uint8Array[i]);
-        }
-        const base64 = btoa(binary);
-        resolve(base64);
-      })
-      .catch((error) => {
-        document.body.removeChild(container);
-        reject(error);
-      });
+    // Handle iframe errors
+    iframe.onerror = (error) => {
+      document.body.removeChild(iframe);
+      reject(error);
+    };
   });
 }
 
