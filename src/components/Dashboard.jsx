@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { kywardDB } from '../services/Database';
 import { styles } from '../styles/Theme';
 import { openPdfPreview } from '../services/PdfGenerator';
-import { previewEmail } from '../services/EmailService';
 import TelegramBlur from './TelegramBlur';
 import Footer from './Footer';
 import { useLanguage, LanguageToggle } from '../i18n';

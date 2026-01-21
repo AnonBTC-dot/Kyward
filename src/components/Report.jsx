@@ -3,7 +3,6 @@ import { styles } from '../styles/Theme';
 import { kywardDB } from '../services/Database';
 import { generateRecommendations, getFreeTips, getLockedTipsPreview, generateInheritancePlan } from '../services/Recommendations';
 import { openPdfPreview, downloadHtmlReport } from '../services/PdfGenerator';
-import { sendSecurityPlanEmail } from '../services/EmailService';
 import TelegramBlur from './TelegramBlur';
 import Footer from './Footer';
 import { useLanguage, LanguageToggle } from '../i18n';
@@ -15,12 +14,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
   const [lockedTips, setLockedTips] = useState([]);
   const [expandedTip, setExpandedTip] = useState(null);
   const [comparison, setComparison] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [copiedPassword, setCopiedPassword] = useState(false);
   const [canTakeNew, setCanTakeNew] = useState(false);
-  const [sendingEmail, setSendingEmail] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-  const [emailError, setEmailError] = useState(null);
 
   // Plan detection - más preciso para los 4 tiers
   const subscriptionLevel = user?.subscriptionLevel || user?.subscription || 'free';
@@ -35,7 +29,6 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
   // Determinar qué mostrar según plan
   const showFullReport = isPremium;                          // Full tips + recomendaciones
   const showPdfButton = isPremium;                           // PDF solo premium
-  const showEmailButton = isPremium;                         // Email solo premium
 
   // Check assessment permission asynchronously
   useEffect(() => {
@@ -55,34 +48,6 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
   }, [isSentinel, isConsultation]);
 
   const showNewAssessmentButton = canTakeNew;
-
-  const handleCopyPassword = () => {
-    if (user?.pdfPassword) {
-      navigator.clipboard.writeText(user.pdfPassword);
-      setCopiedPassword(true);
-      setTimeout(() => setCopiedPassword(false), 2000);
-    }
-  };
-
-  const handleSendEmail = async () => {
-    setSendingEmail(true);
-    setEmailError(null);
-    try {
-      const result = await sendSecurityPlanEmail(user, score, answers);
-      if (result.success) {
-        setEmailSent(true);
-        setTimeout(() => setEmailSent(false), 5000);
-      } else {
-        setEmailError(result.error || 'Failed to send email');
-        setTimeout(() => setEmailError(null), 5000);
-      }
-    } catch (error) {
-      setEmailError(error.message || 'Failed to send email');
-      setTimeout(() => setEmailError(null), 5000);
-    } finally {
-      setSendingEmail(false);
-    }
-  };
 
   useEffect(() => {
     if (answers && score !== undefined) {
@@ -1166,133 +1131,6 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                 onClick={() => openPdfPreview(user, score, answers)}
               >
                 {t.report.premium.downloadButton}
-              </button>
-            </div>
-
-            <div style={styles.reportEmailSection}>
-              {/* Password with blur effect */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                background: 'rgba(247,147,26,0.1)',
-                border: '1px solid rgba(247,147,26,0.2)',
-                borderRadius: '10px',
-                padding: '12px 16px',
-                marginBottom: '16px',
-                flexWrap: 'wrap',
-                gap: '12px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <rect x="3" y="11" width="18" height="11" rx="2" stroke="#F7931A" strokeWidth="2"/>
-                    <path d="M7 11V7C7 4.23858 9.23858 2 12 2C14.7614 2 17 4.23858 17 7V11" stroke="#F7931A" strokeWidth="2"/>
-                  </svg>
-                  <div>
-                    <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: '2px' }}>{t.report.premium.pdfPassword}</div>
-                    <div
-                      onClick={() => setShowPassword(!showPassword)}
-                      style={{
-                        position: 'relative',
-                        cursor: 'pointer',
-                        display: 'inline-block'
-                      }}
-                    >
-                      <span style={{
-                        fontFamily: 'monospace',
-                        fontSize: '16px',
-                        fontWeight: '700',
-                        color: '#F7931A',
-                        letterSpacing: '1px',
-                        filter: showPassword ? 'none' : 'blur(5px)',
-                        transition: 'filter 0.3s ease',
-                        userSelect: showPassword ? 'text' : 'none'
-                      }}>
-                        {user?.pdfPassword || 'N/A'}
-                      </span>
-                      {!showPassword && (
-                        <span style={{
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, -50%)',
-                          pointerEvents: 'none'
-                        }}>
-                          {[...Array(3)].map((_, i) => (
-                            <span
-                              key={i}
-                              style={{
-                                position: 'absolute',
-                                left: `${-10 + i * 10}px`,
-                                width: '3px',
-                                height: '3px',
-                                borderRadius: '50%',
-                                background: '#F7931A',
-                                boxShadow: '0 0 4px #F7931A',
-                                animation: `starPulse ${1 + i * 0.2}s ease-in-out infinite`
-                              }}
-                            />
-                          ))}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      padding: '6px 12px',
-                      background: 'rgba(107,114,128,0.1)',
-                      border: '1px solid rgba(107,114,128,0.2)',
-                      borderRadius: '6px',
-                      color: '#9ca3af',
-                      fontSize: '12px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {showPassword ? t.report.premium.hide : t.report.premium.show}
-                  </button>
-                  <button
-                    onClick={handleCopyPassword}
-                    style={{
-                      padding: '6px 12px',
-                      background: copiedPassword ? 'rgba(34,197,94,0.1)' : 'rgba(247,147,26,0.1)',
-                      border: `1px solid ${copiedPassword ? 'rgba(34,197,94,0.3)' : 'rgba(247,147,26,0.2)'}`,
-                      borderRadius: '6px',
-                      color: copiedPassword ? '#22c55e' : '#F7931A',
-                      fontSize: '12px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {copiedPassword ? t.report.premium.copied : t.report.premium.copy}
-                  </button>
-                </div>
-              </div>
-              <style>{`
-                @keyframes starPulse {
-                  0%, 100% { opacity: 0.4; transform: scale(1); }
-                  50% { opacity: 1; transform: scale(1.3); }
-                }
-              `}</style>
-              <p style={styles.reportEmailNote}>
-                {t.report.premium.emailNote} <strong>{user?.email}</strong> {t.report.premium.withPassword}
-              </p>
-              <button
-                style={{
-                  ...styles.reportPdfBtn,
-                  marginTop: '16px',
-                  backgroundColor: emailSent ? '#22c55e' : emailError ? '#ef4444' : '#3b82f6',
-                  opacity: sendingEmail ? 0.7 : 1,
-                  cursor: sendingEmail ? 'not-allowed' : 'pointer'
-                }}
-                onClick={handleSendEmail}
-                disabled={sendingEmail}
-              >
-                {sendingEmail ? (t.report.premium.sendingEmail || 'Sending...') :
-                 emailSent ? (t.report.premium.emailSent || 'Email Sent!') :
-                 emailError ? emailError :
-                 (t.report.premium.sendEmail || 'Send Report via Email')}
               </button>
             </div>
           </div>
