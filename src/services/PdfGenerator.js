@@ -82,6 +82,7 @@ export const generatePdfContent = (user, score, answers) => {
       margin-bottom: 20px;
     }
     .section h3 { font-size: 18px; color: #fff; margin: 20px 0 12px; }
+    .section h4 { font-size: 16px; color: #F7931A; margin: 16px 0 8px; }
     .section p { color: #d1d5db; margin-bottom: 12px; }
 
     /* Lists */
@@ -128,6 +129,14 @@ export const generatePdfContent = (user, score, answers) => {
     .wallet-box h3 { color: #F7931A; margin-bottom: 12px; }
     .wallet-box h4 { color: #fff; margin-top: 16px; }
     .wallet-box p { color: #d1d5db; }
+    .wallet-path { 
+      margin: 24px 0; 
+      padding: 16px; 
+      border: 1px solid #2a2a2a; 
+      border-radius: 8px; 
+      background: rgba(0,0,0,0.3);
+    }
+    .wallet-path h4 { color: #F7931A; }
 
     /* Action Plan Table */
     table { width: 100%; border-collapse: collapse; margin: 16px 0; }
@@ -213,59 +222,108 @@ export const generatePdfContent = (user, score, answers) => {
       <h2>Recommended Wallet Setup</h2>
 
       <div class="wallet-box">
-        <h3>Primary Wallet: Sparrow Wallet</h3>
-        <p>Sparrow is a desktop Bitcoin wallet focused on security and privacy. It's the recommended choice for self-custody.</p>
+        <h3>Primary Wallet Recommendation: Sparrow Wallet</h3>
+        <p>Sparrow is a desktop Bitcoin wallet focused on security, privacy, and self-custody. It excels at both single-signature and multi-signature setups.</p>
         <p><strong>Download:</strong> https://sparrowwallet.com</p>
-        <h4 style="margin-top: 16px;">Setup Steps:</h4>
+        <h4>Setup Steps:</h4>
         <ol>
           <li>Download from official website only</li>
           <li>Verify the GPG signature before installing</li>
           <li>Connect your hardware wallet via USB</li>
           <li>Create new wallet or import existing</li>
-          <li>Enable Tor for enhanced privacy (optional)</li>
+          <li>Enable Tor for enhanced privacy (optional but recommended)</li>
           <li>Always verify addresses on your hardware wallet screen</li>
         </ol>
       </div>
 
+      <!-- Nueva sección: Cold Storage Wallet Options -->
+      <div class="wallet-box">
+        <h3>Cold Storage Wallet Options (Bitcoin Mainnet)</h3>
+        <p>For long-term cold storage (minimal interaction, maximum security), consider these mobile/desktop wallets designed specifically for Bitcoin mainnet use:</p>
+        
+        <ul>
+          <li><strong>BlueWallet</strong> - Mobile-first, supports watch-only mode, Lightning + on-chain, easy to use for cold storage with air-gapped signing via PSBT export/import.</li>
+          <li><strong>Blockstream Jade</strong> - Hardware wallet with strong cold storage capabilities (air-gapped via QR codes), fully open-source, integrates well with Green wallet or Sparrow for offline signing.</li>
+          <li><strong>Bull Bitcoin Wallet</strong> - Focused on non-KYC Bitcoin privacy, supports cold storage setups with strong emphasis on self-custody and Canadian-friendly features (good for geographic diversification).</li>
+        </ul>
+
+        <p><strong>Best Practice for Cold Storage:</strong> Use these wallets in watch-only mode on your online device, sign transactions offline/air-gapped, and never expose private keys online.</p>
+      </div>
+
       ${!plan.currentSetup.hasMultisig ? `
       <div class="wallet-box">
-        <h3>Multi-Signature Setup (2-of-3)</h3>
-        <p>For maximum security, we recommend a 2-of-3 multisig setup. This means you need any 2 of 3 keys to spend your Bitcoin.</p>
+        <h3>Choose Your Security & Inheritance Path</h3>
+        <p>You have two strong options depending on your needs: active management with multisig (Sparrow) or automated trustless inheritance (Liana). Choose based on your priorities.</p>
 
-        <h4>Recommended Hardware:</h4>
-        <table>
-          <tr>
-            <th>Device</th>
-            <th>Purpose</th>
-            <th>Location</th>
-          </tr>
-          <tr>
-            <td>Coldcard Mk4</td>
-            <td>Primary signing device</td>
-            <td>With you (home safe)</td>
-          </tr>
-          <tr>
-            <td>Trezor Model T</td>
-            <td>Secondary device</td>
-            <td>Bank safety deposit box</td>
-          </tr>
-          <tr>
-            <td>Ledger Nano X</td>
-            <td>Inheritance device</td>
-            <td>Trusted heir or lawyer</td>
-          </tr>
-        </table>
+        <!-- Path 1: Sparrow Multisig -->
+        <div class="wallet-path">
+          <h4>Path 1: Multisig with Sparrow (Best for Active Management)</h4>
+          <p>Use Sparrow to create a 2-of-3 multisig setup for maximum security against loss or theft while maintaining full control.</p>
 
-        <h4>Sparrow Multisig Setup:</h4>
-        <ol>
-          <li>Create keystore for each hardware wallet</li>
-          <li>File → New Wallet → Multi Signature</li>
-          <li>Set threshold to 2-of-3</li>
-          <li>Import all three xpubs</li>
-          <li>Verify all devices show the same addresses</li>
-          <li>Send a small test transaction</li>
-          <li>Document everything for inheritance</li>
-        </ol>
+          <h5>Recommended Hardware:</h5>
+          <table>
+            <tr>
+              <th>Device</th>
+              <th>Purpose</th>
+              <th>Location Suggestion</th>
+            </tr>
+            <tr>
+              <td>Coldcard Mk4</td>
+              <td>Primary signing device</td>
+              <td>With you (home safe)</td>
+            </tr>
+            <tr>
+              <td>BitBox02</td>
+              <td>Secondary device</td>
+              <td>Bank safety deposit box</td>
+            </tr>
+            <tr>
+              <td>Jade Wallet</td>
+              <td>Inheritance / backup device</td>
+              <td>Trusted heir or lawyer</td>
+            </tr>
+          </table>
+
+          <h5>Setup Steps in Sparrow:</h5>
+          <ol>
+            <li>Create keystore for each hardware wallet</li>
+            <li>File → New Wallet → Multi Signature</li>
+            <li>Set threshold to 2-of-3</li>
+            <li>Import all three xpubs</li>
+            <li>Verify all devices show the same addresses</li>
+            <li>Send a small test transaction</li>
+            <li>Document everything for inheritance</li>
+          </ol>
+
+          <p><strong>Best for:</strong> Users who want full control, frequent transactions, and strong protection against single-point failures.</p>
+        </div>
+
+        <!-- Path 2: Liana Time-lock -->
+        <div class="wallet-path">
+          <h4>Path 2: Time-locked Inheritance with Liana (Best for Hands-off Inheritance)</h4>
+          <p>Liana adds automatic inheritance via time-locks — if you don't move funds for a set period, a recovery key (held by your heir) can access them. No third party required.</p>
+          <p><strong>Website:</strong> https://wizardsardine.com/liana/</p>
+
+          <h5>How It Works:</h5>
+          <ol>
+            <li>Set up your primary key (your hardware wallet)</li>
+            <li>Set up a recovery key (heir's hardware wallet)</li>
+            <li>Define a timelock (e.g., 365 days of inactivity)</li>
+            <li>After timelock expires, recovery key can spend</li>
+            <li>Your regular transactions automatically reset the timer</li>
+            <li>Fully trustless — no one can access funds early</li>
+          </ol>
+
+          <h5>Important Considerations:</h5>
+          <ul>
+            <li>Recovery key holder cannot access funds before timelock</li>
+            <li>You must make occasional transactions to prevent accidental activation</li>
+            <li>Consider 180-day timelock with calendar reminders for check-ins</li>
+            <li>Heir needs basic technical ability or very clear written instructions</li>
+          </ul>
+
+          <p><strong>Best for:</strong> Users who want automatic, trustless inheritance without relying on lawyers or services, even if it means less frequent manual control.</p>
+        </div>
       </div>
       ` : ''}
     </div>
@@ -274,29 +332,7 @@ export const generatePdfContent = (user, score, answers) => {
     <div class="section">
       <h2>Inheritance Strategy</h2>
 
-      <div class="wallet-box">
-        <h3>Recommended: Liana Wallet</h3>
-        <p>Liana is a Bitcoin wallet with built-in inheritance through time-locked recovery. If you don't move your coins for a specified period, a recovery key can access them.</p>
-        <p><strong>Website:</strong> https://wizardsardine.com/liana/</p>
-
-        <h4>How It Works:</h4>
-        <ol>
-          <li>Set up your primary key (your hardware wallet)</li>
-          <li>Set up a recovery key (heir's hardware wallet)</li>
-          <li>Define a timelock (e.g., 365 days of inactivity)</li>
-          <li>After the timelock, the recovery key can spend</li>
-          <li>Your regular transactions reset the timer</li>
-          <li>No third party needed - fully trustless inheritance</li>
-        </ol>
-
-        <h4>Important Considerations:</h4>
-        <ul>
-          <li>Recovery key holder cannot access funds before timelock expires</li>
-          <li>You must transact periodically to reset the timer</li>
-          <li>Consider a 180-day timelock with regular check-in reminders</li>
-          <li>Heir needs technical ability or very clear instructions</li>
-        </ul>
-      </div>
+      <p>Choose between the two paths above (Sparrow multisig or Liana time-lock) based on whether you prefer active control or automated inheritance protection.</p>
 
       <h3>Documentation for Heirs</h3>
       <p>Prepare the following documents and store them securely:</p>

@@ -87,7 +87,7 @@ export const sendSecurityPlanEmail = async (user, score, answers) => {
     // Send to backend
     const token = kywardDB.getToken();
 
-    const response = await fetch(`${API_URL}/api/email/send-plan`, {
+    const response = await fetch(`${API_URL}/email/send-plan`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
