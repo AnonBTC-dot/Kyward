@@ -304,7 +304,12 @@ export const translations = {
         date: 'Date',
         viewReport: 'View Report',
         premiumOnly: 'Premium feature'
-      }
+      },
+
+      emailPreferences: 'Email Preferences',
+      dailyTips: 'Daily Security Tips',
+      securityAlerts: 'Security Alerts & hack notifications',
+      monthlyReviews: 'Monthly wallet review reminders',
     },
 
     // Questionnaire
@@ -588,7 +593,10 @@ export const translations = {
         copied: 'Copied!',
         emailNote: 'The PDF will be sent to',
         withPassword: 'with this password.',
-        previewEmail: 'Preview Email'
+        previewEmail: 'Preview Email',
+        sendingEmail: 'Sending...',
+        emailSent: 'Email Sent!',
+        sendEmail: 'Send Report via Email'
       },
 
       backToDashboard: 'Back to Dashboard'
@@ -734,7 +742,9 @@ export const translations = {
       assessmentLimitEssential: 'You have already used your one Essential assessment. Purchase again to create a new one.',
       subscriptionExpired: 'Your subscription has expired. Renew to continue with full access.',
       oneTimePayment: 'One-time payment',
-      monthlySubscription: 'Monthly subscription'
+      monthlySubscription: 'Monthly subscription',
+      saving: 'Saving...',
+      saveChanges : 'Save Preferences'
     }
   },
 
@@ -1039,7 +1049,12 @@ export const translations = {
         date: 'Fecha',
         viewReport: 'Ver Reporte',
         premiumOnly: 'Función premium'
-      }
+      },
+
+      emailPreferences: 'Preferencias de Email',
+      dailyTips: 'Consejos Diarios de Seguridad',
+      securityAlerts: 'Alertas de Seguridad y notificaciones de hacks',
+      monthlyReviews: 'Recordatorios mensuales de revisión de wallets'
     },
 
     // Questionnaire
@@ -1322,7 +1337,10 @@ export const translations = {
         copied: '¡Copiado!',
         emailNote: 'El PDF será enviado a',
         withPassword: 'con esta contraseña.',
-        previewEmail: 'Vista Previa Email'
+        previewEmail: 'Vista Previa Email',
+        sendingEmail: 'Enviando...',
+        emailSent: '¡Email Enviado!',
+        sendEmail: 'Enviar Reporte al Email'
       },
 
       backToDashboard: 'Volver al Panel'
@@ -1468,7 +1486,9 @@ export const translations = {
       assessmentLimitEssential: 'Ya usaste tu única evaluación Essential. Compra de nuevo para crear una nueva.',
       subscriptionExpired: 'Tu suscripción ha expirado. Renueva para continuar con acceso completo.',
       oneTimePayment: 'Pago único',
-      monthlySubscription: 'Suscripción mensual'
+      monthlySubscription: 'Suscripción mensual',
+      saving: 'Guardando...',
+      saveChanges : 'Preferencias Guardadas'
     }
   }
 };

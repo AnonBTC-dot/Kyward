@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { styles } from '../styles/Theme';
 import { kywardDB } from '../services/Database';
-import { generateRecommendations } from '../services/Recommendations';
 import { useLanguage, LanguageToggle } from '../i18n';
 
 const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
@@ -178,22 +177,13 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
 
       const score = calculateScore();
 
-      // Generate recommendations for the backend to include in the email
-      const recommendations = generateRecommendations(answers, score).map(r => ({
-        title: r.title,
-        shortTip: r.shortTip,
-        priority: r.priority,
-        category: r.category
-      }));
-
       const assessment = {
         score,
         responses: answers,
-        recommendations, // Include for auto-email with PDF
         // NO envíes userId ni timestamp (el backend los maneja)
       };
 
-      console.log('Enviando assessment con recomendaciones:', assessment);
+      console.log('Enviando assessment:', assessment);
 
       const result = await kywardDB.saveAssessment(assessment);
 

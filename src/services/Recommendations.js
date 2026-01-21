@@ -14,9 +14,8 @@ export const allRecommendations = {
 
 **Recommended Options:**
 - **Coldcard** - Maximum security, air-gapped, Bitcoin-only
-- **Trezor Model T** - User-friendly, open-source
-- **Ledger Nano X** - Good balance of security and usability
-- **BitBox02** - Swiss-made, excellent security
+- **Jade Wallet** - Open-source, affordable, strong focus on Bitcoin (by Blockstream)
+- **BitBox02** - Swiss-made, excellent security, great privacy features
 
 **Action Steps:**
 1. Purchase directly from manufacturer (never third-party)
@@ -381,7 +380,7 @@ export const allRecommendations = {
 - [ ] Review transaction history for anomalies
 - [ ] Check hardware wallet firmware
 - [ ] Update inheritance documentation if needed
-- [ ] Review and rotate any passwords
+- [ ] Review overall security posture
 
 **Annual Review:**
 - [ ] Full recovery test on secondary device
@@ -499,15 +498,15 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
       description: 'A 2-of-3 multisig requires any 2 of 3 private keys to authorize a transaction. This protects against loss, theft, and single points of failure.',
       hardware: [
         { device: 'Coldcard Mk4', purpose: 'Primary signing device (with you)', cost: '$150' },
-        { device: 'Trezor Model T', purpose: 'Secondary device (safety deposit)', cost: '$180' },
-        { device: 'Ledger Nano X', purpose: 'Inheritance device (with heir/lawyer)', cost: '$150' }
+        { device: 'BitBox02', purpose: 'Secondary device (safety deposit)', cost: '$180' },
+        { device: 'Jade Wallet', purpose: 'Inheritance device (with heir/lawyer)', cost: '$150' }
       ],
       softwareSetup: {
         name: 'Sparrow Wallet',
         steps: [
           'Create first keystore with Coldcard',
-          'Create second keystore with Trezor',
-          'Create third keystore with Ledger',
+          'Create second keystore with BitBox02',
+          'Create third keystore with Jade Wallet',
           'In Sparrow: File > New Wallet > Multi Signature',
           'Set M of N to 2-of-3',
           'Import all three xpubs',
@@ -547,7 +546,11 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
       locations: [
         'Location 1: Home safe (primary access)',
         'Location 2: Bank safety deposit box',
-        'Location 3: Trusted family member in different city'
+        'Location 3: Trusted family member in different city',
+        'Location 4: Bank custodian',
+        'Location 5: Office',
+        'Location 6: Close family member\'s house',
+        'Location 7: Another house'
       ],
       passphraseStorage: 'Memorized + encrypted digital backup'
     },
