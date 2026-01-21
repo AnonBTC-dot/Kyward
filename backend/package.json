@@ -17,6 +17,8 @@
     "tiny-secp256k1": "^2.2.3",
     "bs58check": "^3.0.1",
     "nodemailer": "^6.9.7",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "muhammara": "^3.8.1",
+    "memory-streams": "^0.1.3"
   }
 }
