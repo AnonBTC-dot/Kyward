@@ -46,7 +46,7 @@ export const translations = {
       whyCards: {
         personalized: {
           title: 'Personalized Assessment',
-          description: 'Answer 10-15 questions about your current setup. Get a custom security score and actionable recommendations tailored to YOUR situation.'
+          description: 'Answer 15 questions about your current setup. Get a custom security score and actionable recommendations tailored to YOUR situation.'
         },
         zeroData: {
           title: 'Zero Data Storage',
@@ -744,7 +744,8 @@ export const translations = {
       oneTimePayment: 'One-time payment',
       monthlySubscription: 'Monthly subscription',
       saving: 'Saving...',
-      saveChanges : 'Save Preferences'
+      saveChanges : 'Save Preferences',
+      unlimitedAccess: 'Unlimited assessments & features'
     }
   },
 
@@ -793,7 +794,7 @@ export const translations = {
       whyCards: {
         personalized: {
           title: 'Evaluación Personalizada',
-          description: 'Responde 10-15 preguntas sobre tu configuración actual. Obtén una puntuación de seguridad personalizada y recomendaciones adaptadas a TU situación.'
+          description: 'Responde 15 preguntas sobre tu configuración actual. Obtén una puntuación de seguridad personalizada y recomendaciones adaptadas a TU situación.'
         },
         zeroData: {
           title: 'Cero Almacenamiento de Datos',
@@ -1488,7 +1489,8 @@ export const translations = {
       oneTimePayment: 'Pago único',
       monthlySubscription: 'Suscripción mensual',
       saving: 'Guardando...',
-      saveChanges : 'Preferencias Guardadas'
+      saveChanges : 'Preferencias Guardadas',
+      unlimitedAccess: 'Evaluaciones y funciones ilimitadas'
     }
   }
 };

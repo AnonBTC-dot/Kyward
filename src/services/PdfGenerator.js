@@ -236,7 +236,7 @@ export const generatePdfContent = (user, score, answers) => {
         </ol>
       </div>
 
-      <!-- Nueva sección: Cold Storage Wallet Options -->
+      <!-- Cold Storage Wallet Options -->
       <div class="wallet-box">
         <h3>Cold Storage Wallet Options (Bitcoin Mainnet)</h3>
         <p>For long-term cold storage (minimal interaction, maximum security), consider these mobile/desktop wallets designed specifically for Bitcoin mainnet use:</p>
@@ -345,28 +345,48 @@ export const generatePdfContent = (user, score, answers) => {
       </ol>
     </div>
 
-    <!-- Backup Strategy -->
+    <!-- Backup Strategy - ACTUALIZADO -->
     <div class="section">
       <h2>Backup Strategy</h2>
 
+      <h3>Passphrase Generation (Most Secure Method)</h3>
+      <p>Use physical dice for true randomness — never generate digitally.</p>
+      <ol>
+        <li>Get 5 standard six-sided dice</li>
+        <li>Roll all dice and note the numbers in order</li>
+        <li>Concatenate into a 5-digit number (e.g., 14263)</li>
+        <li>Find the matching word in the official BIP39 English wordlist (print it offline)</li>
+        <li>Repeat 3–5 times to create your passphrase (e.g., "apple zebra moon river stone")</li>
+        <li>Memorize it completely and test recall daily for a week</li>
+      </ol>
+
       <h3>Seed Phrase Storage</h3>
       <ul>
-        <li><strong>Format:</strong> Metal backup plates (Cryptosteel, Billfodl, or stamped steel washers)</li>
-        <li><strong>Location 1:</strong> Home safe (primary access)</li>
-        <li><strong>Location 2:</strong> Bank safety deposit box</li>
-        <li><strong>Location 3:</strong> Trusted family member in different city</li>
+        <li><strong>Format:</strong> Metal backup plates or paper (choose what you prefer)</li>
+        <li><strong>Model:</strong> 2-of-3 Recovery Model (Split Knowledge)</li>
+        <li><strong>How it works:</strong> Distribute across 3 locations. No single location has both seed phrase AND passphrase. Example: Location 1 has only seed, Location 2 has only passphrase, Location 3 has backup of one (never both). If one is lost, the other two allow full recovery.</li>
+        <li><strong>Security:</strong> Use tamper-evident security bags (bolsas selladas que se dañan al abrirse). If damaged, you know someone tried to access it — create new backups immediately.</li>
+        <li><strong>Locations (examples - mix and match):</strong></li>
+        <ul>
+          <li>Home safe or hidden home spot</li>
+          <li>Bank safety deposit box or custodian bank</li>
+          <li>Trusted close family member’s house (different city if possible)</li>
+          <li>Your office or work safe (if secure)</li>
+          <li>Partner/spouse’s house or trusted friend’s place</li>
+          <li>Another personal property or secondary home</li>
+        </ul>
       </ul>
 
       <h3>Passphrase Storage</h3>
       <ul>
-        <li>Memorize your passphrase (25th word)</li>
-        <li>Store encrypted backup separately from seed</li>
-        <li>Never store passphrase with seed phrase</li>
+        <li>Memorize first (use dice method above)</li>
+        <li>Store encrypted backup separately from seed phrase (never in same location)</li>
+        <li>Never store passphrase with seed phrase in any location</li>
       </ul>
 
       <h3>Documentation Storage</h3>
       <ul>
-        <li>Physical copy in sealed envelope with lawyer</li>
+        <li>Physical copy in sealed envelope in a secure place of your choice</li>
         <li>Encrypted digital copy (use VeraCrypt or similar)</li>
         <li>Update annually or when setup changes</li>
       </ul>
