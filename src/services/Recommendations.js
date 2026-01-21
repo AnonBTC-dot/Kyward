@@ -618,8 +618,8 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
   plan.actionPlanLiana = tempActionPlan.map(item => {
     let newItem = { ...item };
     if (newItem.action.includes('multisig')) {
-      newItem.action = 'Set up Liana wallet with time-locked recovery (primary + recovery key)';
-      newItem.cost = 'Free';
+      newItem.action = 'Set up Liana wallet multisign 2-3 with time-locked recovery (primary + recovery key)';
+      newItem.cost = '$300-500 (additional hardware)';
     }
     if (newItem.action.includes('Liana wallet for inheritance')) {
       newItem.action = 'Define timelock period and test recovery simulation';
