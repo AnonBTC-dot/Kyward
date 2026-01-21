@@ -13,7 +13,8 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // 1. TRADUCTOR JSON (DEBE IR ANTES QUE LAS RUTAS)
-app.use(express.json());
+// Increased limit to 10MB for PDF uploads via email
+app.use(express.json({ limit: '10mb' }));
 
 // Middleware de CORS mejorado
 const allowedOrigins = [
