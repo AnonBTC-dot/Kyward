@@ -301,7 +301,7 @@ app.get('/api/user/premium', authMiddleware, async (req, res) => {
 // Save assessment
 app.post('/api/assessments', authMiddleware, async (req, res) => {
   try {
-    const { score, responses, recommendations, timestamp } = req.body;
+    const { score, responses, timestamp } = req.body;
 
     console.log('POST /api/assessments - Body recibido:', req.body);
     console.log('Usuario autenticado:', req.user.email, req.user.id);
@@ -318,28 +318,7 @@ app.post('/api/assessments', authMiddleware, async (req, res) => {
     const success = await db.saveAssessment(req.user.id, score, responses, timestamp || new Date().toISOString());
 
     if (success) {
-      // Send PDF via email automatically for premium users
-      const hasPremium = await db.hasPremiumAccess(req.user.email);
-      let emailSent = false;
-
-      if (hasPremium && req.user.pdfPassword) {
-        console.log('📧 Premium user - sending PDF email automatically');
-        try {
-          const emailResult = await emailService.sendSecurityPlanWithPdf(
-            req.user.email,
-            req.user.pdfPassword,
-            score,
-            recommendations || []
-          );
-          emailSent = emailResult.success;
-          console.log('📧 Auto-email result:', emailResult);
-        } catch (emailError) {
-          console.error('📧 Auto-email failed:', emailError);
-          // Don't fail the assessment save if email fails
-        }
-      }
-
-      res.json({ success: true, emailSent });
+      res.json({ success: true });
     } else {
       res.status(500).json({ error: 'Failed to save assessment' });
     }
@@ -700,7 +679,7 @@ app.get('/api/email/status', async (req, res) => {
 // Send security plan email with PDF attachment
 app.post('/api/email/send-plan', authMiddleware, async (req, res) => {
   try {
-    const { score, recommendations } = req.body;
+    const { pdfBase64, score } = req.body;
 
     const hasPremium = await db.hasPremiumAccess(req.user.email);
     if (!hasPremium) {
@@ -711,13 +690,20 @@ app.post('/api/email/send-plan', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'No PDF password found. Please contact support.' });
     }
 
+    if (!pdfBase64) {
+      return res.status(400).json({ error: 'PDF data is required' });
+    }
+
     console.log('📧 Sending security plan with PDF to:', req.user.email);
 
-    const result = await emailService.sendSecurityPlanWithPdf(
+    // Convert base64 to buffer
+    const pdfBuffer = Buffer.from(pdfBase64, 'base64');
+
+    const result = await emailService.sendEmailWithPdfAttachment(
       req.user.email,
       req.user.pdfPassword,
       score || 0,
-      recommendations || []
+      pdfBuffer
     );
 
     if (result.success) {
