@@ -115,7 +115,6 @@ export const allRecommendations = {
 **How to Test Safely:**
 1. **Option A - New Device:** Get a second hardware wallet, restore from seed
 2. **Option B - Sparrow Wallet:** Restore as watch-only using your seed
-3. **Option C - Wipe & Restore:** (Only for small amounts) Reset device and restore
 
 **Verification Checklist:**
 - [ ] All 24 words recorded correctly
@@ -224,8 +223,7 @@ export const allRecommendations = {
 **How to Avoid:**
 - Use wallet software that auto-generates new addresses
 - Sparrow Wallet handles this automatically
-- Never manually share the same address twice
-- Use PayNyms or Silent Payments for recurring payments`,
+- Never manually share the same address twice`,
     trigger: (answers) => answers.q7 === 'often'
   },
 
@@ -539,35 +537,31 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
     ]
   };
 
-  // Backup Strategy - ACTUALIZADO
+  // Backup Strategy
   plan.backupStrategy = {
     passphraseGeneration: {
-      method: 'Dice-based Passphrase Creation (Most Secure Method)',
-      description: 'The strongest way to create your passphrase is using physical dice for true randomness (no digital generation). Roll 5 six-sided dice to get a number (e.g., 14263), look up the corresponding BIP39 word from the official list. Repeat 3 to 5 times to build your full passphrase. Memorize it completely and test your recall multiple times.',
+      method: 'Dice-based Passphrase Creation',
+      description: 'The best way to create a secure passphrase is using dice for true randomness. Roll 5 dice, convert the numbers to a word from the BIP39 wordlist. Repeat 3 or 5 times and that will be your passphrase.',
       steps: [
-        'Get 5 standard six-sided dice',
-        'Roll all dice and note the numbers in order',
-        'Concatenate into a 5-digit number',
-        'Find the matching word in the official BIP39 English wordlist (print it or use offline)',
-        'Repeat the process 3–5 times to create your passphrase (e.g., "apple zebra moon river stone")',
-        'Never generate digitally — dice provide entropy real',
-        'Practice recalling it daily for a week to ensure you remember it perfectly'
+        'Gather 5 dice',
+        'Roll them to get 5 numbers',
+        'Concatenate the numbers (e.g., 1,4,2,6,3 → 14263)',
+        'Look up the corresponding BIP39 word',
+        'Repeat 3 or 5 times for the full passphrase',
+        'Write it on paper and store securely'
       ]
     },
     seedPhrases: {
-      storage: 'Metal backup plates or paper (choose what you prefer)',
+      storage: 'Metal backup plates or paper (as preferred)',
       model: '2-of-3 Recovery Model (Split Knowledge)',
-      modelDescription: 'Distribute your seed phrase and passphrase across 3 separate locations. No single location contains both the seed phrase AND its passphrase. This means: if one location is lost or compromised, the other two still allow full recovery. Example setup: Location 1 has only the seed phrase, Location 2 has only the passphrase, Location 3 has a backup copy of one of them (but never both). This protects against single-point failure while keeping security high.',
-      security: 'Use tamper-evident security bags (bolsas selladas de toda la vida que se rompen al abrirse). This alerts you if backups have been accessed — if the bag is damaged, create new backups and move funds immediately.',
+      modelDescription: 'Distribute your seed phrase and passphrase across 3 locations. No single location contains both the seed phrase and its passphrase. This way, if one location is compromised, the attacker cannot access your funds. To recover, combine information from any two locations. For example: If Location 1 is lost, use Location 2 (seed) + Location 3 (passphrase). If Location 2 is lost, use Location 1 (passphrase) + Location 3 (seed). If Location 3 is lost, use Location 1 + Location 2.',
+      security: 'Use tamper-evident bags that must be damaged to open. This alerts you if backups have been accessed.',
       locations: [
-        'Location 1: Home safe or hidden home spot (primary access)',
-        'Location 2: Bank safety deposit box or custodian bank',
-        'Location 3: Trusted close family member\'s house (different city if possible)',
-        'Location 4: Your office or work safe (if secure)',
-        'Location 5: Partner/spouse\'s house or trusted friend\'s place',
-        'Location 6: Another personal property or secondary home'
+        'Location 1: Home safe - Store seed phrase for Wallet 1 + passphrase copy for Wallet 2',
+        'Location 2: Bank or office - Store seed phrase for Wallet 2 + passphrase copy for Wallet 3',
+        'Location 3: Family home or partners house - Store seed phrase for Wallet 3 + passphrase copy for Wallet 1'
       ],
-      passphraseStorage: 'Memorized first + encrypted digital backup (never in the same location as the seed phrase)'
+      passphraseStorage: 'Written on paper + encrypted digital backup'
     },
     documentation: {
       items: [
@@ -577,11 +571,11 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
         'Derivation paths (BIP84 for native SegWit)',
         'Approximate holdings (for estate planning)'
       ],
-      storage: 'Sealed envelope in a secure place of your choice + encrypted digital copy (use VeraCrypt or similar)'
+      storage: 'Sealed envelope with family or trusted friend + encrypted digital copy (use VeraCrypt or similar)'
     }
   };
 
-  // Action Plan with two paths (Sparrow vs Liana)
+  // Action Plan with priorities
   plan.actionPlan = [];
 
   if (!plan.currentSetup.hasHardwareWallet) {
@@ -596,7 +590,7 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
   if (!plan.currentSetup.hasMetalBackup) {
     plan.actionPlan.push({
       priority: 2,
-      action: 'Create metal seed backup (or paper if preferred)',
+      action: 'Create metal seed backup',
       timeframe: 'Within 2 weeks',
       cost: '$30-100'
     });
@@ -605,54 +599,33 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
   if (!plan.currentSetup.hasPassphrase) {
     plan.actionPlan.push({
       priority: 3,
-      action: 'Generate and add passphrase using dice method',
+      action: 'Add passphrase to wallet',
       timeframe: 'Within 1 month',
       cost: 'Free'
     });
   }
 
-  // Camino condicional: Sparrow o Liana
-  if (!plan.currentSetup.hasMultisig && !plan.currentSetup.hasInheritancePlan) {
+  if (!plan.currentSetup.hasMultisig) {
     plan.actionPlan.push({
       priority: 4,
-      action: 'Choose your path: Sparrow Multisig (active control) OR Liana Time-lock (automated inheritance)',
+      action: 'Set up 2-of-3 multisig with Sparrow',
       timeframe: 'Within 2 months',
-      cost: 'Depends on choice'
+      cost: '$300-500 (additional hardware)'
     });
+  }
 
-    // Sub-pasos según el camino (se muestra en el PDF según preferencia)
-    if (plan.currentSetup.prefersLiana) {
-      plan.actionPlan.push({
-        priority: 5,
-        action: 'Set up Liana wallet with time-locked recovery (primary + recovery key)',
-        timeframe: 'Within 2-3 months',
-        cost: 'Free'
-      });
-      plan.actionPlan.push({
-        priority: 6,
-        action: 'Define timelock period and test recovery simulation',
-        timeframe: 'Within 3 months',
-        cost: 'Free'
-      });
-    } else {
-      plan.actionPlan.push({
-        priority: 5,
-        action: 'Set up 2-of-3 multisig with Sparrow Wallet',
-        timeframe: 'Within 2 months',
-        cost: '$300-500 (additional hardware)'
-      });
-      plan.actionPlan.push({
-        priority: 6,
-        action: 'Distribute keys across 3 secure locations (never both seed + passphrase together)',
-        timeframe: 'Within 3 months',
-        cost: 'Free'
-      });
-    }
+  if (!plan.currentSetup.hasInheritancePlan) {
+    plan.actionPlan.push({
+      priority: 5,
+      action: 'Implement Liana wallet for inheritance',
+      timeframe: 'Within 3 months',
+      cost: 'Free'
+    });
   }
 
   plan.actionPlan.push({
     priority: plan.actionPlan.length + 1,
-    action: 'Document everything securely and inform heirs (without revealing secrets)',
+    action: 'Document everything and inform heirs',
     timeframe: 'Ongoing',
     cost: 'Free'
   });
