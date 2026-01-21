@@ -9,86 +9,108 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 /**
  * Generate PDF from HTML content and return as base64
- * Extracts styles and body content to render properly with html2pdf
+ * Uses an iframe to render the full HTML document properly
  */
 async function generatePdfBase64(htmlContent) {
   return new Promise((resolve, reject) => {
-    // Extract styles from the HTML
-    const styleMatch = htmlContent.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
-    const styles = styleMatch ? styleMatch[1] : '';
-
-    // Extract body content from the HTML
-    const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-    const bodyContent = bodyMatch ? bodyMatch[1] : htmlContent;
-
-    // Create a container that will be visible for rendering
-    const container = document.createElement('div');
-    container.id = 'pdf-render-container';
-    container.innerHTML = bodyContent;
-
-    // Apply styles via a style element
-    const styleElement = document.createElement('style');
-    styleElement.textContent = styles;
-    container.insertBefore(styleElement, container.firstChild);
-
-    // Position off-screen but still renderable
-    container.style.cssText = `
+    // Create an iframe to render the complete HTML document
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = `
       position: fixed;
-      left: -9999px;
+      left: 0;
       top: 0;
-      width: 8.5in;
-      background: #0a0a0a;
-      color: #e5e5e5;
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      width: 850px;
+      height: 1100px;
+      border: none;
+      opacity: 0;
+      pointer-events: none;
+      z-index: -1;
     `;
+    document.body.appendChild(iframe);
 
-    document.body.appendChild(container);
+    // Wait for iframe to be ready
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
-    // Wait for styles and content to be applied
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        const opt = {
-          margin: [0.3, 0.3, 0.3, 0.3],
-          filename: 'kyward-security-plan.pdf',
-          image: { type: 'jpeg', quality: 0.95 },
-          html2canvas: {
-            scale: 1.5,
-            useCORS: true,
-            backgroundColor: '#0a0a0a',
-            logging: false,
-            scrollY: 0,
-            scrollX: 0
-          },
-          jsPDF: {
-            unit: 'in',
-            format: 'letter',
-            orientation: 'portrait'
-          },
-          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-        };
+    // Write the complete HTML to the iframe
+    iframeDoc.open();
+    iframeDoc.write(htmlContent);
+    iframeDoc.close();
 
-        html2pdf()
-          .set(opt)
-          .from(container)
-          .outputPdf('arraybuffer')
-          .then((pdfArrayBuffer) => {
-            document.body.removeChild(container);
+    // Wait for content to fully render
+    const checkReady = () => {
+      const container = iframeDoc.querySelector('.container');
+      if (container && container.offsetHeight > 0) {
+        // Content is rendered, proceed with PDF generation
+        setTimeout(() => {
+          generateFromIframe();
+        }, 500); // Extra time for fonts and styles
+      } else {
+        // Not ready yet, check again
+        setTimeout(checkReady, 100);
+      }
+    };
 
-            // Convert ArrayBuffer to base64
-            const uint8Array = new Uint8Array(pdfArrayBuffer);
-            let binary = '';
-            for (let i = 0; i < uint8Array.length; i++) {
-              binary += String.fromCharCode(uint8Array[i]);
+    const generateFromIframe = () => {
+      const opt = {
+        margin: [0.25, 0.25, 0.25, 0.25],
+        filename: 'kyward-security-plan.pdf',
+        image: { type: 'jpeg', quality: 0.92 },
+        html2canvas: {
+          scale: 1.5,
+          useCORS: true,
+          backgroundColor: '#0a0a0a',
+          logging: false,
+          windowWidth: 850,
+          windowHeight: 1100,
+          onclone: (clonedDoc) => {
+            // Ensure background colors are preserved in clone
+            const body = clonedDoc.body;
+            if (body) {
+              body.style.backgroundColor = '#0a0a0a';
+              body.style.margin = '0';
+              body.style.padding = '40px';
             }
-            const base64 = btoa(binary);
-            resolve(base64);
-          })
-          .catch((error) => {
-            document.body.removeChild(container);
-            reject(error);
-          });
-      }, 300);
-    });
+          }
+        },
+        jsPDF: {
+          unit: 'in',
+          format: 'letter',
+          orientation: 'portrait'
+        },
+        pagebreak: { mode: ['css', 'legacy'], before: '.section' }
+      };
+
+      html2pdf()
+        .set(opt)
+        .from(iframeDoc.body)
+        .outputPdf('arraybuffer')
+        .then((pdfArrayBuffer) => {
+          document.body.removeChild(iframe);
+
+          // Convert ArrayBuffer to base64
+          const uint8Array = new Uint8Array(pdfArrayBuffer);
+          let binary = '';
+          for (let i = 0; i < uint8Array.length; i++) {
+            binary += String.fromCharCode(uint8Array[i]);
+          }
+          const base64 = btoa(binary);
+          resolve(base64);
+        })
+        .catch((error) => {
+          document.body.removeChild(iframe);
+          reject(error);
+        });
+    };
+
+    // Start checking when iframe loads
+    iframe.onload = checkReady;
+
+    // Fallback timeout
+    setTimeout(() => {
+      if (document.body.contains(iframe)) {
+        generateFromIframe();
+      }
+    }, 3000);
   });
 }
 
