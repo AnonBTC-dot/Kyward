@@ -1016,6 +1016,112 @@ export const translations = {
       }
     },
 
+    // Inheritance Plan Generation (Recommendations.js)
+    inheritancePlanGen: {
+      executiveSummary: {
+        excellent: 'Your Bitcoin security score of {score} indicates an excellent setup. This plan will help you optimize your inheritance strategy and add the final layers of protection.',
+        moderate: 'Your Bitcoin security score of {score} shows a moderate foundation. This plan addresses critical gaps and establishes a proper inheritance strategy.',
+        needsWork: 'Your Bitcoin security score of {score} indicates significant vulnerabilities. This plan provides a complete security overhaul and establishes proper inheritance protocols.'
+      },
+      walletRecommendation: {
+        primary: 'Sparrow Wallet',
+        description: 'Sparrow is a desktop Bitcoin wallet focused on security and privacy. It supports all hardware wallets and is perfect for both singlesig and multisig setups.',
+        downloadUrl: 'https://sparrowwallet.com',
+        setupSteps: [
+          'Download from official website (verify signature)',
+          'Connect your hardware wallet via USB',
+          'Create new wallet or import existing',
+          'Enable Tor for privacy (optional but recommended)',
+          'Verify receiving addresses on hardware wallet'
+        ]
+      },
+      multisigPlan: {
+        type: '2-of-3',
+        description: 'A 2-of-3 multisig requires any 2 of 3 private keys to authorize a transaction. This protects against loss, theft, and single points of failure.',
+        hardware: {
+          coldcard: { device: 'Coldcard Mk4', purpose: 'Primary signing device (with you)', cost: '$150' },
+          bitbox: { device: 'BitBox02', purpose: 'Secondary device (safety deposit)', cost: '$180' },
+          jade: { device: 'Jade Wallet', purpose: 'Inheritance device (with heir/lawyer)', cost: '$150' }
+        },
+        setupSteps: [
+          'Create first keystore with Coldcard',
+          'Create second keystore with BitBox02',
+          'Create third keystore with Jade Wallet',
+          'In Sparrow: File > New Wallet > Multi Signature',
+          'Set M of N to 2-of-3',
+          'Import all three xpubs',
+          'Verify addresses match on all devices',
+          'Send small test transaction',
+          'Document everything for inheritance'
+        ]
+      },
+      inheritanceStrategy: {
+        recommended: 'Liana Wallet',
+        description: "Liana is a Bitcoin wallet with built-in inheritance through time-locked recovery paths. If you don't move your coins for a specified period, a recovery key can access them.",
+        howItWorks: [
+          'Set up primary key (your hardware wallet)',
+          'Set up recovery key (heir\'s hardware wallet)',
+          'Define timelock (e.g., 365 days of inactivity)',
+          'After timelock, recovery key can spend',
+          'Regular transactions reset the timer',
+          'No third party needed - fully trustless'
+        ],
+        setupUrl: 'https://wizardsardine.com/liana/',
+        considerations: [
+          'Recovery key holder cannot access funds before timelock',
+          'You must transact periodically to reset timer',
+          'Consider shorter timelock (180 days) with regular check-in reminder',
+          'Heir needs technical ability or clear instructions'
+        ]
+      },
+      backupStrategy: {
+        passphraseGeneration: {
+          method: 'Dice-based Passphrase Creation',
+          description: 'The best way to create a secure passphrase is using dice for true randomness. Roll 5 dice, convert the numbers to a word from the BIP39 wordlist. Repeat 3 or 5 times and that will be your passphrase.',
+          steps: [
+            'Gather 5 dice',
+            'Roll them to get 5 numbers',
+            'Concatenate the numbers (e.g., 1,4,2,6,3 → 14263)',
+            'Look up the corresponding BIP39 word',
+            'Repeat 3 or 5 times for the full passphrase',
+            'Write it on paper and store securely'
+          ]
+        },
+        seedPhrases: {
+          storage: 'Metal backup plates or paper (as preferred)',
+          model: '2-of-3 Recovery Model (Split Knowledge)',
+          modelDescription: 'Distribute your seed phrase and passphrase across 3 locations. No single location contains both the seed phrase and its passphrase. This way, if one location is compromised, the attacker cannot access your funds. To recover, combine information from any two locations.',
+          security: 'Use tamper-evident bags that must be damaged to open. This alerts you if backups have been accessed.',
+          locations: [
+            "Location 1: Home safe - Store seed phrase for Wallet 1 + passphrase copy for Wallet 2",
+            "Location 2: Bank or office - Store seed phrase for Wallet 2 + passphrase copy for Wallet 3",
+            "Location 3: Family home or partner's house - Store seed phrase for Wallet 3 + passphrase copy for Wallet 1"
+          ],
+          passphraseStorage: 'Written on paper and stored separately from seed phrases in each location'
+        },
+        documentation: {
+          items: [
+            'Written instructions for heirs (non-technical)',
+            'Hardware wallet serial numbers and locations',
+            'Wallet software used and version',
+            'Derivation paths (BIP84 for native SegWit)',
+            'Approximate holdings (for estate planning)'
+          ],
+          storage: 'Sealed envelope with family or trusted friend/lawyer'
+        }
+      },
+      actionPlan: {
+        purchaseHardware: { action: 'Purchase hardware wallet from official manufacturer', timeframe: 'This week', cost: '$150-200' },
+        createMetalBackup: { action: 'Create metal seed backup (or paper if preferred)', timeframe: 'Within 2 weeks', cost: '$30-100' },
+        generatePassphrase: { action: 'Generate and add passphrase using dice method', timeframe: 'Within 1 month', cost: 'Free' },
+        setupMultisig: { action: 'Set up 2-of-3 multisig with Sparrow Wallet', timeframe: 'Within 2 months', cost: '$300-500 (additional hardware)' },
+        implementLiana: { action: 'Implement Liana wallet for inheritance', timeframe: 'Within 3 months', cost: 'Free' },
+        documentEverything: { action: 'Document everything and inform heirs (without revealing secrets)', timeframe: 'Ongoing', cost: 'Free' },
+        lianaMultisig: { action: 'Set up Liana wallet multisign 2-3 with time-locked recovery (primary + recovery key)', cost: '$300-500 (additional hardware)' },
+        lianaTimelock: { action: 'Define timelock period and test recovery simulation' }
+      }
+    },
+
     // Common
     common: {
       loading: 'Loading...',
@@ -2061,6 +2167,112 @@ export const translations = {
         high: 'ALTO',
         medium: 'MEDIO',
         low: 'BAJO'
+      }
+    },
+
+    // Inheritance Plan Generation (Recommendations.js)
+    inheritancePlanGen: {
+      executiveSummary: {
+        excellent: 'Tu puntuación de seguridad Bitcoin de {score} indica una configuración excelente. Este plan te ayudará a optimizar tu estrategia de herencia y añadir las capas finales de protección.',
+        moderate: 'Tu puntuación de seguridad Bitcoin de {score} muestra una base moderada. Este plan aborda las brechas críticas y establece una estrategia de herencia adecuada.',
+        needsWork: 'Tu puntuación de seguridad Bitcoin de {score} indica vulnerabilidades significativas. Este plan proporciona una revisión completa de seguridad y establece protocolos de herencia apropiados.'
+      },
+      walletRecommendation: {
+        primary: 'Sparrow Wallet',
+        description: 'Sparrow es una wallet Bitcoin de escritorio enfocada en seguridad y privacidad. Soporta todas las hardware wallets y es perfecta tanto para configuraciones singlesig como multisig.',
+        downloadUrl: 'https://sparrowwallet.com',
+        setupSteps: [
+          'Descargar del sitio oficial (verificar firma)',
+          'Conectar tu hardware wallet vía USB',
+          'Crear nueva wallet o importar existente',
+          'Habilitar Tor para privacidad (opcional pero recomendado)',
+          'Verificar direcciones de recepción en hardware wallet'
+        ]
+      },
+      multisigPlan: {
+        type: '2-de-3',
+        description: 'Un multisig 2-de-3 requiere cualquier 2 de 3 llaves privadas para autorizar una transacción. Esto protege contra pérdida, robo y puntos únicos de falla.',
+        hardware: {
+          coldcard: { device: 'Coldcard Mk4', purpose: 'Dispositivo de firma primario (contigo)', cost: '$150' },
+          bitbox: { device: 'BitBox02', purpose: 'Dispositivo secundario (caja de seguridad)', cost: '$180' },
+          jade: { device: 'Jade Wallet', purpose: 'Dispositivo de herencia (con heredero/abogado)', cost: '$150' }
+        },
+        setupSteps: [
+          'Crear primer keystore con Coldcard',
+          'Crear segundo keystore con BitBox02',
+          'Crear tercer keystore con Jade Wallet',
+          'En Sparrow: Archivo > Nueva Wallet > Multi Firma',
+          'Establecer M de N a 2-de-3',
+          'Importar los tres xpubs',
+          'Verificar que las direcciones coincidan en todos los dispositivos',
+          'Enviar pequeña transacción de prueba',
+          'Documentar todo para herencia'
+        ]
+      },
+      inheritanceStrategy: {
+        recommended: 'Liana Wallet',
+        description: 'Liana es una wallet Bitcoin con herencia integrada mediante rutas de recuperación con time-lock. Si no mueves tus monedas por un período especificado, una llave de recuperación puede acceder a ellas.',
+        howItWorks: [
+          'Configurar llave primaria (tu hardware wallet)',
+          'Configurar llave de recuperación (hardware wallet del heredero)',
+          'Definir timelock (ej., 365 días de inactividad)',
+          'Después del timelock, la llave de recuperación puede gastar',
+          'Las transacciones regulares reinician el temporizador',
+          'No se necesita tercero - completamente sin confianza'
+        ],
+        setupUrl: 'https://wizardsardine.com/liana/',
+        considerations: [
+          'El poseedor de la llave de recuperación no puede acceder a los fondos antes del timelock',
+          'Debes realizar transacciones periódicamente para reiniciar el temporizador',
+          'Considera un timelock más corto (180 días) con recordatorio regular de check-in',
+          'El heredero necesita habilidad técnica o instrucciones claras'
+        ]
+      },
+      backupStrategy: {
+        passphraseGeneration: {
+          method: 'Creación de Frase de Paso con Dados',
+          description: 'La mejor forma de crear una frase de paso segura es usando dados para verdadera aleatoriedad. Tira 5 dados, convierte los números a una palabra de la lista BIP39. Repite 3 o 5 veces y esa será tu frase de paso.',
+          steps: [
+            'Consigue 5 dados',
+            'Tíralos para obtener 5 números',
+            'Concatena los números (ej., 1,4,2,6,3 → 14263)',
+            'Busca la palabra BIP39 correspondiente',
+            'Repite 3 o 5 veces para la frase de paso completa',
+            'Escríbela en papel y guárdala de forma segura'
+          ]
+        },
+        seedPhrases: {
+          storage: 'Placas de respaldo en metal o papel (según preferencia)',
+          model: 'Modelo de Recuperación 2-de-3 (Conocimiento Dividido)',
+          modelDescription: 'Distribuye tu frase semilla y frase de paso en 3 ubicaciones. Ninguna ubicación contiene tanto la frase semilla como su frase de paso. De esta forma, si una ubicación se compromete, el atacante no puede acceder a tus fondos. Para recuperar, combina información de cualquier dos ubicaciones.',
+          security: 'Usa bolsas con evidencia de manipulación que deben dañarse para abrirse. Esto te alerta si los respaldos han sido accedidos.',
+          locations: [
+            'Ubicación 1: Caja fuerte en casa - Guardar frase semilla de Wallet 1 + copia de frase de paso de Wallet 2',
+            'Ubicación 2: Banco u oficina - Guardar frase semilla de Wallet 2 + copia de frase de paso de Wallet 3',
+            'Ubicación 3: Casa familiar o de pareja - Guardar frase semilla de Wallet 3 + copia de frase de paso de Wallet 1'
+          ],
+          passphraseStorage: 'Escrita en papel y guardada separada de las frases semilla en cada ubicación'
+        },
+        documentation: {
+          items: [
+            'Instrucciones escritas para herederos (no técnicas)',
+            'Números de serie y ubicaciones de hardware wallets',
+            'Software de wallet usado y versión',
+            'Rutas de derivación (BIP84 para SegWit nativo)',
+            'Tenencias aproximadas (para planificación patrimonial)'
+          ],
+          storage: 'Sobre sellado con familia o amigo/abogado de confianza'
+        }
+      },
+      actionPlan: {
+        purchaseHardware: { action: 'Comprar hardware wallet del fabricante oficial', timeframe: 'Esta semana', cost: '$150-200' },
+        createMetalBackup: { action: 'Crear respaldo de semilla en metal (o papel si se prefiere)', timeframe: 'En 2 semanas', cost: '$30-100' },
+        generatePassphrase: { action: 'Generar y añadir frase de paso usando método de dados', timeframe: 'En 1 mes', cost: 'Gratis' },
+        setupMultisig: { action: 'Configurar multisig 2-de-3 con Sparrow Wallet', timeframe: 'En 2 meses', cost: '$300-500 (hardware adicional)' },
+        implementLiana: { action: 'Implementar wallet Liana para herencia', timeframe: 'En 3 meses', cost: 'Gratis' },
+        documentEverything: { action: 'Documentar todo e informar a herederos (sin revelar secretos)', timeframe: 'Continuo', cost: 'Gratis' },
+        lianaMultisig: { action: 'Configurar wallet Liana multisig 2-3 con recuperación time-locked (llave primaria + de recuperación)', cost: '$300-500 (hardware adicional)' },
+        lianaTimelock: { action: 'Definir período de timelock y probar simulación de recuperación' }
       }
     },
 

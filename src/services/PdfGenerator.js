@@ -27,7 +27,7 @@ export const generatePdfContent = (user, score, answers, lang = 'en') => {
   const t = translations[lang] || translations.en;
   const pdf = t.pdf;
 
-  const plan = generateInheritancePlan(answers, score, user.email);
+  const plan = generateInheritancePlan(answers, score, user.email, lang);
   const recommendations = generateRecommendations(answers, score);
 
   // Translate recommendations

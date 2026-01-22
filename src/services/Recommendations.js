@@ -418,8 +418,12 @@ export const getLockedTipsPreview = (recommendations) => {
   }));
 };
 
-// Generate full inheritance plan based on answers
-export const generateInheritancePlan = (answers, score, userEmail) => {
+// Generate full inheritance plan based on answers (with i18n support)
+export const generateInheritancePlan = (answers, score, userEmail, lang = 'en') => {
+  // Import translations dynamically to avoid circular dependencies
+  const { translations } = require('../i18n/translations');
+  const t = translations[lang]?.inheritancePlanGen || translations.en.inheritancePlanGen;
+
   const plan = {
     generatedAt: new Date().toISOString(),
     userEmail,
@@ -445,184 +449,141 @@ export const generateInheritancePlan = (answers, score, userEmail) => {
     coldStoragePercent: answers.q8 === 'all' ? 95 : answers.q8 === 'most' ? 70 : answers.q8 === 'some' ? 30 : 5
   };
 
-  // Executive Summary
+  // Executive Summary (translated)
   if (score >= 80) {
-    plan.executiveSummary = `Your Bitcoin security score of ${score} indicates an excellent setup. This plan will help you optimize your inheritance strategy and add the final layers of protection.`;
+    plan.executiveSummary = t.executiveSummary.excellent.replace('{score}', score);
   } else if (score >= 50) {
-    plan.executiveSummary = `Your Bitcoin security score of ${score} shows a moderate foundation. This plan addresses critical gaps and establishes a proper inheritance strategy.`;
+    plan.executiveSummary = t.executiveSummary.moderate.replace('{score}', score);
   } else {
-    plan.executiveSummary = `Your Bitcoin security score of ${score} indicates significant vulnerabilities. This plan provides a complete security overhaul and establishes proper inheritance protocols.`;
+    plan.executiveSummary = t.executiveSummary.needsWork.replace('{score}', score);
   }
 
-  // Wallet Recommendation
+  // Wallet Recommendation (translated)
   if (!plan.currentSetup.hasMultisig && score < 80) {
     plan.walletRecommendation = {
-      primary: 'Sparrow Wallet',
-      description: 'Sparrow is a desktop Bitcoin wallet focused on security and privacy. It supports all hardware wallets and is perfect for both singlesig and multisig setups.',
-      downloadUrl: 'https://sparrowwallet.com',
-      setupSteps: [
-        'Download from official website (verify signature)',
-        'Connect your hardware wallet via USB',
-        'Create new wallet or import existing',
-        'Enable Tor for privacy (optional but recommended)',
-        'Verify receiving addresses on hardware wallet'
-      ]
+      primary: t.walletRecommendation.primary,
+      description: t.walletRecommendation.description,
+      downloadUrl: t.walletRecommendation.downloadUrl,
+      setupSteps: t.walletRecommendation.setupSteps
     };
   }
 
-  // Multisig Plan
+  // Multisig Plan (translated)
   if (!plan.currentSetup.hasMultisig) {
     plan.multisigPlan = {
       recommended: true,
-      type: '2-of-3',
-      description: 'A 2-of-3 multisig requires any 2 of 3 private keys to authorize a transaction. This protects against loss, theft, and single points of failure.',
+      type: t.multisigPlan.type,
+      description: t.multisigPlan.description,
       hardware: [
-        { device: 'Coldcard Mk4', purpose: 'Primary signing device (with you)', cost: '$150' },
-        { device: 'BitBox02', purpose: 'Secondary device (safety deposit)', cost: '$180' },
-        { device: 'Jade Wallet', purpose: 'Inheritance device (with heir/lawyer)', cost: '$150' }
+        { device: t.multisigPlan.hardware.coldcard.device, purpose: t.multisigPlan.hardware.coldcard.purpose, cost: t.multisigPlan.hardware.coldcard.cost },
+        { device: t.multisigPlan.hardware.bitbox.device, purpose: t.multisigPlan.hardware.bitbox.purpose, cost: t.multisigPlan.hardware.bitbox.cost },
+        { device: t.multisigPlan.hardware.jade.device, purpose: t.multisigPlan.hardware.jade.purpose, cost: t.multisigPlan.hardware.jade.cost }
       ],
       softwareSetup: {
-        name: 'Sparrow Wallet',
-        steps: [
-          'Create first keystore with Coldcard',
-          'Create second keystore with BitBox02',
-          'Create third keystore with Jade Wallet',
-          'In Sparrow: File > New Wallet > Multi Signature',
-          'Set M of N to 2-of-3',
-          'Import all three xpubs',
-          'Verify addresses match on all devices',
-          'Send small test transaction',
-          'Document everything for inheritance'
-        ]
+        name: t.walletRecommendation.primary,
+        steps: t.multisigPlan.setupSteps
       }
     };
   }
 
-  // Liana recommendation
+  // Liana recommendation (translated)
   plan.inheritanceStrategy = {
-    recommended: 'Liana Wallet',
-    description: 'Liana is a Bitcoin wallet with built-in inheritance through time-locked recovery paths. If you don\'t move your coins for a specified period, a recovery key can access them.',
-    howItWorks: [
-      'Set up primary key (your hardware wallet)',
-      'Set up recovery key (heir\'s hardware wallet)',
-      'Define timelock (e.g., 365 days of inactivity)',
-      'After timelock, recovery key can spend',
-      'Regular transactions reset the timer',
-      'No third party needed - fully trustless'
-    ],
-    setupUrl: 'https://wizardsardine.com/liana/',
-    considerations: [
-      'Recovery key holder cannot access funds before timelock',
-      'You must transact periodically to reset timer',
-      'Consider shorter timelock (180 days) with regular check-in reminder',
-      'Heir needs technical ability or clear instructions'
-    ]
+    recommended: t.inheritanceStrategy.recommended,
+    description: t.inheritanceStrategy.description,
+    howItWorks: t.inheritanceStrategy.howItWorks,
+    setupUrl: t.inheritanceStrategy.setupUrl,
+    considerations: t.inheritanceStrategy.considerations
   };
 
-  // Backup Strategy (ya actualizada previamente)
+  // Backup Strategy (translated)
   plan.backupStrategy = {
     passphraseGeneration: {
-      method: 'Dice-based Passphrase Creation',
-      description: 'The best way to create a secure passphrase is using dice for true randomness. Roll 5 dice, convert the numbers to a word from the BIP39 wordlist. Repeat 3 or 5 times and that will be your passphrase.',
-      steps: [
-        'Gather 5 dice',
-        'Roll them to get 5 numbers',
-        'Concatenate the numbers (e.g., 1,4,2,6,3 → 14263)',
-        'Look up the corresponding BIP39 word',
-        'Repeat 3 or 5 times for the full passphrase',
-        'Write it on paper and store securely'
-      ]
+      method: t.backupStrategy.passphraseGeneration.method,
+      description: t.backupStrategy.passphraseGeneration.description,
+      steps: t.backupStrategy.passphraseGeneration.steps
     },
     seedPhrases: {
-      storage: 'Metal backup plates or paper (as preferred)',
-      model: '2-of-3 Recovery Model (Split Knowledge)',
-      modelDescription: 'Distribute your seed phrase and passphrase across 3 locations. No single location contains both the seed phrase and its passphrase. This way, if one location is compromised, the attacker cannot access your funds. To recover, combine information from any two locations.',
-      security: 'Use tamper-evident bags that must be damaged to open. This alerts you if backups have been accessed.',
-      locations: [
-        'Location 1: Home safe - Store seed phrase for Wallet 1 + passphrase copy for Wallet 2',
-        'Location 2: Bank or office - Store seed phrase for Wallet 2 + passphrase copy for Wallet 3',
-        'Location 3: Family home or partner\'s house - Store seed phrase for Wallet 3 + passphrase copy for Wallet 1'
-      ],
-      passphraseStorage: 'Written on paper and stored separately from seed phrases in each location'
+      storage: t.backupStrategy.seedPhrases.storage,
+      model: t.backupStrategy.seedPhrases.model,
+      modelDescription: t.backupStrategy.seedPhrases.modelDescription,
+      security: t.backupStrategy.seedPhrases.security,
+      locations: t.backupStrategy.seedPhrases.locations,
+      passphraseStorage: t.backupStrategy.seedPhrases.passphraseStorage
     },
     documentation: {
-      items: [
-        'Written instructions for heirs (non-technical)',
-        'Hardware wallet serial numbers and locations',
-        'Wallet software used and version',
-        'Derivation paths (BIP84 for native SegWit)',
-        'Approximate holdings (for estate planning)'
-      ],
-      storage: 'Sealed envelope with family or trusted friend/lawyer'
+      items: t.backupStrategy.documentation.items,
+      storage: t.backupStrategy.documentation.storage
     }
   };
 
-  // Action Plan dinámico con tus if originales
+  // Action Plan (translated)
   let tempActionPlan = [];
 
   if (!plan.currentSetup.hasHardwareWallet) {
     tempActionPlan.push({
       priority: 1,
-      action: 'Purchase hardware wallet from official manufacturer',
-      timeframe: 'This week',
-      cost: '$150-200'
+      action: t.actionPlan.purchaseHardware.action,
+      timeframe: t.actionPlan.purchaseHardware.timeframe,
+      cost: t.actionPlan.purchaseHardware.cost
     });
   }
 
   if (!plan.currentSetup.hasMetalBackup) {
     tempActionPlan.push({
       priority: 2,
-      action: 'Create metal seed backup (or paper if preferred)',
-      timeframe: 'Within 2 weeks',
-      cost: '$30-100'
+      action: t.actionPlan.createMetalBackup.action,
+      timeframe: t.actionPlan.createMetalBackup.timeframe,
+      cost: t.actionPlan.createMetalBackup.cost
     });
   }
 
   if (!plan.currentSetup.hasPassphrase) {
     tempActionPlan.push({
       priority: 3,
-      action: 'Generate and add passphrase using dice method',
-      timeframe: 'Within 1 month',
-      cost: 'Free'
+      action: t.actionPlan.generatePassphrase.action,
+      timeframe: t.actionPlan.generatePassphrase.timeframe,
+      cost: t.actionPlan.generatePassphrase.cost
     });
   }
 
   if (!plan.currentSetup.hasMultisig) {
     tempActionPlan.push({
       priority: 4,
-      action: 'Set up 2-of-3 multisig with Sparrow Wallet',
-      timeframe: 'Within 2 months',
-      cost: '$300-500 (additional hardware)'
+      action: t.actionPlan.setupMultisig.action,
+      timeframe: t.actionPlan.setupMultisig.timeframe,
+      cost: t.actionPlan.setupMultisig.cost
     });
   }
 
   if (!plan.currentSetup.hasInheritancePlan) {
     tempActionPlan.push({
       priority: 5,
-      action: 'Implement Liana wallet for inheritance',
-      timeframe: 'Within 3 months',
-      cost: 'Free'
+      action: t.actionPlan.implementLiana.action,
+      timeframe: t.actionPlan.implementLiana.timeframe,
+      cost: t.actionPlan.implementLiana.cost
     });
   }
 
   tempActionPlan.push({
     priority: tempActionPlan.length + 1,
-    action: 'Document everything and inform heirs (without revealing secrets)',
-    timeframe: 'Ongoing',
-    cost: 'Free'
+    action: t.actionPlan.documentEverything.action,
+    timeframe: t.actionPlan.documentEverything.timeframe,
+    cost: t.actionPlan.documentEverything.cost
   });
 
-  // Crear los dos caminos siempre
+  // Create both paths
   plan.actionPlanSparrow = tempActionPlan.map(item => ({ ...item }));
 
   plan.actionPlanLiana = tempActionPlan.map(item => {
     let newItem = { ...item };
-    if (newItem.action.includes('multisig')) {
-      newItem.action = 'Set up Liana wallet multisign 2-3 with time-locked recovery (primary + recovery key)';
-      newItem.cost = '$300-500 (additional hardware)';
+    // Replace multisig step with Liana multisig
+    if (newItem.action === t.actionPlan.setupMultisig.action) {
+      newItem.action = t.actionPlan.lianaMultisig.action;
+      newItem.cost = t.actionPlan.lianaMultisig.cost;
     }
-    if (newItem.action.includes('Liana wallet for inheritance')) {
-      newItem.action = 'Define timelock period and test recovery simulation';
+    // Replace Liana inheritance step
+    if (newItem.action === t.actionPlan.implementLiana.action) {
+      newItem.action = t.actionPlan.lianaTimelock.action;
     }
     return newItem;
   });
