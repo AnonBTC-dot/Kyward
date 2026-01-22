@@ -713,6 +713,309 @@ export const translations = {
       }
     },
 
+    // PDF Report
+    pdf: {
+      title: 'Bitcoin Security & Inheritance Plan',
+      confidential: 'CONFIDENTIAL - STORE SECURELY',
+      generatedFor: 'Personalized for',
+      generatedOn: 'Generated',
+
+      score: {
+        excellent: 'Excellent Security',
+        moderate: 'Moderate Security',
+        needsImprovement: 'Needs Improvement'
+      },
+
+      sections: {
+        executiveSummary: 'Executive Summary',
+        currentSetup: 'Current Setup Analysis',
+        priorityRecommendations: 'Priority Recommendations',
+        walletSetup: 'Recommended Wallet Setup',
+        inheritanceStrategy: 'Inheritance Strategy',
+        backupStrategy: 'Backup Strategy',
+        actionPlan: 'Your Action Plan',
+        securityChecklist: 'Quarterly Security Review Checklist',
+        annualReview: 'Annual Review'
+      },
+
+      currentSetup: {
+        hardwareWallet: 'Hardware Wallet',
+        metalBackup: 'Metal Backup',
+        passphrase: 'Passphrase',
+        multiSignature: 'Multi-signature',
+        coldStorage: 'Cold Storage',
+        inheritancePlan: 'Inheritance Plan',
+        yes: 'Yes',
+        no: 'No',
+        criticalRisk: 'No - Critical Risk',
+        recommended: 'No - Recommended',
+        documented: 'Documented',
+        notDocumented: 'Not Documented - Critical',
+        ofHoldings: 'of holdings'
+      },
+
+      sparrow: {
+        title: 'Primary Wallet Recommendation: Sparrow Wallet',
+        description: 'Sparrow is a desktop Bitcoin wallet focused on security, privacy, and self-custody. It excels at both single-signature and multi-signature setups.',
+        download: 'Download',
+        setupSteps: 'Setup Steps',
+        steps: [
+          'Download from official website only',
+          'Verify the GPG signature before installing',
+          'Connect your hardware wallet via USB',
+          'Create new wallet or import existing',
+          'Enable Tor for enhanced privacy (optional but recommended)',
+          'Always verify addresses on your hardware wallet screen'
+        ]
+      },
+
+      coldStorage: {
+        title: 'Cold Storage Wallet Options (Bitcoin Mainnet)',
+        description: 'For long-term cold storage (minimal interaction, maximum security), consider these mobile/desktop wallets designed specifically for Bitcoin mainnet use:',
+        blueWallet: 'Mobile-first, supports watch-only mode, Lightning + on-chain, easy to use for cold storage with air-gapped signing via PSBT export/import.',
+        jade: 'Hardware wallet with strong cold storage capabilities (air-gapped via QR codes), fully open-source, integrates well with Green wallet or Sparrow for offline signing.',
+        bullBitcoin: 'Focused on non-KYC Bitcoin privacy, supports cold storage setups with strong emphasis on self-custody and Canadian-friendly features (good for geographic diversification).',
+        bestPractice: 'Best Practice',
+        bestPracticeText: 'Use in watch-only mode on online device, sign offline/air-gapped, never expose private keys online.'
+      },
+
+      paths: {
+        chooseTitle: 'Choose Your Security & Inheritance Path',
+        chooseDesc: 'You have two strong options depending on your needs: active management with multisig (Sparrow) or automated trustless inheritance (Liana). Both paths are detailed below so you can compare them.',
+
+        sparrow: {
+          title: 'Path 1: Multisig with Sparrow (Best for Active Management)',
+          description: 'Use Sparrow to create a 2-of-3 multisig setup for maximum security against loss or theft while maintaining full control.',
+          hardware: 'Recommended Hardware',
+          device: 'Device',
+          purpose: 'Purpose',
+          location: 'Location Suggestion',
+          coldcard: 'Primary signing device',
+          coldcardLocation: 'With you (home safe)',
+          bitbox: 'Secondary device',
+          bitboxLocation: 'Bank safety deposit box/Office/Partners Office',
+          jade: 'Inheritance / backup device',
+          jadeLocation: 'Trusted heir/lawyer/Close Family',
+          setupSteps: 'Setup Steps in Sparrow',
+          steps: [
+            'Create keystore for each hardware wallet',
+            'File → New Wallet → Multi Signature',
+            'Set threshold to 2-of-3',
+            'Import all three xpubs',
+            'Verify all devices show the same addresses',
+            'Send a small test transaction',
+            'Document everything for inheritance'
+          ],
+          bestFor: 'Best for',
+          bestForText: 'Users who want full control, frequent transactions, and strong protection against single-point failures.'
+        },
+
+        liana: {
+          title: 'Path 2: Time-locked Inheritance with Liana (Best for Hands-off Inheritance)',
+          description: 'Liana adds automatic inheritance via time-locks — if you don\'t move funds for a set period, a recovery key (held by your heir) can access them. No third party required.',
+          website: 'Website',
+          howItWorks: 'How It Works',
+          steps: [
+            'Set up primary key (your hardware wallet)',
+            'Set up recovery key (heir\'s hardware wallet)',
+            'Define a timelock (e.g., 365 days of inactivity)',
+            'After timelock expires, recovery key can spend',
+            'Your regular transactions automatically reset the timer',
+            'Fully trustless — no one can access funds early'
+          ],
+          considerations: 'Important Considerations',
+          considerationsList: [
+            'Recovery key holder cannot access funds before timelock',
+            'You must make occasional transactions to prevent accidental activation',
+            'Consider 180-day timelock with calendar reminders for check-ins',
+            'Heir needs basic technical ability or very clear written instructions'
+          ],
+          bestFor: 'Best for',
+          bestForText: 'Users who want automatic, trustless inheritance without relying on lawyers or services, even if it means less frequent manual control.'
+        }
+      },
+
+      inheritance: {
+        bothPathsValid: 'Both paths (Sparrow multisig or Liana time-lock) are valid and secure. Choose based on whether you prefer active control or automated inheritance protection.',
+        documentation: 'Documentation for Heirs',
+        documentationDesc: 'Prepare the following documents and store them securely:',
+        documents: [
+          'Letter of Explanation: What Bitcoin is and why it\'s valuable',
+          'Asset List: Approximate holdings (not exact amounts)',
+          'Hardware Locations: Where devices are stored',
+          'Recovery Instructions: Step-by-step guide for non-technical heirs',
+          'Contact List: Technical people who can help if needed'
+        ]
+      },
+
+      backup: {
+        passphraseTitle: 'Passphrase Generation (Most Secure Method)',
+        passphraseDesc: 'Use physical dice for true randomness — never generate digitally.',
+        passphraseSteps: [
+          'Get 5 standard six-sided dice',
+          'Roll all dice and note the numbers in order',
+          'Concatenate into a 5-digit number (e.g., 14263)',
+          'Find the matching word in the official BIP39 English wordlist (print it offline)',
+          'Repeat 3–5 times to create your passphrase (e.g., "apple zebra moon river stone")',
+          'Write it on paper and store securely in separate locations'
+        ],
+        seedStorage: 'Seed Phrase Storage - 2-of-3 Split Knowledge Model',
+        seedStorageDesc: 'To achieve maximum security, we use a 2-of-3 recovery model: your seed phrase and passphrase are split across 3 separate locations. No single location contains both. If one location is lost or compromised, the other two allow full recovery. If only one is found, the funds remain inaccessible.',
+        exactDistribution: 'Exact Distribution (follow this exactly):',
+        location1: 'Location 1 (Home safe or personal secure spot):',
+        location1Items: ['Seed phrase copy #1', 'Passphrase copy #2', 'Passphrase copy #3'],
+        location2: 'Location 2 (Bank safety deposit box, office safe, or custodian):',
+        location2Items: ['Seed phrase copy #2', 'Passphrase copy #3', 'Passphrase copy #1'],
+        location3: 'Location 3 (Trusted family member, partner, or secondary property):',
+        location3Items: ['Seed phrase copy #3', 'Passphrase copy #1', 'Passphrase copy #2'],
+        recoveryWorks: 'How Recovery Works (examples):',
+        recoveryExamples: [
+          'If Location 1 is lost → Use Location 2 + Location 3',
+          'If Location 2 is compromised → Use Location 1 + Location 3',
+          'If Location 3 is inaccessible → Use Location 1 + Location 2'
+        ],
+        physicalSecurity: 'Physical Security Requirement',
+        physicalSecurityText: 'Use tamper-evident security bags (sealed bags that break when opened) in all 3 locations. If any bag is damaged or shows signs of tampering, immediately create new backups and move funds to a new wallet.',
+        additionalRecs: 'Additional Recommendations',
+        additionalRecsList: [
+          'Never store seed and its own passphrase in the same location',
+          'Label each backup clearly (e.g., "Seed #1 - Do not open unless emergency")',
+          'Use metal plates (Cryptosteel, Billfodl) or acid-free archival paper',
+          'Test readability of all backups before sealing'
+        ],
+        passphraseStorage: 'Passphrase Storage',
+        passphraseStorageList: [
+          'Written on paper (never memorized only)',
+          'Store backup separately from seed phrase (never in same location)',
+          'Never store passphrase with seed phrase in any location'
+        ],
+        docStorage: 'Documentation Storage',
+        docStorageList: [
+          'Physical copy in sealed envelope in a secure place of your choice',
+          'Check annually or when setup changes'
+        ]
+      },
+
+      actionPlan: {
+        description: 'Below are the detailed action plans for both paths. You can follow the one that best matches your preference (or compare them).',
+        sparrowTitle: 'Path 1: Sparrow Multisig Action Plan (Active Control)',
+        sparrowDesc: 'Steps if you choose multisig management with Sparrow Wallet.',
+        lianaTitle: 'Path 2: Liana Time-lock Action Plan (Automated Inheritance)',
+        lianaDesc: 'Steps if you choose time-locked inheritance with Liana Wallet.'
+      },
+
+      checklist: {
+        quarterly: [
+          'Verify backup locations are secure and accessible',
+          'Test that seed phrase backups are readable',
+          'Update wallet software (verify signatures first)',
+          'Review transaction history for anomalies',
+          'Check hardware wallet firmware is current',
+          'Update inheritance documentation if needed',
+          'Confirm heirs know how to reach this documentation'
+        ],
+        annual: [
+          'Full recovery test on secondary device',
+          'Consider upgrading security setup',
+          'Update estate planning documents',
+          'Review overall security posture'
+        ]
+      },
+
+      footer: {
+        tagline: 'Bitcoin Security Made Simple',
+        confidentialNote: 'This document is confidential. Store it securely and never share your seed phrase.'
+      },
+
+      quickActionPlans: {
+        title: 'Quick Action Plans - Sentinel',
+        description: 'With Sentinel, you can add a query whenever you want to monitor your Bitcoin security setup and receive real-time alerts.',
+        pricing: 'Pricing Structure',
+        time: 'Time',
+        cost: 'Cost',
+        firstHour: 'First hour',
+        subsequentHours: 'Subsequent hours',
+        perHour: '/hour',
+        features: 'Features included:',
+        featuresList: [
+          'Add custom queries anytime',
+          'Real-time monitoring and alerts',
+          'On-demand security analysis',
+          'Flexible hourly support'
+        ]
+      }
+    },
+
+    // PDF Recommendations (translated)
+    pdfRecommendations: {
+      hardware_wallet: {
+        title: 'Use a Hardware Wallet',
+        shortTip: 'Move your Bitcoin to a hardware wallet for maximum security.'
+      },
+      seed_backup_metal: {
+        title: 'Create Metal Seed Backup',
+        shortTip: 'Store your seed phrase on metal for fire/water protection.'
+      },
+      multiple_backups: {
+        title: 'Distribute Backup Locations',
+        shortTip: 'Store seed phrase copies in multiple secure locations.'
+      },
+      passphrase_setup: {
+        title: 'Add a Passphrase (25th Word)',
+        shortTip: 'Add an extra layer of security with a BIP39 passphrase.'
+      },
+      recovery_test: {
+        title: 'Test Your Recovery Process',
+        shortTip: 'Verify you can actually recover your wallet from backup.'
+      },
+      multisig_setup: {
+        title: 'Consider Multi-Signature Setup',
+        shortTip: 'Require multiple keys to spend your Bitcoin for ultimate security.'
+      },
+      address_verification: {
+        title: 'Always Verify Addresses on Device',
+        shortTip: 'Confirm receiving addresses on your hardware wallet screen.'
+      },
+      cold_storage: {
+        title: 'Move More Bitcoin to Cold Storage',
+        shortTip: 'Keep 90%+ of your Bitcoin in cold storage, not on exchanges.'
+      },
+      address_reuse: {
+        title: 'Stop Reusing Bitcoin Addresses',
+        shortTip: 'Use a new address for each transaction to protect your privacy.'
+      },
+      verify_updates: {
+        title: 'Verify Software Signatures',
+        shortTip: 'Always verify cryptographic signatures before updating wallet software.'
+      },
+      seed_security: {
+        title: 'Never Share Your Seed Phrase',
+        shortTip: 'Your seed phrase should be known only by you.'
+      },
+      dedicated_device: {
+        title: 'Use a Dedicated Bitcoin Device',
+        shortTip: 'Use a separate device for Bitcoin transactions to minimize attack surface.'
+      },
+      inheritance_plan: {
+        title: 'Create an Inheritance Plan',
+        shortTip: 'Ensure your Bitcoin can be accessed by heirs if something happens to you.'
+      },
+      utxo_management: {
+        title: 'Learn UTXO Management',
+        shortTip: 'Understanding coin control improves privacy and reduces fees.'
+      },
+      security_review: {
+        title: 'Schedule Regular Security Reviews',
+        shortTip: 'Review your security setup at least quarterly.'
+      },
+      priority: {
+        critical: 'CRITICAL',
+        high: 'HIGH',
+        medium: 'MEDIUM',
+        low: 'LOW'
+      }
+    },
+
     // Common
     common: {
       loading: 'Loading...',
@@ -1455,6 +1758,309 @@ export const translations = {
       physicalSecurity: {
         title: 'Seguridad Física',
         text: 'Considera las amenazas de seguridad física. No divulgues públicamente tus tenencias de Bitcoin, y ten cuidado con quién sabe que posees Bitcoin.'
+      }
+    },
+
+    // PDF Report
+    pdf: {
+      title: 'Plan de Seguridad y Herencia Bitcoin',
+      confidential: 'CONFIDENCIAL - GUARDAR DE FORMA SEGURA',
+      generatedFor: 'Personalizado para',
+      generatedOn: 'Generado',
+
+      score: {
+        excellent: 'Seguridad Excelente',
+        moderate: 'Seguridad Moderada',
+        needsImprovement: 'Necesita Mejoras'
+      },
+
+      sections: {
+        executiveSummary: 'Resumen Ejecutivo',
+        currentSetup: 'Análisis de Configuración Actual',
+        priorityRecommendations: 'Recomendaciones Prioritarias',
+        walletSetup: 'Configuración de Wallet Recomendada',
+        inheritanceStrategy: 'Estrategia de Herencia',
+        backupStrategy: 'Estrategia de Respaldo',
+        actionPlan: 'Tu Plan de Acción',
+        securityChecklist: 'Lista de Verificación Trimestral de Seguridad',
+        annualReview: 'Revisión Anual'
+      },
+
+      currentSetup: {
+        hardwareWallet: 'Hardware Wallet',
+        metalBackup: 'Respaldo en Metal',
+        passphrase: 'Frase de Paso',
+        multiSignature: 'Multi-firma',
+        coldStorage: 'Almacenamiento Frío',
+        inheritancePlan: 'Plan de Herencia',
+        yes: 'Sí',
+        no: 'No',
+        criticalRisk: 'No - Riesgo Crítico',
+        recommended: 'No - Recomendado',
+        documented: 'Documentado',
+        notDocumented: 'No Documentado - Crítico',
+        ofHoldings: 'de tenencias'
+      },
+
+      sparrow: {
+        title: 'Wallet Principal Recomendada: Sparrow Wallet',
+        description: 'Sparrow es una wallet Bitcoin de escritorio enfocada en seguridad, privacidad y auto-custodia. Destaca tanto en configuraciones de firma única como multi-firma.',
+        download: 'Descargar',
+        setupSteps: 'Pasos de Configuración',
+        steps: [
+          'Descargar solo del sitio oficial',
+          'Verificar la firma GPG antes de instalar',
+          'Conectar tu hardware wallet vía USB',
+          'Crear nueva wallet o importar existente',
+          'Habilitar Tor para mayor privacidad (opcional pero recomendado)',
+          'Siempre verificar direcciones en la pantalla de tu hardware wallet'
+        ]
+      },
+
+      coldStorage: {
+        title: 'Opciones de Wallet para Almacenamiento Frío (Bitcoin Mainnet)',
+        description: 'Para almacenamiento frío a largo plazo (mínima interacción, máxima seguridad), considera estas wallets móviles/escritorio diseñadas específicamente para Bitcoin mainnet:',
+        blueWallet: 'Enfocada en móvil, soporta modo watch-only, Lightning + on-chain, fácil de usar para almacenamiento frío con firma air-gapped vía exportación/importación de PSBT.',
+        jade: 'Hardware wallet con fuertes capacidades de almacenamiento frío (air-gapped vía códigos QR), completamente open-source, se integra bien con Green wallet o Sparrow para firma offline.',
+        bullBitcoin: 'Enfocada en privacidad Bitcoin sin KYC, soporta configuraciones de almacenamiento frío con fuerte énfasis en auto-custodia y características amigables para Canadá (bueno para diversificación geográfica).',
+        bestPractice: 'Mejor Práctica',
+        bestPracticeText: 'Usar en modo watch-only en dispositivo online, firmar offline/air-gapped, nunca exponer llaves privadas online.'
+      },
+
+      paths: {
+        chooseTitle: 'Elige Tu Camino de Seguridad y Herencia',
+        chooseDesc: 'Tienes dos opciones sólidas según tus necesidades: gestión activa con multisig (Sparrow) o herencia automatizada sin confianza (Liana). Ambos caminos se detallan a continuación para que puedas compararlos.',
+
+        sparrow: {
+          title: 'Camino 1: Multisig con Sparrow (Mejor para Gestión Activa)',
+          description: 'Usa Sparrow para crear una configuración multisig 2-de-3 para máxima seguridad contra pérdida o robo manteniendo control total.',
+          hardware: 'Hardware Recomendado',
+          device: 'Dispositivo',
+          purpose: 'Propósito',
+          location: 'Ubicación Sugerida',
+          coldcard: 'Dispositivo de firma primario',
+          coldcardLocation: 'Contigo (caja fuerte en casa)',
+          bitbox: 'Dispositivo secundario',
+          bitboxLocation: 'Caja de seguridad bancaria/Oficina/Oficina de socio',
+          jade: 'Dispositivo de herencia / respaldo',
+          jadeLocation: 'Heredero de confianza/abogado/Familia cercana',
+          setupSteps: 'Pasos de Configuración en Sparrow',
+          steps: [
+            'Crear keystore para cada hardware wallet',
+            'Archivo → Nueva Wallet → Multi Firma',
+            'Establecer umbral a 2-de-3',
+            'Importar los tres xpubs',
+            'Verificar que todos los dispositivos muestren las mismas direcciones',
+            'Enviar una pequeña transacción de prueba',
+            'Documentar todo para herencia'
+          ],
+          bestFor: 'Mejor para',
+          bestForText: 'Usuarios que quieren control total, transacciones frecuentes y fuerte protección contra fallos de punto único.'
+        },
+
+        liana: {
+          title: 'Camino 2: Herencia con Time-lock usando Liana (Mejor para Herencia Automatizada)',
+          description: 'Liana añade herencia automática vía time-locks — si no mueves fondos por un período establecido, una llave de recuperación (en manos de tu heredero) puede acceder a ellos. No se requiere tercero.',
+          website: 'Sitio Web',
+          howItWorks: 'Cómo Funciona',
+          steps: [
+            'Configurar llave primaria (tu hardware wallet)',
+            'Configurar llave de recuperación (hardware wallet del heredero)',
+            'Definir un timelock (ej., 365 días de inactividad)',
+            'Después de que expire el timelock, la llave de recuperación puede gastar',
+            'Tus transacciones regulares reinician automáticamente el temporizador',
+            'Completamente sin confianza — nadie puede acceder a los fondos antes'
+          ],
+          considerations: 'Consideraciones Importantes',
+          considerationsList: [
+            'El poseedor de la llave de recuperación no puede acceder a los fondos antes del timelock',
+            'Debes hacer transacciones ocasionales para prevenir activación accidental',
+            'Considera timelock de 180 días con recordatorios de calendario para check-ins',
+            'El heredero necesita habilidad técnica básica o instrucciones escritas muy claras'
+          ],
+          bestFor: 'Mejor para',
+          bestForText: 'Usuarios que quieren herencia automática y sin confianza sin depender de abogados o servicios, aunque signifique menos control manual frecuente.'
+        }
+      },
+
+      inheritance: {
+        bothPathsValid: 'Ambos caminos (multisig Sparrow o time-lock Liana) son válidos y seguros. Elige basándote en si prefieres control activo o protección de herencia automatizada.',
+        documentation: 'Documentación para Herederos',
+        documentationDesc: 'Prepara los siguientes documentos y guárdalos de forma segura:',
+        documents: [
+          'Carta de Explicación: Qué es Bitcoin y por qué es valioso',
+          'Lista de Activos: Tenencias aproximadas (no cantidades exactas)',
+          'Ubicaciones de Hardware: Dónde están guardados los dispositivos',
+          'Instrucciones de Recuperación: Guía paso a paso para herederos no técnicos',
+          'Lista de Contactos: Personas técnicas que pueden ayudar si es necesario'
+        ]
+      },
+
+      backup: {
+        passphraseTitle: 'Generación de Frase de Paso (Método Más Seguro)',
+        passphraseDesc: 'Usa dados físicos para verdadera aleatoriedad — nunca generes digitalmente.',
+        passphraseSteps: [
+          'Consigue 5 dados estándar de seis caras',
+          'Tira todos los dados y anota los números en orden',
+          'Concatena en un número de 5 dígitos (ej., 14263)',
+          'Encuentra la palabra correspondiente en la lista oficial BIP39 en inglés (imprímela offline)',
+          'Repite 3–5 veces para crear tu frase de paso (ej., "apple zebra moon river stone")',
+          'Escríbela en papel y guárdala de forma segura en ubicaciones separadas'
+        ],
+        seedStorage: 'Almacenamiento de Frase Semilla - Modelo de Conocimiento Dividido 2-de-3',
+        seedStorageDesc: 'Para lograr máxima seguridad, usamos un modelo de recuperación 2-de-3: tu frase semilla y frase de paso se dividen en 3 ubicaciones separadas. Ninguna ubicación contiene ambas. Si una ubicación se pierde o compromete, las otras dos permiten recuperación completa. Si solo se encuentra una, los fondos permanecen inaccesibles.',
+        exactDistribution: 'Distribución Exacta (sigue esto exactamente):',
+        location1: 'Ubicación 1 (Caja fuerte en casa o lugar personal seguro):',
+        location1Items: ['Copia de frase semilla #1', 'Copia de frase de paso #2', 'Copia de frase de paso #3'],
+        location2: 'Ubicación 2 (Caja de seguridad bancaria, caja fuerte de oficina, o custodio):',
+        location2Items: ['Copia de frase semilla #2', 'Copia de frase de paso #3', 'Copia de frase de paso #1'],
+        location3: 'Ubicación 3 (Familiar de confianza, pareja, o propiedad secundaria):',
+        location3Items: ['Copia de frase semilla #3', 'Copia de frase de paso #1', 'Copia de frase de paso #2'],
+        recoveryWorks: 'Cómo Funciona la Recuperación (ejemplos):',
+        recoveryExamples: [
+          'Si se pierde Ubicación 1 → Usar Ubicación 2 + Ubicación 3',
+          'Si se compromete Ubicación 2 → Usar Ubicación 1 + Ubicación 3',
+          'Si Ubicación 3 es inaccesible → Usar Ubicación 1 + Ubicación 2'
+        ],
+        physicalSecurity: 'Requisito de Seguridad Física',
+        physicalSecurityText: 'Usa bolsas de seguridad con evidencia de manipulación (bolsas selladas que se rompen al abrirse) en las 3 ubicaciones. Si alguna bolsa está dañada o muestra signos de manipulación, crea inmediatamente nuevos respaldos y mueve los fondos a una nueva wallet.',
+        additionalRecs: 'Recomendaciones Adicionales',
+        additionalRecsList: [
+          'Nunca guardes la semilla y su propia frase de paso en la misma ubicación',
+          'Etiqueta cada respaldo claramente (ej., "Semilla #1 - No abrir excepto emergencia")',
+          'Usa placas de metal (Cryptosteel, Billfodl) o papel de archivo libre de ácido',
+          'Prueba la legibilidad de todos los respaldos antes de sellar'
+        ],
+        passphraseStorage: 'Almacenamiento de Frase de Paso',
+        passphraseStorageList: [
+          'Escrita en papel (nunca solo memorizada)',
+          'Guardar respaldo separado de la frase semilla (nunca en la misma ubicación)',
+          'Nunca guardar frase de paso con frase semilla en ninguna ubicación'
+        ],
+        docStorage: 'Almacenamiento de Documentación',
+        docStorageList: [
+          'Copia física en sobre sellado en un lugar seguro de tu elección',
+          'Revisar anualmente o cuando cambie la configuración'
+        ]
+      },
+
+      actionPlan: {
+        description: 'A continuación están los planes de acción detallados para ambos caminos. Puedes seguir el que mejor se adapte a tu preferencia (o compararlos).',
+        sparrowTitle: 'Camino 1: Plan de Acción Multisig Sparrow (Control Activo)',
+        sparrowDesc: 'Pasos si eliges gestión multisig con Sparrow Wallet.',
+        lianaTitle: 'Camino 2: Plan de Acción Time-lock Liana (Herencia Automatizada)',
+        lianaDesc: 'Pasos si eliges herencia con time-lock con Liana Wallet.'
+      },
+
+      checklist: {
+        quarterly: [
+          'Verificar que las ubicaciones de respaldo sean seguras y accesibles',
+          'Probar que los respaldos de frase semilla sean legibles',
+          'Actualizar software de wallet (verificar firmas primero)',
+          'Revisar historial de transacciones por anomalías',
+          'Verificar que el firmware del hardware wallet esté actualizado',
+          'Actualizar documentación de herencia si es necesario',
+          'Confirmar que los herederos sepan cómo acceder a esta documentación'
+        ],
+        annual: [
+          'Prueba de recuperación completa en dispositivo secundario',
+          'Considerar actualizar configuración de seguridad',
+          'Actualizar documentos de planificación patrimonial',
+          'Revisar postura general de seguridad'
+        ]
+      },
+
+      footer: {
+        tagline: 'Seguridad Bitcoin Simplificada',
+        confidentialNote: 'Este documento es confidencial. Guárdalo de forma segura y nunca compartas tu frase semilla.'
+      },
+
+      quickActionPlans: {
+        title: 'Planes de Acción Rápida - Sentinel',
+        description: 'Con Sentinel, puedes añadir una consulta cuando quieras para monitorear tu configuración de seguridad Bitcoin y recibir alertas en tiempo real.',
+        pricing: 'Estructura de Precios',
+        time: 'Tiempo',
+        cost: 'Costo',
+        firstHour: 'Primera hora',
+        subsequentHours: 'Horas siguientes',
+        perHour: '/hora',
+        features: 'Características incluidas:',
+        featuresList: [
+          'Añadir consultas personalizadas en cualquier momento',
+          'Monitoreo y alertas en tiempo real',
+          'Análisis de seguridad bajo demanda',
+          'Soporte flexible por hora'
+        ]
+      }
+    },
+
+    // PDF Recommendations (translated)
+    pdfRecommendations: {
+      hardware_wallet: {
+        title: 'Usa una Hardware Wallet',
+        shortTip: 'Mueve tu Bitcoin a una hardware wallet para máxima seguridad.'
+      },
+      seed_backup_metal: {
+        title: 'Crea Respaldo de Semilla en Metal',
+        shortTip: 'Guarda tu frase semilla en metal para protección contra fuego/agua.'
+      },
+      multiple_backups: {
+        title: 'Distribuye Ubicaciones de Respaldo',
+        shortTip: 'Guarda copias de la frase semilla en múltiples ubicaciones seguras.'
+      },
+      passphrase_setup: {
+        title: 'Añade una Frase de Paso (Palabra 25)',
+        shortTip: 'Añade una capa extra de seguridad con una frase de paso BIP39.'
+      },
+      recovery_test: {
+        title: 'Prueba Tu Proceso de Recuperación',
+        shortTip: 'Verifica que realmente puedas recuperar tu wallet desde el respaldo.'
+      },
+      multisig_setup: {
+        title: 'Considera Configuración Multi-Firma',
+        shortTip: 'Requiere múltiples llaves para gastar tu Bitcoin para máxima seguridad.'
+      },
+      address_verification: {
+        title: 'Siempre Verifica Direcciones en el Dispositivo',
+        shortTip: 'Confirma direcciones de recepción en la pantalla de tu hardware wallet.'
+      },
+      cold_storage: {
+        title: 'Mueve Más Bitcoin a Almacenamiento Frío',
+        shortTip: 'Mantén 90%+ de tu Bitcoin en almacenamiento frío, no en exchanges.'
+      },
+      address_reuse: {
+        title: 'Deja de Reutilizar Direcciones Bitcoin',
+        shortTip: 'Usa una nueva dirección para cada transacción para proteger tu privacidad.'
+      },
+      verify_updates: {
+        title: 'Verifica Firmas de Software',
+        shortTip: 'Siempre verifica firmas criptográficas antes de actualizar software de wallet.'
+      },
+      seed_security: {
+        title: 'Nunca Compartas Tu Frase Semilla',
+        shortTip: 'Tu frase semilla debe ser conocida solo por ti.'
+      },
+      dedicated_device: {
+        title: 'Usa un Dispositivo Dedicado para Bitcoin',
+        shortTip: 'Usa un dispositivo separado para transacciones Bitcoin para minimizar superficie de ataque.'
+      },
+      inheritance_plan: {
+        title: 'Crea un Plan de Herencia',
+        shortTip: 'Asegura que tu Bitcoin pueda ser accedido por herederos si algo te sucede.'
+      },
+      utxo_management: {
+        title: 'Aprende Gestión de UTXOs',
+        shortTip: 'Entender control de monedas mejora privacidad y reduce comisiones.'
+      },
+      security_review: {
+        title: 'Programa Revisiones de Seguridad Regulares',
+        shortTip: 'Revisa tu configuración de seguridad al menos trimestralmente.'
+      },
+      priority: {
+        critical: 'CRÍTICO',
+        high: 'ALTO',
+        medium: 'MEDIO',
+        low: 'BAJO'
       }
     },
 
