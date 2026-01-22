@@ -8,7 +8,7 @@ import Footer from './Footer';
 import { useLanguage, LanguageToggle } from '../i18n';
 
 const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, onStartAssessment }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [recommendations, setRecommendations] = useState([]);
   const [freeTips, setFreeTips] = useState([]);
   const [lockedTips, setLockedTips] = useState([]);
@@ -1128,7 +1128,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
               </div>
               <button
                 style={styles.reportPdfBtn}
-                onClick={() => openPdfPreview(user, score, answers)}
+                onClick={() => openPdfPreview(user, score, answers, language)}
               >
                 {t.report.premium.downloadButton}
               </button>

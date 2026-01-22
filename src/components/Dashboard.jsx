@@ -20,7 +20,7 @@ const getDailyTipKey = () => {
 };
 
 const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onViewReport }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [copiedPassword, setCopiedPassword] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -452,6 +452,120 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
             );
           })()}
 
+          {/* Quick Action Plans - Request Consultation Time */}
+          {isPremium && (
+            <div style={{
+              margin: '32px 0',
+              padding: '24px',
+              background: 'linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(247,147,26,0.08) 100%)',
+              border: '1px solid rgba(168,85,247,0.3)',
+              borderRadius: '16px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                  <circle cx="14" cy="14" r="12" fill="rgba(168,85,247,0.2)" stroke="#a855f7" strokeWidth="2"/>
+                  <path d="M14 8V14L18 16" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <h3 style={{ color: '#a855f7', margin: 0, fontSize: '18px', fontWeight: '700' }}>
+                  {t.dashboard.quickActions?.consultationTitle || 'Quick Action Plans - Sentinel'}
+                </h3>
+              </div>
+              <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '20px', lineHeight: '1.6' }}>
+                {t.dashboard.quickActions?.consultationDesc || 'Request expert consultation time whenever you need personalized security guidance. Add a query whenever you want.'}
+              </p>
+
+              <div style={{
+                display: 'flex',
+                gap: '16px',
+                flexWrap: 'wrap',
+                marginBottom: '16px'
+              }}>
+                {/* First Hour / Additional Hour Button */}
+                <button
+                  onClick={() => onUpgrade(user.consultationCount > 0 ? 'consultation_additional' : 'consultation')}
+                  style={{
+                    flex: '1',
+                    minWidth: '200px',
+                    padding: '20px',
+                    background: 'linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(168,85,247,0.05) 100%)',
+                    border: '2px solid rgba(168,85,247,0.4)',
+                    borderRadius: '12px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    textAlign: 'left'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = '#a855f7';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(168,85,247,0.4)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <span style={{ color: '#a855f7', fontSize: '24px', fontWeight: '800' }}>
+                      ${user.consultationCount > 0 ? '49' : '99'}
+                    </span>
+                    {user.consultationCount > 0 && (
+                      <span style={{
+                        fontSize: '10px',
+                        color: '#22c55e',
+                        background: 'rgba(34,197,94,0.15)',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontWeight: '600'
+                      }}>
+                        RETURNING RATE
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ color: '#fff', fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>
+                    {user.consultationCount > 0
+                      ? (t.dashboard.quickActions?.additionalHour || 'Additional Hour')
+                      : (t.dashboard.quickActions?.firstHour || 'First Hour')}
+                  </div>
+                  <div style={{ color: '#9ca3af', fontSize: '13px' }}>
+                    {user.consultationCount > 0
+                      ? (t.dashboard.quickActions?.additionalHourDesc || '1-on-1 expert consultation')
+                      : (t.dashboard.quickActions?.firstHourDesc || 'Private security audit session')}
+                  </div>
+                </button>
+
+                {/* Multi-hour package hint */}
+                <div style={{
+                  flex: '1',
+                  minWidth: '200px',
+                  padding: '20px',
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px dashed rgba(107,114,128,0.4)',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center'
+                }}>
+                  <div style={{ color: '#6b7280', fontSize: '13px', marginBottom: '8px' }}>
+                    {t.dashboard.quickActions?.pricingNote || 'Pricing structure:'}
+                  </div>
+                  <div style={{ color: '#9ca3af', fontSize: '12px', lineHeight: '1.6' }}>
+                    • {t.dashboard.quickActions?.firstHourPrice || 'First hour: $99'}<br/>
+                    • {t.dashboard.quickActions?.subsequentPrice || 'Subsequent hours: $49/hr'}
+                  </div>
+                  {user.consultationCount > 0 && (
+                    <div style={{
+                      marginTop: '12px',
+                      color: '#22c55e',
+                      fontSize: '12px',
+                      fontWeight: '600'
+                    }}>
+                      ✓ {t.dashboard.quickActions?.hoursUsed || `${user.consultationCount} hour(s) purchased`}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Email Preferences - Solo Sentinel */}
           {isSentinel && (
             <div style={{
@@ -602,7 +716,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            openPdfPreview(user, assessment.score, assessment.responses);
+                            openPdfPreview(user, assessment.score, assessment.responses, language);
                           }}
                           style={{
                             flex: 1,
