@@ -124,8 +124,10 @@ export const translations = {
           period: '/month',
           features: [
             'Unlimited Assessments',
-            'Email Alerts (security news & hacks)',
-            'Daily Security Tips by email',
+            'BTC Guardian Telegram Bot',
+            'Real-time wallet balance alerts',
+            'Transaction notifications',
+            'BTC price milestone alerts',
             'All Essential features',
             'Cancel anytime'
           ],
@@ -139,11 +141,13 @@ export const translations = {
           period: '+ $49/hr additional',
           features: [
             '1-hour private audit (video call)',
-            'All Sentinel features',
             'Personalized deep-dive recommendations',
             'Priority support',
-            'Additional hours available'
+            'Unlimited Assessments',
+            'Full PDF Reports',
+            'Additional hours at $49/hr'
           ],
+          note: 'Does not include BTC Guardian bot (Sentinel exclusive)',
           cta: 'Book Your Consultation'
         }
       },
@@ -1281,9 +1285,11 @@ export const translations = {
           period: '/mes',
           features: [
             'Evaluaciones Ilimitadas',
-            'Alertas por email (noticias de seguridad y hacks)',
-            'Consejos diarios de seguridad por email',
-            'Todas las características de Essential',
+            'Bot de Telegram BTC Guardian',
+            'Alertas de balance en tiempo real',
+            'Notificaciones de transacciones',
+            'Alertas de hitos de precio BTC',
+            'Todas las caracteristicas de Essential',
             'Cancelar cuando quieras'
           ],
           cta: 'Suscribirse a Sentinel'
@@ -1295,12 +1301,14 @@ export const translations = {
           price: '$99',
           period: '+ $49/hora adicional',
           features: [
-            'Auditoría privada de 1 hora (videollamada)',
-            'Todas las características de Sentinel',
+            'Auditoria privada de 1 hora (videollamada)',
             'Recomendaciones personalizadas en profundidad',
             'Soporte prioritario',
-            'Horas adicionales disponibles'
+            'Evaluaciones Ilimitadas',
+            'Reportes PDF completos',
+            'Horas adicionales a $49/hora'
           ],
+          note: 'No incluye el bot BTC Guardian (exclusivo de Sentinel)',
           cta: 'Reservar tu Consulta'
         }
       },

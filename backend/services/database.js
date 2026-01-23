@@ -810,6 +810,300 @@ const getUserAssessments = async (email) => {
 };
 
 // ============================================
+// TELEGRAM INTEGRATION
+// ============================================
+
+// Generate verification code for Telegram linking
+const generateVerificationCode = () => {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+};
+
+// Initiate Telegram link - generates verification code
+const initiateTelegramLink = async (userId) => {
+  const db = initSupabase();
+
+  if (!db) {
+    return { success: false, message: 'Database not configured' };
+  }
+
+  try {
+    const verificationCode = generateVerificationCode();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Check if user already has a link
+    const { data: existing } = await db
+      .from('telegram_links')
+      .select('id, is_verified')
+      .eq('user_id', userId)
+      .single();
+
+    if (existing && existing.is_verified) {
+      return { success: false, message: 'Telegram already linked', alreadyLinked: true };
+    }
+
+    if (existing) {
+      // Update existing unverified link
+      const { error } = await db
+        .from('telegram_links')
+        .update({
+          verification_code: verificationCode,
+          verification_expires_at: expiresAt.toISOString()
+        })
+        .eq('user_id', userId);
+
+      if (error) throw error;
+    } else {
+      // Create new link entry
+      const { error } = await db
+        .from('telegram_links')
+        .insert([{
+          user_id: userId,
+          telegram_user_id: 0, // Placeholder until verified
+          verification_code: verificationCode,
+          verification_expires_at: expiresAt.toISOString(),
+          is_verified: false
+        }]);
+
+      if (error) throw error;
+    }
+
+    return {
+      success: true,
+      verificationCode,
+      expiresAt: expiresAt.toISOString()
+    };
+  } catch (error) {
+    console.error('Initiate Telegram link error:', error);
+    return { success: false, message: 'Failed to initiate Telegram link' };
+  }
+};
+
+// Verify Telegram link (called by bot)
+const verifyTelegramLink = async (verificationCode, telegramUserId, telegramUsername, telegramFirstName) => {
+  const db = initSupabase();
+
+  if (!db) {
+    return { success: false, message: 'Database not configured' };
+  }
+
+  try {
+    // Find pending link with this code
+    const { data: link, error: findError } = await db
+      .from('telegram_links')
+      .select('*, users!inner(email, subscription_level, subscription_end)')
+      .eq('verification_code', verificationCode)
+      .eq('is_verified', false)
+      .single();
+
+    if (findError || !link) {
+      return { success: false, message: 'Invalid or expired verification code' };
+    }
+
+    // Check if code expired
+    if (new Date(link.verification_expires_at) < new Date()) {
+      return { success: false, message: 'Verification code expired' };
+    }
+
+    // Check if this telegram_user_id is already linked to another account
+    const { data: existingLink } = await db
+      .from('telegram_links')
+      .select('user_id')
+      .eq('telegram_user_id', telegramUserId)
+      .eq('is_verified', true)
+      .single();
+
+    if (existingLink && existingLink.user_id !== link.user_id) {
+      return { success: false, message: 'This Telegram account is already linked to another Kyward account' };
+    }
+
+    // Update the link
+    const { error: updateError } = await db
+      .from('telegram_links')
+      .update({
+        telegram_user_id: telegramUserId,
+        telegram_username: telegramUsername,
+        telegram_first_name: telegramFirstName,
+        is_verified: true,
+        linked_at: new Date().toISOString(),
+        verification_code: null,
+        verification_expires_at: null
+      })
+      .eq('id', link.id);
+
+    if (updateError) throw updateError;
+
+    // Also create/update bot_preferences
+    const { error: prefError } = await db
+      .from('bot_preferences')
+      .upsert({
+        user_id: link.user_id,
+        telegram_user_id: telegramUserId,
+        daily_updates: false,
+        transaction_alerts: true,
+        price_alerts: true
+      }, { onConflict: 'user_id' });
+
+    if (prefError) {
+      console.error('Bot preferences upsert error:', prefError);
+    }
+
+    return {
+      success: true,
+      email: link.users.email,
+      subscriptionLevel: link.users.subscription_level,
+      subscriptionEnd: link.users.subscription_end
+    };
+  } catch (error) {
+    console.error('Verify Telegram link error:', error);
+    return { success: false, message: 'Failed to verify Telegram link' };
+  }
+};
+
+// Get Telegram link status for a user
+const getTelegramLink = async (userId) => {
+  const db = initSupabase();
+
+  if (!db) {
+    return null;
+  }
+
+  try {
+    const { data, error } = await db
+      .from('telegram_links')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) return null;
+    return data;
+  } catch (error) {
+    return null;
+  }
+};
+
+// Get user by Telegram ID
+const getUserByTelegramId = async (telegramUserId) => {
+  const db = initSupabase();
+
+  if (!db) {
+    return null;
+  }
+
+  try {
+    const { data: link, error } = await db
+      .from('telegram_links')
+      .select('*, users!inner(*)')
+      .eq('telegram_user_id', telegramUserId)
+      .eq('is_verified', true)
+      .single();
+
+    if (error || !link) return null;
+    return sanitizeUser(link.users);
+  } catch (error) {
+    return null;
+  }
+};
+
+// Check Sentinel subscription by Telegram ID (for bot to call)
+const checkSentinelSubscription = async (telegramUserId) => {
+  const db = initSupabase();
+
+  if (!db) {
+    return { hasAccess: false, reason: 'Database not configured' };
+  }
+
+  try {
+    const { data: link, error } = await db
+      .from('telegram_links')
+      .select('*, users!inner(subscription_level, subscription_end, payment_type, email)')
+      .eq('telegram_user_id', telegramUserId)
+      .eq('is_verified', true)
+      .single();
+
+    if (error || !link) {
+      return { hasAccess: false, reason: 'Telegram not linked to Kyward account' };
+    }
+
+    const user = link.users;
+    const now = new Date();
+
+    // Check if subscription is Sentinel or Consultation AND active
+    if (user.subscription_level === 'sentinel' || user.subscription_level === 'consultation') {
+      if (user.payment_type === 'subscription' && user.subscription_end) {
+        const endDate = new Date(user.subscription_end);
+        if (endDate > now) {
+          return {
+            hasAccess: true,
+            email: user.email,
+            subscriptionLevel: user.subscription_level,
+            subscriptionEnd: user.subscription_end,
+            daysRemaining: Math.ceil((endDate - now) / (1000 * 60 * 60 * 24))
+          };
+        } else {
+          return {
+            hasAccess: false,
+            reason: 'Subscription expired',
+            email: user.email,
+            expiredAt: user.subscription_end
+          };
+        }
+      }
+    }
+
+    return {
+      hasAccess: false,
+      reason: `Sentinel subscription required (current: ${user.subscription_level})`,
+      email: user.email,
+      subscriptionLevel: user.subscription_level
+    };
+  } catch (error) {
+    console.error('Check Sentinel subscription error:', error);
+    return { hasAccess: false, reason: 'Error checking subscription' };
+  }
+};
+
+// Unlink Telegram
+const unlinkTelegram = async (userId) => {
+  const db = initSupabase();
+
+  if (!db) {
+    return { success: false, message: 'Database not configured' };
+  }
+
+  try {
+    // Delete from telegram_links
+    const { error: linkError } = await db
+      .from('telegram_links')
+      .delete()
+      .eq('user_id', userId);
+
+    if (linkError) throw linkError;
+
+    // Also delete bot_preferences
+    await db
+      .from('bot_preferences')
+      .delete()
+      .eq('user_id', userId);
+
+    // Delete monitored wallets
+    await db
+      .from('monitored_wallets')
+      .delete()
+      .eq('user_id', userId);
+
+    return { success: true };
+  } catch (error) {
+    console.error('Unlink Telegram error:', error);
+    return { success: false, message: 'Failed to unlink Telegram' };
+  }
+};
+
+// ============================================
 // COMMUNITY STATS
 // ============================================
 
@@ -900,5 +1194,12 @@ module.exports = {
   getCommunityStats,
   compareToAverage,
   generatePdfPassword,
-  sanitizeUser
+  sanitizeUser,
+  // Telegram integration
+  initiateTelegramLink,
+  verifyTelegramLink,
+  getTelegramLink,
+  getUserByTelegramId,
+  checkSentinelSubscription,
+  unlinkTelegram
 };

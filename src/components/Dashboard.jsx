@@ -33,6 +33,97 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
     monthlyReviews: user?.emailWalletReviews ?? false
   });
 
+  // Telegram linking state
+  const [telegramStatus, setTelegramStatus] = useState(null);
+  const [telegramLoading, setTelegramLoading] = useState(false);
+  const [telegramCode, setTelegramCode] = useState(null);
+  const [telegramCodeExpiry, setTelegramCodeExpiry] = useState(null);
+  const [copiedTelegramCode, setCopiedTelegramCode] = useState(false);
+
+  // Fetch Telegram link status for Sentinel users
+  useEffect(() => {
+    const subscriptionLevel = user?.subscriptionLevel || user?.subscription || 'free';
+    const isSentinelOrConsultation = subscriptionLevel === 'sentinel' || subscriptionLevel === 'consultation';
+
+    if (isSentinelOrConsultation) {
+      const fetchTelegramStatus = async () => {
+        try {
+          const token = localStorage.getItem('kyward_token');
+          const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/telegram/status`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setTelegramStatus(data);
+          }
+        } catch (error) {
+          console.error('Error fetching Telegram status:', error);
+        }
+      };
+      fetchTelegramStatus();
+    }
+  }, [user?.subscriptionLevel, user?.subscription]);
+
+  // Handle initiating Telegram link
+  const handleLinkTelegram = async () => {
+    setTelegramLoading(true);
+    setTelegramCode(null);
+    try {
+      const token = localStorage.getItem('kyward_token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/telegram/link/start`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setTelegramCode(data.verificationCode);
+        setTelegramCodeExpiry(new Date(data.expiresAt));
+      } else {
+        alert(data.error || 'Failed to generate code');
+      }
+    } catch (error) {
+      console.error('Error starting Telegram link:', error);
+      alert('Failed to connect. Please try again.');
+    } finally {
+      setTelegramLoading(false);
+    }
+  };
+
+  // Handle unlinking Telegram
+  const handleUnlinkTelegram = async () => {
+    if (!confirm('Are you sure you want to unlink your Telegram account?')) return;
+
+    setTelegramLoading(true);
+    try {
+      const token = localStorage.getItem('kyward_token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/telegram/unlink`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success) {
+        setTelegramStatus({ linked: false, canLink: true });
+        setTelegramCode(null);
+      }
+    } catch (error) {
+      console.error('Error unlinking Telegram:', error);
+    } finally {
+      setTelegramLoading(false);
+    }
+  };
+
+  // Copy Telegram code to clipboard
+  const handleCopyTelegramCode = () => {
+    if (telegramCode) {
+      navigator.clipboard.writeText(`/link ${telegramCode}`);
+      setCopiedTelegramCode(true);
+      setTimeout(() => setCopiedTelegramCode(false), 2000);
+    }
+  };
+
   // Combined refresh: user data + assessments + permission check in one effect to ensure sync
   useEffect(() => {
     let isMounted = true;
@@ -452,7 +543,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
             );
           })()}
 
-          {/* Quick Action Plans - Request Consultation Time */}
+          {/* Expert Consultation - Available for all premium users */}
           {isPremium && (
             <div style={{
               margin: '32px 0',
@@ -467,11 +558,13 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                   <path d="M14 8V14L18 16" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 <h3 style={{ color: '#a855f7', margin: 0, fontSize: '18px', fontWeight: '700' }}>
-                  {t.dashboard.quickActions?.consultationTitle || 'Quick Action Plans - Sentinel'}
+                  {language === 'es' ? 'Consultoria Experta' : 'Expert Consultation'}
                 </h3>
               </div>
               <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '20px', lineHeight: '1.6' }}>
-                {t.dashboard.quickActions?.consultationDesc || 'Request expert consultation time whenever you need personalized security guidance. Add a query whenever you want.'}
+                {language === 'es'
+                  ? 'Solicita tiempo de consultoria personalizada con expertos en seguridad Bitcoin.'
+                  : 'Request personalized consultation time with Bitcoin security experts.'}
               </p>
 
               <div style={{
@@ -480,7 +573,6 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                 flexWrap: 'wrap',
                 marginBottom: '16px'
               }}>
-                {/* First Hour / Additional Hour Button */}
                 <button
                   onClick={() => onUpgrade(user.consultationCount > 0 ? 'consultation_additional' : 'consultation')}
                   style={{
@@ -516,23 +608,20 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                         borderRadius: '4px',
                         fontWeight: '600'
                       }}>
-                        RETURNING RATE
+                        {language === 'es' ? 'TARIFA CLIENTE' : 'RETURNING RATE'}
                       </span>
                     )}
                   </div>
                   <div style={{ color: '#fff', fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>
                     {user.consultationCount > 0
-                      ? (t.dashboard.quickActions?.additionalHour || 'Additional Hour')
-                      : (t.dashboard.quickActions?.firstHour || 'First Hour')}
+                      ? (language === 'es' ? 'Hora Adicional' : 'Additional Hour')
+                      : (language === 'es' ? 'Primera Hora' : 'First Hour')}
                   </div>
                   <div style={{ color: '#9ca3af', fontSize: '13px' }}>
-                    {user.consultationCount > 0
-                      ? (t.dashboard.quickActions?.additionalHourDesc || '1-on-1 expert consultation')
-                      : (t.dashboard.quickActions?.firstHourDesc || 'Private security audit session')}
+                    {language === 'es' ? 'Sesion privada de auditoria de seguridad' : 'Private security audit session'}
                   </div>
                 </button>
 
-                {/* Multi-hour package hint */}
                 <div style={{
                   flex: '1',
                   minWidth: '200px',
@@ -545,11 +634,11 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                   justifyContent: 'center'
                 }}>
                   <div style={{ color: '#6b7280', fontSize: '13px', marginBottom: '8px' }}>
-                    {t.dashboard.quickActions?.pricingNote || 'Pricing structure:'}
+                    {language === 'es' ? 'Estructura de precios:' : 'Pricing structure:'}
                   </div>
                   <div style={{ color: '#9ca3af', fontSize: '12px', lineHeight: '1.6' }}>
-                    • {t.dashboard.quickActions?.firstHourPrice || 'First hour: $99'}<br/>
-                    • {t.dashboard.quickActions?.subsequentPrice || 'Subsequent hours: $49/hr'}
+                    • {language === 'es' ? 'Primera hora: $99' : 'First hour: $99'}<br/>
+                    • {language === 'es' ? 'Horas adicionales: $49/hr' : 'Subsequent hours: $49/hr'}
                   </div>
                   {user.consultationCount > 0 && (
                     <div style={{
@@ -558,7 +647,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                       fontSize: '12px',
                       fontWeight: '600'
                     }}>
-                      ✓ {t.dashboard.quickActions?.hoursUsed || `${user.consultationCount} hour(s) purchased`}
+                      ✓ {user.consultationCount} {language === 'es' ? 'hora(s) compradas' : 'hour(s) purchased'}
                     </div>
                   )}
                 </div>
@@ -566,69 +655,200 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
             </div>
           )}
 
-          {/* Email Preferences - Solo Sentinel */}
+          {/* BTC Guardian Bot - Sentinel users only */}
           {isSentinel && (
             <div style={{
               margin: '32px 0',
               padding: '24px',
-              background: 'rgba(34,197,94,0.08)',
-              border: '1px solid rgba(34,197,94,0.3)',
+              background: 'linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(34,197,94,0.08) 100%)',
+              border: '1px solid rgba(59,130,246,0.3)',
               borderRadius: '16px'
             }}>
-              <h3 style={{ color: '#22c55e', margin: '0 0 16px 0' }}>
-                {t.dashboard.emailPreferences || 'Email Preferences'}
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9ca3af', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={emailPrefs.dailyTips}
-                    onChange={(e) => setEmailPrefs(p => ({ ...p, dailyTips: e.target.checked }))}
-                    style={{ accentColor: '#22c55e', cursor: 'pointer' }}
-                  />
-                  {t.dashboard.dailyTips || 'Daily security tips'}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9ca3af', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={emailPrefs.securityAlerts}
-                    onChange={(e) => setEmailPrefs(p => ({ ...p, securityAlerts: e.target.checked }))}
-                    style={{ accentColor: '#22c55e', cursor: 'pointer' }}
-                  />
-                  {t.dashboard.securityAlerts || 'Security alerts & hack notifications'}
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#9ca3af', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={emailPrefs.monthlyReviews}
-                    onChange={(e) => setEmailPrefs(p => ({ ...p, monthlyReviews: e.target.checked }))}
-                    style={{ accentColor: '#22c55e', cursor: 'pointer' }}
-                  />
-                  {t.dashboard.monthlyReviews || 'Monthly wallet review reminders'}
-                </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                  <circle cx="14" cy="14" r="12" fill="rgba(59,130,246,0.2)" stroke="#3b82f6" strokeWidth="2"/>
+                  <path d="M8 14L12 18L20 10" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <h3 style={{ color: '#3b82f6', margin: 0, fontSize: '18px', fontWeight: '700' }}>
+                  {language === 'es' ? 'BTC Guardian - Bot de Telegram' : 'BTC Guardian - Telegram Bot'}
+                </h3>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '16px' }}>
-                <button
-                  onClick={handleSavePreferences}
-                  disabled={savingPrefs}
-                  style={{
-                    padding: '10px 20px',
-                    background: savingPrefs ? '#6b7280' : '#22c55e',
-                    color: '#000',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontWeight: '600',
-                    cursor: savingPrefs ? 'not-allowed' : 'pointer'
-                  }}
-                >
-                  {savingPrefs ? (t.common.saving || 'Saving...') : (t.common.saveChanges || 'Save Preferences')}
-                </button>
-                {prefsSaved && (
-                  <span style={{ color: '#22c55e', fontSize: '14px', fontWeight: '600' }}>
-                    ✓ {t.common.saved || 'Saved!'}
-                  </span>
-                )}
-              </div>
+
+              <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '20px', lineHeight: '1.6' }}>
+                {language === 'es'
+                  ? 'Vincula tu cuenta de Telegram para recibir alertas de balance en tiempo real, notificaciones de transacciones y seguimiento de precio de BTC.'
+                  : 'Link your Telegram account to receive real-time balance alerts, transaction notifications, and BTC price tracking.'}
+              </p>
+
+              {telegramStatus?.linked ? (
+                // Already linked
+                <div style={{
+                  padding: '16px',
+                  background: 'rgba(34,197,94,0.1)',
+                  border: '1px solid rgba(34,197,94,0.3)',
+                  borderRadius: '12px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                    <span style={{ color: '#22c55e', fontSize: '20px' }}>✓</span>
+                    <span style={{ color: '#22c55e', fontWeight: '600' }}>
+                      {language === 'es' ? 'Telegram Vinculado' : 'Telegram Linked'}
+                    </span>
+                  </div>
+                  {telegramStatus.telegramUsername && (
+                    <p style={{ color: '#9ca3af', fontSize: '13px', margin: '0 0 12px 0' }}>
+                      @{telegramStatus.telegramUsername}
+                      {telegramStatus.linkedAt && (
+                        <span style={{ marginLeft: '8px', color: '#6b7280' }}>
+                          ({language === 'es' ? 'desde' : 'since'} {new Date(telegramStatus.linkedAt).toLocaleDateString()})
+                        </span>
+                      )}
+                    </p>
+                  )}
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    <a
+                      href="https://t.me/GuardianBTCBot"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        padding: '10px 16px',
+                        background: '#3b82f6',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontWeight: '600',
+                        fontSize: '13px',
+                        textDecoration: 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                      </svg>
+                      {language === 'es' ? 'Abrir Bot' : 'Open Bot'}
+                    </a>
+                    <button
+                      onClick={handleUnlinkTelegram}
+                      disabled={telegramLoading}
+                      style={{
+                        padding: '10px 16px',
+                        background: 'transparent',
+                        color: '#ef4444',
+                        border: '1px solid rgba(239,68,68,0.4)',
+                        borderRadius: '8px',
+                        fontWeight: '600',
+                        fontSize: '13px',
+                        cursor: telegramLoading ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {language === 'es' ? 'Desvincular' : 'Unlink'}
+                    </button>
+                  </div>
+                </div>
+              ) : telegramCode ? (
+                // Show verification code
+                <div style={{
+                  padding: '20px',
+                  background: 'rgba(59,130,246,0.1)',
+                  border: '1px solid rgba(59,130,246,0.3)',
+                  borderRadius: '12px',
+                  textAlign: 'center'
+                }}>
+                  <p style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '16px' }}>
+                    {language === 'es'
+                      ? 'Abre @GuardianBTCBot en Telegram y envia:'
+                      : 'Open @GuardianBTCBot on Telegram and send:'}
+                  </p>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '12px',
+                    marginBottom: '16px'
+                  }}>
+                    <code style={{
+                      padding: '12px 20px',
+                      background: 'rgba(0,0,0,0.3)',
+                      borderRadius: '8px',
+                      color: '#3b82f6',
+                      fontSize: '18px',
+                      fontWeight: '700',
+                      fontFamily: 'monospace'
+                    }}>
+                      /link {telegramCode}
+                    </code>
+                    <button
+                      onClick={handleCopyTelegramCode}
+                      style={{
+                        padding: '12px',
+                        background: copiedTelegramCode ? '#22c55e' : 'rgba(59,130,246,0.2)',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        color: copiedTelegramCode ? '#fff' : '#3b82f6'
+                      }}
+                    >
+                      {copiedTelegramCode ? '✓' : '📋'}
+                    </button>
+                  </div>
+                  <p style={{ color: '#6b7280', fontSize: '12px', margin: 0 }}>
+                    {language === 'es'
+                      ? `Codigo valido por 10 minutos`
+                      : `Code valid for 10 minutes`}
+                  </p>
+                  <a
+                    href="https://t.me/GuardianBTCBot"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-block',
+                      marginTop: '16px',
+                      padding: '12px 24px',
+                      background: '#3b82f6',
+                      color: '#fff',
+                      borderRadius: '8px',
+                      fontWeight: '600',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    {language === 'es' ? 'Abrir @GuardianBTCBot' : 'Open @GuardianBTCBot'}
+                  </a>
+                </div>
+              ) : (
+                // Not linked - show link button
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={handleLinkTelegram}
+                    disabled={telegramLoading}
+                    style={{
+                      padding: '14px 24px',
+                      background: telegramLoading ? '#6b7280' : '#3b82f6',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      cursor: telegramLoading ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                    </svg>
+                    {telegramLoading
+                      ? (language === 'es' ? 'Generando...' : 'Generating...')
+                      : (language === 'es' ? 'Vincular Telegram' : 'Link Telegram')}
+                  </button>
+                  <div style={{ color: '#6b7280', fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                    {language === 'es'
+                      ? 'Incluido con tu suscripcion Sentinel'
+                      : 'Included with your Sentinel subscription'}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
