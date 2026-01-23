@@ -220,12 +220,12 @@ const validateSession = async (token) => {
 
   if (db) {
     try {
-      // First, validate the session token
+      // First, validate the session token (use .maybeSingle() to handle 0 or 1 rows)
       const { data: session, error: sessionError } = await db
         .from('session_tokens')
         .select('user_id, expires_at')
         .eq('token', token)
-        .single();
+        .maybeSingle();
 
       if (sessionError) {
         console.error('Session validation error:', sessionError.message);
@@ -236,6 +236,8 @@ const validateSession = async (token) => {
         console.log('No session found for token:', token.substring(0, 10) + '...');
         return null;
       }
+
+      console.log('Session found, user_id:', session.user_id);
 
       if (new Date(session.expires_at) < new Date()) {
         await db.from('session_tokens').delete().eq('token', token);
