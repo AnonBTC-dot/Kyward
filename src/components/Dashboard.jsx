@@ -49,7 +49,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
       const fetchTelegramStatus = async () => {
         try {
           const token = localStorage.getItem('kyward_token');
-          const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/telegram/status`, {
+          const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/telegram/status`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (response.ok) {
@@ -70,7 +70,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
     setTelegramCode(null);
     try {
       const token = localStorage.getItem('kyward_token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/telegram/link/start`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/telegram/link/start`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -99,7 +99,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
     setTelegramLoading(true);
     try {
       const token = localStorage.getItem('kyward_token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/telegram/unlink`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/telegram/unlink`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
