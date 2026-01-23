@@ -48,7 +48,8 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
     if (isSentinelOrConsultation) {
       const fetchTelegramStatus = async () => {
         try {
-          const token = localStorage.getItem('kyward_token');
+          const token = localStorage.getItem('kyward_session_token');
+          if (!token) return; // Skip if no token
           const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/telegram/status`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
@@ -69,7 +70,12 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
     setTelegramLoading(true);
     setTelegramCode(null);
     try {
-      const token = localStorage.getItem('kyward_token');
+      const token = localStorage.getItem('kyward_session_token');
+      if (!token) {
+        alert('Session expired. Please log in again.');
+        window.location.href = '/login';
+        return;
+      }
       const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/telegram/link/start`, {
         method: 'POST',
         headers: {
@@ -98,7 +104,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
 
     setTelegramLoading(true);
     try {
-      const token = localStorage.getItem('kyward_token');
+      const token = localStorage.getItem('kyward_session_token');
       const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/telegram/unlink`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
