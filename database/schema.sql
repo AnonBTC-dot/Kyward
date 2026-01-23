@@ -188,3 +188,124 @@ CREATE POLICY "Full access for service role" ON consultations FOR ALL USING (tru
 CREATE POLICY "Full access for service role" ON session_tokens FOR ALL USING (true);
 CREATE POLICY "Read access for all" ON community_stats FOR SELECT USING (true);
 CREATE POLICY "Full access for service role" ON community_stats FOR ALL USING (true);
+
+-- ============================================
+-- TELEGRAM BOT INTEGRATION TABLES
+-- For BTC Guardian integration with Kyward
+-- ============================================
+
+-- Link Telegram users to Kyward accounts
+CREATE TABLE IF NOT EXISTS telegram_links (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  telegram_user_id BIGINT UNIQUE NOT NULL,
+  telegram_username VARCHAR(255),
+  telegram_first_name VARCHAR(255),
+  linked_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  is_verified BOOLEAN DEFAULT FALSE,
+  verification_code VARCHAR(10),
+  verification_expires_at TIMESTAMP WITH TIME ZONE
+);
+
+CREATE INDEX IF NOT EXISTS idx_telegram_links_user_id ON telegram_links(user_id);
+CREATE INDEX IF NOT EXISTS idx_telegram_links_telegram_user_id ON telegram_links(telegram_user_id);
+
+-- Monitored Bitcoin wallets (from BTC Guardian)
+CREATE TABLE IF NOT EXISTS monitored_wallets (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  telegram_user_id BIGINT NOT NULL,
+  address TEXT NOT NULL,
+  label VARCHAR(100),
+  address_type VARCHAR(20) DEFAULT 'single', -- 'single', 'xpub', 'ypub', 'zpub'
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  last_balance_btc DECIMAL(18, 8),
+  last_balance_usd DECIMAL(18, 2),
+  last_checked_at TIMESTAMP WITH TIME ZONE,
+  UNIQUE(user_id, address)
+);
+
+CREATE INDEX IF NOT EXISTS idx_monitored_wallets_user_id ON monitored_wallets(user_id);
+CREATE INDEX IF NOT EXISTS idx_monitored_wallets_telegram_user_id ON monitored_wallets(telegram_user_id);
+
+-- Transaction alerts seen (deduplication)
+CREATE TABLE IF NOT EXISTS transactions_seen (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  txid TEXT UNIQUE NOT NULL,
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  wallet_address TEXT,
+  amount_btc DECIMAL(18, 8),
+  tx_type VARCHAR(20), -- 'incoming', 'outgoing'
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_transactions_seen_txid ON transactions_seen(txid);
+CREATE INDEX IF NOT EXISTS idx_transactions_seen_user_id ON transactions_seen(user_id);
+
+-- Historical balance snapshots for charts
+CREATE TABLE IF NOT EXISTS historical_balances (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  wallet_address TEXT NOT NULL,
+  btc_balance DECIMAL(18, 8),
+  usd_balance DECIMAL(18, 2),
+  recorded_at DATE DEFAULT CURRENT_DATE,
+  UNIQUE(user_id, wallet_address, recorded_at)
+);
+
+CREATE INDEX IF NOT EXISTS idx_historical_balances_user_id ON historical_balances(user_id);
+
+-- Bot preferences per user
+CREATE TABLE IF NOT EXISTS bot_preferences (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+  telegram_user_id BIGINT UNIQUE,
+  daily_updates BOOLEAN DEFAULT FALSE,
+  report_frequency VARCHAR(20) DEFAULT 'weekly', -- 'daily', 'weekly', 'monthly'
+  preferred_language VARCHAR(5) DEFAULT 'en', -- 'en', 'es', 'pt'
+  last_report_sent TIMESTAMP WITH TIME ZONE,
+  price_alerts BOOLEAN DEFAULT TRUE,
+  transaction_alerts BOOLEAN DEFAULT TRUE
+);
+
+CREATE INDEX IF NOT EXISTS idx_bot_preferences_telegram_user_id ON bot_preferences(telegram_user_id);
+
+-- XPUB address derivation cache
+CREATE TABLE IF NOT EXISTS xpub_cache (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  xpub TEXT UNIQUE NOT NULL,
+  derived_addresses TEXT[], -- Array of derived addresses
+  last_index INTEGER DEFAULT 0,
+  last_scan TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Bot global config
+CREATE TABLE IF NOT EXISTS bot_config (
+  key VARCHAR(100) PRIMARY KEY,
+  value TEXT,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Initialize bot config
+INSERT INTO bot_config (key, value) VALUES
+  ('last_payment_index', '0'),
+  ('last_known_btc_price', '0')
+ON CONFLICT (key) DO NOTHING;
+
+-- RLS for new tables
+ALTER TABLE telegram_links ENABLE ROW LEVEL SECURITY;
+ALTER TABLE monitored_wallets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transactions_seen ENABLE ROW LEVEL SECURITY;
+ALTER TABLE historical_balances ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bot_preferences ENABLE ROW LEVEL SECURITY;
+ALTER TABLE xpub_cache ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bot_config ENABLE ROW LEVEL SECURITY;
+
+-- Policies for new tables (service role full access)
+CREATE POLICY "Full access for service role" ON telegram_links FOR ALL USING (true);
+CREATE POLICY "Full access for service role" ON monitored_wallets FOR ALL USING (true);
+CREATE POLICY "Full access for service role" ON transactions_seen FOR ALL USING (true);
+CREATE POLICY "Full access for service role" ON historical_balances FOR ALL USING (true);
+CREATE POLICY "Full access for service role" ON bot_preferences FOR ALL USING (true);
+CREATE POLICY "Full access for service role" ON xpub_cache FOR ALL USING (true);
+CREATE POLICY "Full access for service role" ON bot_config FOR ALL USING (true);

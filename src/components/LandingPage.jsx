@@ -458,6 +458,19 @@ const LandingPage = ({ onLogin, onSignup }) => {
               </li>
             ))}
           </ul>
+          {t.landing.plans.consultation.note && (
+            <p style={{
+              fontSize: '11px',
+              color: '#f85149',
+              margin: '12px 0 16px 0',
+              padding: '8px 12px',
+              background: 'rgba(248,81,73,0.1)',
+              borderRadius: '6px',
+              textAlign: 'center'
+            }}>
+              {t.landing.plans.consultation.note}
+            </p>
+          )}
           <button onClick={onSignup} style={styles.pricingButtonPro}>
             {t.landing.plans.consultation.cta}
           </button>

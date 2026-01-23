@@ -720,6 +720,127 @@ app.post('/api/email/send-plan', authMiddleware, async (req, res) => {
 });
 
 // ============================================
+// TELEGRAM BOT INTEGRATION ENDPOINTS
+// ============================================
+
+// Start Telegram linking process (dashboard initiates this)
+app.post('/api/telegram/link/start', authMiddleware, async (req, res) => {
+  try {
+    const result = await db.initiateTelegramLink(req.user.id);
+
+    if (!result.success) {
+      if (result.alreadyLinked) {
+        return res.status(400).json({ error: 'Telegram already linked to this account' });
+      }
+      return res.status(500).json({ error: result.message });
+    }
+
+    res.json({
+      success: true,
+      verificationCode: result.verificationCode,
+      expiresAt: result.expiresAt,
+      instructions: `Send this code to @BTCGuardianBot: /link ${result.verificationCode}`
+    });
+  } catch (error) {
+    console.error('Telegram link start error:', error);
+    res.status(500).json({ error: 'Failed to start Telegram linking' });
+  }
+});
+
+// Verify Telegram link (called by the bot)
+app.post('/api/telegram/link/verify', async (req, res) => {
+  try {
+    const { verificationCode, telegramUserId, telegramUsername, telegramFirstName } = req.body;
+
+    if (!verificationCode || !telegramUserId) {
+      return res.status(400).json({ error: 'Verification code and Telegram user ID are required' });
+    }
+
+    const result = await db.verifyTelegramLink(
+      verificationCode.toUpperCase(),
+      telegramUserId,
+      telegramUsername || null,
+      telegramFirstName || null
+    );
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.message });
+    }
+
+    res.json({
+      success: true,
+      email: result.email,
+      subscriptionLevel: result.subscriptionLevel,
+      subscriptionEnd: result.subscriptionEnd,
+      message: 'Telegram account linked successfully!'
+    });
+  } catch (error) {
+    console.error('Telegram verify error:', error);
+    res.status(500).json({ error: 'Failed to verify Telegram link' });
+  }
+});
+
+// Check subscription status (called by bot before allowing features)
+app.get('/api/telegram/subscription/:telegram_user_id', async (req, res) => {
+  try {
+    const telegramUserId = parseInt(req.params.telegram_user_id);
+
+    if (isNaN(telegramUserId)) {
+      return res.status(400).json({ error: 'Invalid Telegram user ID' });
+    }
+
+    const result = await db.checkSentinelSubscription(telegramUserId);
+
+    res.json(result);
+  } catch (error) {
+    console.error('Telegram subscription check error:', error);
+    res.status(500).json({ error: 'Failed to check subscription' });
+  }
+});
+
+// Get Telegram link status for dashboard
+app.get('/api/telegram/status', authMiddleware, async (req, res) => {
+  try {
+    const link = await db.getTelegramLink(req.user.id);
+
+    if (!link) {
+      return res.json({
+        linked: false,
+        canLink: req.user.subscriptionLevel === 'sentinel' || req.user.subscriptionLevel === 'consultation'
+      });
+    }
+
+    res.json({
+      linked: link.is_verified,
+      telegramUsername: link.telegram_username,
+      telegramFirstName: link.telegram_first_name,
+      linkedAt: link.linked_at,
+      canLink: req.user.subscriptionLevel === 'sentinel' || req.user.subscriptionLevel === 'consultation',
+      pendingVerification: !link.is_verified && link.verification_code
+    });
+  } catch (error) {
+    console.error('Telegram status error:', error);
+    res.status(500).json({ error: 'Failed to get Telegram status' });
+  }
+});
+
+// Unlink Telegram account
+app.post('/api/telegram/unlink', authMiddleware, async (req, res) => {
+  try {
+    const result = await db.unlinkTelegram(req.user.id);
+
+    if (!result.success) {
+      return res.status(500).json({ error: result.message });
+    }
+
+    res.json({ success: true, message: 'Telegram unlinked successfully' });
+  } catch (error) {
+    console.error('Telegram unlink error:', error);
+    res.status(500).json({ error: 'Failed to unlink Telegram' });
+  }
+});
+
+// ============================================
 // START SERVER
 // ============================================
 
