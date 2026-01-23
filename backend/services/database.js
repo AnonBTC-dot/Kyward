@@ -165,11 +165,18 @@ const loginUser = async (email, password) => {
       const token = generateSessionToken();
       const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
-      await db.from('session_tokens').insert([{
+      const { error: sessionError } = await db.from('session_tokens').insert([{
         user_id: user.id,
         token,
         expires_at: expiresAt.toISOString()
       }]);
+
+      if (sessionError) {
+        console.error('Failed to create session:', sessionError);
+        return { success: false, message: 'Failed to create session. Please try again.' };
+      }
+
+      console.log('Session created successfully for user:', email);
 
       // Update last login
       await db
@@ -220,7 +227,15 @@ const validateSession = async (token) => {
         .eq('token', token)
         .single();
 
-      if (sessionError || !session) return null;
+      if (sessionError) {
+        console.error('Session validation error:', sessionError.message);
+        return null;
+      }
+
+      if (!session) {
+        console.log('No session found for token:', token.substring(0, 10) + '...');
+        return null;
+      }
 
       if (new Date(session.expires_at) < new Date()) {
         await db.from('session_tokens').delete().eq('token', token);
