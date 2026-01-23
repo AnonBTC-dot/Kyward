@@ -1,6 +1,8 @@
 // KYWARD RECOMMENDATIONS ENGINE
 // Generates personalized security tips and inheritance plans
 
+import { translations } from '../i18n/translations';
+
 // All available recommendations organized by category
 export const allRecommendations = {
   hardware_wallet: {
@@ -420,8 +422,6 @@ export const getLockedTipsPreview = (recommendations) => {
 
 // Generate full inheritance plan based on answers (with i18n support)
 export const generateInheritancePlan = (answers, score, userEmail, lang = 'en') => {
-  // Import translations dynamically to avoid circular dependencies
-  const { translations } = require('../i18n/translations');
   const t = translations[lang]?.inheritancePlanGen || translations.en.inheritancePlanGen;
 
   const plan = {
