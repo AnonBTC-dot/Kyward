@@ -841,6 +841,234 @@ app.post('/api/telegram/unlink', authMiddleware, async (req, res) => {
 });
 
 // ============================================
+// BTC GUARDIAN WALLET MANAGEMENT ENDPOINTS
+// ============================================
+
+// Get all monitored wallets for a Telegram user
+app.get('/api/wallets/:telegram_user_id', async (req, res) => {
+  try {
+    const telegramUserId = parseInt(req.params.telegram_user_id);
+    if (isNaN(telegramUserId)) {
+      return res.status(400).json({ error: 'Invalid Telegram user ID' });
+    }
+
+    const wallets = await db.getMonitoredWallets(telegramUserId);
+    res.json({ success: true, wallets });
+  } catch (error) {
+    console.error('Get wallets error:', error);
+    res.status(500).json({ error: 'Failed to get wallets' });
+  }
+});
+
+// Add a monitored wallet
+app.post('/api/wallets', async (req, res) => {
+  try {
+    const { telegramUserId, address, label, addressType } = req.body;
+
+    if (!telegramUserId || !address) {
+      return res.status(400).json({ error: 'Telegram user ID and address are required' });
+    }
+
+    const result = await db.addMonitoredWallet(
+      telegramUserId,
+      address,
+      label || '',
+      addressType || 'single'
+    );
+
+    if (!result.success) {
+      if (result.duplicate) {
+        return res.status(409).json({ error: result.message, duplicate: true });
+      }
+      return res.status(400).json({ error: result.message });
+    }
+
+    res.json({ success: true, wallet: result.wallet });
+  } catch (error) {
+    console.error('Add wallet error:', error);
+    res.status(500).json({ error: 'Failed to add wallet' });
+  }
+});
+
+// Remove a monitored wallet
+app.delete('/api/wallets/:telegram_user_id/:address', async (req, res) => {
+  try {
+    const telegramUserId = parseInt(req.params.telegram_user_id);
+    const address = req.params.address;
+
+    if (isNaN(telegramUserId)) {
+      return res.status(400).json({ error: 'Invalid Telegram user ID' });
+    }
+
+    const result = await db.removeMonitoredWallet(telegramUserId, address);
+
+    if (!result.success) {
+      return res.status(500).json({ error: result.message });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Remove wallet error:', error);
+    res.status(500).json({ error: 'Failed to remove wallet' });
+  }
+});
+
+// Update wallet balance
+app.put('/api/wallets/:telegram_user_id/:address/balance', async (req, res) => {
+  try {
+    const telegramUserId = parseInt(req.params.telegram_user_id);
+    const address = req.params.address;
+    const { btcBalance, usdBalance } = req.body;
+
+    if (isNaN(telegramUserId)) {
+      return res.status(400).json({ error: 'Invalid Telegram user ID' });
+    }
+
+    const success = await db.updateWalletBalance(telegramUserId, address, btcBalance, usdBalance);
+
+    if (!success) {
+      return res.status(500).json({ error: 'Failed to update balance' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Update balance error:', error);
+    res.status(500).json({ error: 'Failed to update balance' });
+  }
+});
+
+// ============================================
+// BTC GUARDIAN BOT PREFERENCES ENDPOINTS
+// ============================================
+
+// Get bot preferences
+app.get('/api/bot/preferences/:telegram_user_id', async (req, res) => {
+  try {
+    const telegramUserId = parseInt(req.params.telegram_user_id);
+    if (isNaN(telegramUserId)) {
+      return res.status(400).json({ error: 'Invalid Telegram user ID' });
+    }
+
+    const preferences = await db.getBotPreferences(telegramUserId);
+    res.json({ success: true, preferences });
+  } catch (error) {
+    console.error('Get preferences error:', error);
+    res.status(500).json({ error: 'Failed to get preferences' });
+  }
+});
+
+// Update bot preferences
+app.put('/api/bot/preferences/:telegram_user_id', async (req, res) => {
+  try {
+    const telegramUserId = parseInt(req.params.telegram_user_id);
+    if (isNaN(telegramUserId)) {
+      return res.status(400).json({ error: 'Invalid Telegram user ID' });
+    }
+
+    const result = await db.updateBotPreferences(telegramUserId, req.body);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.message });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Update preferences error:', error);
+    res.status(500).json({ error: 'Failed to update preferences' });
+  }
+});
+
+// Get all active bot users (for monitoring)
+app.get('/api/bot/active-users', async (req, res) => {
+  try {
+    // Verify bot API key
+    const apiKey = req.headers['x-bot-api-key'];
+    const expectedKey = process.env.BOT_API_KEY;
+
+    if (!apiKey || apiKey !== expectedKey) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const users = await db.getActiveBotUsers();
+    res.json({ success: true, users });
+  } catch (error) {
+    console.error('Get active users error:', error);
+    res.status(500).json({ error: 'Failed to get active users' });
+  }
+});
+
+// ============================================
+// BTC GUARDIAN TRANSACTION TRACKING ENDPOINTS
+// ============================================
+
+// Check if transaction was seen
+app.get('/api/transactions/seen/:txid', async (req, res) => {
+  try {
+    const seen = await db.isTransactionSeen(req.params.txid);
+    res.json({ success: true, seen });
+  } catch (error) {
+    console.error('Check transaction error:', error);
+    res.status(500).json({ error: 'Failed to check transaction' });
+  }
+});
+
+// Mark transaction as seen
+app.post('/api/transactions/seen', async (req, res) => {
+  try {
+    const { txid, walletAddress, amountBtc, txType } = req.body;
+
+    if (!txid) {
+      return res.status(400).json({ error: 'Transaction ID is required' });
+    }
+
+    const success = await db.markTransactionSeen(txid, null, walletAddress, amountBtc, txType);
+    res.json({ success });
+  } catch (error) {
+    console.error('Mark transaction error:', error);
+    res.status(500).json({ error: 'Failed to mark transaction' });
+  }
+});
+
+// ============================================
+// BTC GUARDIAN HISTORICAL BALANCES ENDPOINTS
+// ============================================
+
+// Save historical balance
+app.post('/api/balances/history', async (req, res) => {
+  try {
+    const { telegramUserId, walletAddress, btcBalance, usdBalance } = req.body;
+
+    if (!telegramUserId || !walletAddress) {
+      return res.status(400).json({ error: 'Telegram user ID and wallet address are required' });
+    }
+
+    const success = await db.saveHistoricalBalance(telegramUserId, walletAddress, btcBalance, usdBalance);
+    res.json({ success });
+  } catch (error) {
+    console.error('Save history error:', error);
+    res.status(500).json({ error: 'Failed to save balance history' });
+  }
+});
+
+// Get historical balances for charts
+app.get('/api/balances/history/:telegram_user_id', async (req, res) => {
+  try {
+    const telegramUserId = parseInt(req.params.telegram_user_id);
+    const days = parseInt(req.query.days) || 30;
+
+    if (isNaN(telegramUserId)) {
+      return res.status(400).json({ error: 'Invalid Telegram user ID' });
+    }
+
+    const history = await db.getHistoricalBalances(telegramUserId, days);
+    res.json({ success: true, ...history });
+  } catch (error) {
+    console.error('Get history error:', error);
+    res.status(500).json({ error: 'Failed to get balance history' });
+  }
+});
+
+// ============================================
 // START SERVER
 // ============================================
 

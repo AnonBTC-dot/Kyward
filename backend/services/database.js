@@ -1176,6 +1176,398 @@ const compareToAverage = async (userScore) => {
   };
 };
 
+// ============================================
+// WALLET MANAGEMENT (for BTC Guardian)
+// ============================================
+
+// Add a monitored wallet
+const addMonitoredWallet = async (telegramUserId, address, label = '', addressType = 'single') => {
+  const db = initSupabase();
+
+  if (!db) {
+    return { success: false, message: 'Database not configured' };
+  }
+
+  try {
+    // Get user_id from telegram_links
+    const { data: link, error: linkError } = await db
+      .from('telegram_links')
+      .select('user_id')
+      .eq('telegram_user_id', telegramUserId)
+      .eq('is_verified', true)
+      .single();
+
+    if (linkError || !link) {
+      return { success: false, message: 'Telegram not linked' };
+    }
+
+    // Check for duplicate
+    const { data: existing } = await db
+      .from('monitored_wallets')
+      .select('id')
+      .eq('user_id', link.user_id)
+      .ilike('address', address)
+      .single();
+
+    if (existing) {
+      return { success: false, message: 'Wallet already exists', duplicate: true };
+    }
+
+    // Insert wallet
+    const { data, error } = await db
+      .from('monitored_wallets')
+      .insert([{
+        user_id: link.user_id,
+        telegram_user_id: telegramUserId,
+        address: address,
+        label: label || null,
+        address_type: addressType,
+        created_at: new Date().toISOString()
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return { success: true, wallet: data };
+  } catch (error) {
+    console.error('Add wallet error:', error);
+    return { success: false, message: 'Failed to add wallet' };
+  }
+};
+
+// Get all monitored wallets for a user
+const getMonitoredWallets = async (telegramUserId) => {
+  const db = initSupabase();
+
+  if (!db) {
+    return [];
+  }
+
+  try {
+    const { data, error } = await db
+      .from('monitored_wallets')
+      .select('*')
+      .eq('telegram_user_id', telegramUserId)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Get wallets error:', error);
+    return [];
+  }
+};
+
+// Remove a monitored wallet
+const removeMonitoredWallet = async (telegramUserId, address) => {
+  const db = initSupabase();
+
+  if (!db) {
+    return { success: false, message: 'Database not configured' };
+  }
+
+  try {
+    const { error } = await db
+      .from('monitored_wallets')
+      .delete()
+      .eq('telegram_user_id', telegramUserId)
+      .ilike('address', address);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Remove wallet error:', error);
+    return { success: false, message: 'Failed to remove wallet' };
+  }
+};
+
+// Update wallet balance
+const updateWalletBalance = async (telegramUserId, address, btcBalance, usdBalance) => {
+  const db = initSupabase();
+
+  if (!db) return false;
+
+  try {
+    const { error } = await db
+      .from('monitored_wallets')
+      .update({
+        last_balance_btc: btcBalance,
+        last_balance_usd: usdBalance,
+        last_checked_at: new Date().toISOString()
+      })
+      .eq('telegram_user_id', telegramUserId)
+      .ilike('address', address);
+
+    return !error;
+  } catch (error) {
+    console.error('Update wallet balance error:', error);
+    return false;
+  }
+};
+
+// ============================================
+// BOT PREFERENCES
+// ============================================
+
+// Get bot preferences
+const getBotPreferences = async (telegramUserId) => {
+  const db = initSupabase();
+
+  const defaults = {
+    daily_updates: false,
+    transaction_alerts: true,
+    price_alerts: true,
+    report_frequency: 'weekly',
+    preferred_language: 'en'
+  };
+
+  if (!db) return defaults;
+
+  try {
+    const { data, error } = await db
+      .from('bot_preferences')
+      .select('*')
+      .eq('telegram_user_id', telegramUserId)
+      .single();
+
+    if (error || !data) return defaults;
+    return data;
+  } catch (error) {
+    return defaults;
+  }
+};
+
+// Update bot preferences
+const updateBotPreferences = async (telegramUserId, preferences) => {
+  const db = initSupabase();
+
+  if (!db) {
+    return { success: false, message: 'Database not configured' };
+  }
+
+  try {
+    const { data: link } = await db
+      .from('telegram_links')
+      .select('user_id')
+      .eq('telegram_user_id', telegramUserId)
+      .eq('is_verified', true)
+      .single();
+
+    if (!link) {
+      return { success: false, message: 'Telegram not linked' };
+    }
+
+    const { error } = await db
+      .from('bot_preferences')
+      .upsert({
+        user_id: link.user_id,
+        telegram_user_id: telegramUserId,
+        daily_updates: preferences.daily_updates ?? false,
+        transaction_alerts: preferences.transaction_alerts ?? true,
+        price_alerts: preferences.price_alerts ?? true,
+        report_frequency: preferences.report_frequency || 'weekly',
+        preferred_language: preferences.preferred_language || 'en'
+      }, { onConflict: 'telegram_user_id' });
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Update bot preferences error:', error);
+    return { success: false, message: 'Failed to update preferences' };
+  }
+};
+
+// ============================================
+// TRANSACTION TRACKING
+// ============================================
+
+// Check if transaction seen
+const isTransactionSeen = async (txid) => {
+  const db = initSupabase();
+  if (!db) return false;
+
+  try {
+    const { data } = await db
+      .from('transactions_seen')
+      .select('id')
+      .eq('txid', txid)
+      .single();
+    return !!data;
+  } catch (error) {
+    return false;
+  }
+};
+
+// Mark transaction as seen
+const markTransactionSeen = async (txid, visitorId, walletAddress, amountBtc, txType) => {
+  const db = initSupabase();
+  if (!db) return false;
+
+  try {
+    await db.from('transactions_seen').insert([{
+      txid,
+      wallet_address: walletAddress,
+      amount_btc: amountBtc,
+      tx_type: txType
+    }]);
+    return true;
+  } catch (error) {
+    return true; // Likely duplicate
+  }
+};
+
+// ============================================
+// HISTORICAL BALANCES
+// ============================================
+
+// Save daily balance
+const saveHistoricalBalance = async (telegramUserId, walletAddress, btcBalance, usdBalance) => {
+  const db = initSupabase();
+  if (!db) return false;
+
+  try {
+    const { data: link } = await db
+      .from('telegram_links')
+      .select('user_id')
+      .eq('telegram_user_id', telegramUserId)
+      .eq('is_verified', true)
+      .single();
+
+    if (!link) return false;
+
+    const today = new Date().toISOString().split('T')[0];
+
+    await db.from('historical_balances').upsert({
+      user_id: link.user_id,
+      wallet_address: walletAddress,
+      btc_balance: btcBalance,
+      usd_balance: usdBalance,
+      recorded_at: today
+    }, { onConflict: 'user_id,wallet_address,recorded_at' });
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+// Get historical balances
+const getHistoricalBalances = async (telegramUserId, days = 30) => {
+  const db = initSupabase();
+  if (!db) return { dates: [], wallets: [], balances: {} };
+
+  try {
+    const { data: link } = await db
+      .from('telegram_links')
+      .select('user_id')
+      .eq('telegram_user_id', telegramUserId)
+      .eq('is_verified', true)
+      .single();
+
+    if (!link) return { dates: [], wallets: [], balances: {} };
+
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+
+    const { data } = await db
+      .from('historical_balances')
+      .select('*')
+      .eq('user_id', link.user_id)
+      .gte('recorded_at', cutoff.toISOString().split('T')[0])
+      .order('recorded_at', { ascending: true });
+
+    if (!data || data.length === 0) return { dates: [], wallets: [], balances: {} };
+
+    // Format for charts
+    const dates = [...new Set(data.map(d => d.recorded_at))].sort();
+    const wallets = [...new Set(data.map(d => d.wallet_address))];
+    const balances = {};
+
+    for (const wallet of wallets) {
+      balances[wallet] = dates.map(date => {
+        const record = data.find(d => d.wallet_address === wallet && d.recorded_at === date);
+        return record ? parseFloat(record.btc_balance) : 0;
+      });
+    }
+
+    return { dates, wallets, balances };
+  } catch (error) {
+    return { dates: [], wallets: [], balances: {} };
+  }
+};
+
+// ============================================
+// BOT ACTIVE USERS (for monitoring)
+// ============================================
+
+/**
+ * Get all active bot users with their wallets and preferences
+ * Used by the bot for daily updates and transaction monitoring
+ */
+const getActiveBotUsers = async () => {
+  try {
+    // Get all telegram links with active Sentinel subscriptions
+    const { data: links, error: linksError } = await supabase
+      .from('telegram_links')
+      .select('telegram_user_id, user_id')
+      .eq('is_verified', true);
+
+    if (linksError || !links || links.length === 0) {
+      return [];
+    }
+
+    const activeUsers = [];
+
+    for (const link of links) {
+      // Check if user has active Sentinel subscription
+      const { data: user } = await supabase
+        .from('users')
+        .select('subscription_level, subscription_end')
+        .eq('id', link.user_id)
+        .single();
+
+      if (!user || user.subscription_level !== 'sentinel') continue;
+
+      // Check if subscription is still active
+      if (user.subscription_end) {
+        const endDate = new Date(user.subscription_end);
+        if (endDate < new Date()) continue;
+      }
+
+      // Get user's wallets
+      const { data: wallets } = await supabase
+        .from('monitored_wallets')
+        .select('address, label, address_type')
+        .eq('telegram_user_id', link.telegram_user_id);
+
+      // Get user's preferences
+      const { data: prefs } = await supabase
+        .from('bot_preferences')
+        .select('*')
+        .eq('telegram_user_id', link.telegram_user_id)
+        .single();
+
+      activeUsers.push({
+        telegram_user_id: link.telegram_user_id,
+        user_id: link.user_id,
+        wallets: wallets || [],
+        preferences: prefs || {
+          daily_updates: false,
+          transaction_alerts: true,
+          price_alerts: true,
+          preferred_language: 'en'
+        }
+      });
+    }
+
+    return activeUsers;
+  } catch (error) {
+    console.error('Error getting active bot users:', error);
+    return [];
+  }
+};
+
 module.exports = {
   initSupabase,
   createUser,
@@ -1201,5 +1593,21 @@ module.exports = {
   getTelegramLink,
   getUserByTelegramId,
   checkSentinelSubscription,
-  unlinkTelegram
+  unlinkTelegram,
+  // Wallet management
+  addMonitoredWallet,
+  getMonitoredWallets,
+  removeMonitoredWallet,
+  updateWalletBalance,
+  // Bot preferences
+  getBotPreferences,
+  updateBotPreferences,
+  // Transaction tracking
+  isTransactionSeen,
+  markTransactionSeen,
+  // Historical balances
+  saveHistoricalBalance,
+  getHistoricalBalances,
+  // Bot monitoring
+  getActiveBotUsers
 };
