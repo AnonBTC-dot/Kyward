@@ -1523,9 +1523,16 @@ const getHistoricalBalances = async (telegramUserId, days = 30) => {
  * Used by the bot for daily updates and transaction monitoring
  */
 const getActiveBotUsers = async () => {
+  const db = initSupabase();
+
+  if (!db) {
+    console.error('Supabase not initialized');
+    return [];
+  }
+
   try {
     // Get all telegram links with active Sentinel subscriptions
-    const { data: links, error: linksError } = await supabase
+    const { data: links, error: linksError } = await db
       .from('telegram_links')
       .select('telegram_user_id, user_id')
       .eq('is_verified', true);
@@ -1538,11 +1545,11 @@ const getActiveBotUsers = async () => {
 
     for (const link of links) {
       // Check if user has active Sentinel subscription
-      const { data: user } = await supabase
+      const { data: user } = await db
         .from('users')
         .select('subscription_level, subscription_end')
         .eq('id', link.user_id)
-        .single();
+        .maybeSingle();
 
       if (!user || user.subscription_level !== 'sentinel') continue;
 
@@ -1553,17 +1560,17 @@ const getActiveBotUsers = async () => {
       }
 
       // Get user's wallets
-      const { data: wallets } = await supabase
+      const { data: wallets } = await db
         .from('monitored_wallets')
         .select('address, label, address_type')
         .eq('telegram_user_id', link.telegram_user_id);
 
       // Get user's preferences
-      const { data: prefs } = await supabase
+      const { data: prefs } = await db
         .from('bot_preferences')
         .select('*')
         .eq('telegram_user_id', link.telegram_user_id)
-        .single();
+        .maybeSingle();
 
       activeUsers.push({
         telegram_user_id: link.telegram_user_id,
