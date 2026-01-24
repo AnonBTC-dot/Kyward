@@ -89,6 +89,25 @@
     width: 100% !important;
     max-width: 320px !important;
   }
+
+  .nav-content {
+    padding: 10px 12px !important; /* Reduce márgenes laterales para ganar espacio */
+    justify-content: space-between !important;
+  }
+
+  .nav-logo-img {
+    width: 130px !important; /* Ajusta el ancho para que sea visible pero no gigante */
+    height: auto !important;
+  }
+
+  .nav-buttons {
+    gap: 8px !important; /* Estrecha la separación entre botones */
+  }
+
+  .nav-button {
+    padding: 6px 12px !important; /* Botones más compactos */
+    font-size: 13px !important; /* Fuente un poco más pequeña para ahorrar espacio */
+  }
 }
 
 /* Section Titles */
