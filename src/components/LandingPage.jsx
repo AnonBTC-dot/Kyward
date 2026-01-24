@@ -12,7 +12,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
         <div className="nav-content" style={styles.navContent}>
           <div style={styles.navLogo}>
             <img src="/kywardw.svg" style={{ width: '180px', height: 'auto', maxHeight: '100px', cursor: 'pointer'}} onClick={() => window.location.href = "https://kyward.com"} />
-            <span className="nav-logo-text" style={styles.navLogoText}></span>
+            <span className="nav-logo-img" style={styles.navLogoText}></span>
           </div>
           <div className="nav-buttons" style={styles.navButtons}>
             <LanguageToggle />
