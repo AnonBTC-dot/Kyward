@@ -154,7 +154,7 @@ const Footer = () => {
           <div style={footerStyles.socialSection}>
             <h4 style={footerStyles.socialTitle}>Follow Us</h4>
             <div style={footerStyles.socialIcons}>
-              {/* Instagram - PUT YOUR LINK HERE */}
+              {/* Instagram */}
               <a
                 href="https://www.instagram.com/kywardb?igsh=MTF1Z2t5OHV6ZGV1aQ=="
                 target="_blank"
@@ -170,7 +170,23 @@ const Footer = () => {
                 </svg>
               </a>
 
-              {/* X (Twitter) - PUT YOUR LINK HERE */}
+              {/* LinkedIn */}
+              <a
+                href="https://www.linkedin.com/company/kyward/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={footerStyles.socialLink}
+                className="social-icon"
+                aria-label="LinkedIn"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                  <rect x="2" y="9" width="4" height="12"/>
+                  <circle cx="4" cy="4" r="2"/>
+                </svg>
+              </a>
+
+              {/* X (Twitter) */}
               <a
                 href="https://x.com/kywardb"
                 target="_blank"

@@ -154,7 +154,7 @@ export const translations = {
 
       // Footer
       footer: {
-        tagline: 'Empowering Bitcoiners with honest security advice.',
+        tagline: 'Built by Bitcoiners for Bitcoiners',
         copyright: '© 2025 Kyward. Built by Bitcoiners.'
       }
     },
@@ -1314,7 +1314,7 @@ export const translations = {
       },
 
       footer: {
-        tagline: 'Empoderando a Bitcoiners con consejos de seguridad honestos.',
+        tagline: 'Creado por Bitcoiners para Bitcoiners.',
         copyright: '© 2025 Kyward. Creado por Bitcoiners.'
       }
     },
