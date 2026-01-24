@@ -274,8 +274,8 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
       <nav style={styles.nav}>
         <div style={styles.navContent}>
           <div style={styles.navLogo}>
-            <img src="/vite.svg" alt="Kyward" style={{ width: '32px', height: '32px' }} />
-            <span style={styles.navLogoText}>Kyward</span>
+            <img src="/kywardw.svg" style={{ width: '180px', height: 'auto', maxHeight: '100px', cursor: 'pointer'}} onClick={() => window.location.href = "https://kyward.com"} />
+            <span style={styles.navLogoText}></span>
           </div>
           <div style={styles.navButtons}>
             <LanguageToggle style={{ marginRight: '12px' }} />

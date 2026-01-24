@@ -126,12 +126,8 @@ const Footer = () => {
           {/* Logo & Tagline */}
           <div style={footerStyles.logoSection}>
             <div style={footerStyles.logo}>
-              <img
-                src="/vite.svg"
-                alt="Kyward"
-                style={{ width: '36px', height: '36px' }}
-              />
-              <span style={footerStyles.logoText}>Kyward</span>
+              <img src="/kywardw.svg" style={{ width: '180px', height: 'auto', maxHeight: '100px', cursor: 'pointer'}} onClick={() => window.location.href = "https://kyward.com"} />
+              <span style={footerStyles.logoText}></span>
             </div>
             <p style={footerStyles.tagline}>
               {t?.landing?.footer?.tagline || 'Empowering your Bitcoin security journey with personalized assessments and expert guidance.'}

@@ -11,8 +11,8 @@ const LandingPage = ({ onLogin, onSignup }) => {
       <nav style={styles.nav}>
         <div className="nav-content" style={styles.navContent}>
           <div style={styles.navLogo}>
-            <img src="/vite.svg" alt="Kyward" style={{ width: '40px', height: '40px' }} />
-            <span className="nav-logo-text" style={styles.navLogoText}>Kyward</span>
+            <img src="/kywardw.svg" style={{ width: '180px', height: 'auto', maxHeight: '100px', cursor: 'pointer'}} onClick={() => window.location.href = "https://kyward.com"} />
+            <span className="nav-logo-text" style={styles.navLogoText}></span>
           </div>
           <div className="nav-buttons" style={styles.navButtons}>
             <LanguageToggle />
