@@ -99,7 +99,7 @@ OPENNODE_API_KEY=your_opennode_key
 | Plan | Price | Features |
 |------|-------|----------|
 | Free | $0 | 1 assessment/month |
-| Essential | $7.99 (one-time) | 1 assessment + PDF report |
+| Essential | $9.99 (one-time) | 1 assessment + PDF report |
 | Sentinel | $14.99/month | Unlimited assessments + BTC Guardian bot |
 | Consultation | $99/hour | Expert consultation session |
 

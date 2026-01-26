@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 // Payment configuration
 const PAYMENT_CONFIG = {
   prices: {
-    essential: 7.99,              // one-time payment
+    essential: 9.99,              // one-time payment
     sentinel: 14.99,              // monthly subscription
     consultation: 99,             // first consultation session
     consultation_additional: 49   // additional hours/sessions
@@ -31,7 +31,7 @@ export const getPriceDisplay = (plan) => {
   switch (plan) {
     case 'essential':
       return {
-        amount: '$7.99',
+        amount: '$9.99',
         description: 'Essential Plan - One-time payment',
         typeLabel: PAYMENT_CONFIG.planTypeLabels.essential,
         isSubscription: false,

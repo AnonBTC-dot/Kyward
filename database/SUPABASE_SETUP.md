@@ -153,7 +153,7 @@ module.exports = {
 ## Pricing Tiers in Database
 
 - `free`: Default tier, limited features
-- `complete`: $7.99/month subscription
+- `complete`: $9.99/month subscription
 - `consultation`: Has booked consultation ($99 first, $49 additional)
 
 ## Subscription Management

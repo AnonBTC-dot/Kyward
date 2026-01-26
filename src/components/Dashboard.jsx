@@ -503,7 +503,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                     marginTop: '12px'
                   }}
                 >
-                  {t.common.repurchase || 'Repurchase Essential'} - $7.99
+                  {t.common.repurchase || 'Repurchase Essential'} - $9.99
                 </button>
               </div>
             ) : (
@@ -1004,7 +1004,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                   }}
                 >
                   <span>{t.landing?.plans?.essential?.name || 'Essential'}</span>
-                  <span style={{ fontSize: '11px', color: '#6b7280' }}>$7.99 one-time</span>
+                  <span style={{ fontSize: '11px', color: '#6b7280' }}>$9.99 one-time</span>
                 </button>
                 <button
                   onClick={() => onUpgrade('sentinel')}

@@ -314,7 +314,7 @@ Response:
 - Basic security score
 - 1 critical recommendation
 
-### Essential ($7.99 one-time)
+### Essential ($9.99 one-time)
 - 1 assessment (repurchase to retake)
 - Full PDF report download
 - All personalized recommendations

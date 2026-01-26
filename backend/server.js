@@ -69,7 +69,7 @@ const authMiddleware = async (req, res, next) => {
 // Pricing configuration (in USD)
 // Nota: essential es pago único, sentinel es suscripción mensual recurrente
 const PRICES = {
-  essential: 7.99,               // one-time
+  essential: 9.99,               // one-time
   sentinel: 14.99,               // monthly subscription
   consultation: 99,              // primera sesión
   consultation_additional: 49    // sesiones adicionales

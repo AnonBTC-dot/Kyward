@@ -559,7 +559,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                 cursor: 'pointer'
               }}
             >
-              {t.common.getEssential || 'Get Essential - $7.99 one-time'}
+              {t.common.getEssential || 'Get Essential - $9.99 one-time'}
             </button>
 
             <button
@@ -738,7 +738,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                 </p>
               )}
 
-              {/* Upgrade Button - Essential plan ($7.99 one-time) */}
+              {/* Upgrade Button - Essential plan ($9.99 one-time) */}
               <button
                 onClick={() => onUpgrade && onUpgrade('essential')}
                 style={{
@@ -761,7 +761,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
                 </svg>
-                {t.report.recommendations.unlock} {t.report.recommendations.recommendations} - $7.99
+                {t.report.recommendations.unlock} {t.report.recommendations.recommendations} - $9.99
               </button>
             </div>
 

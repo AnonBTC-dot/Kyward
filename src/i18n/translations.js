@@ -105,7 +105,7 @@ export const translations = {
         essential: {
           badge: 'RECOMMENDED',
           name: 'Essential',
-          price: '$7.99',
+          price: '$9.99',
           period: '/one-time',
           features: [
             'Full PDF Report Download',
@@ -114,7 +114,7 @@ export const translations = {
             'Unlimited Re-downloads of your report',
             'One assessment only (repurchase to retake)'
           ],
-          cta: 'Get Essential ($7.99)'
+          cta: 'Get Essential ($9.99)'
         },
 
         sentinel: {
@@ -221,7 +221,7 @@ export const translations = {
 
       statement: {
         part1: 'Start Free – No credit card required.',
-        part2: 'All users start on Free tier. Upgrade anytime to Essential ($7.99 one-time), Sentinel ($14.99/month) or Consultation.',
+        part2: 'All users start on Free tier. Upgrade anytime to Essential ($9.99 one-time), Sentinel ($14.99/month) or Consultation.',
       }
 
     },
@@ -276,7 +276,7 @@ export const translations = {
           recommendations: 'All Recommendations',
           inheritance: 'Inheritance Plan'
         },
-        essentialButton: 'Get Essential - $7.99 one-time',
+        essentialButton: 'Get Essential - $9.99 one-time',
         sentinelButton: 'Subscribe Sentinel - $14.99/month',
         cancelNote: 'Cancel anytime',
         consultButton: 'Book Consultation - $99',
@@ -575,7 +575,7 @@ export const translations = {
         plan: {
           gridtitle: 'MOST POPULAR',
           title1: 'Essential Plan',
-          price1: '$7.99',
+          price1: '$9.99',
           renew1: '/one tiem',
           explanation1: 'Just one payment',
           benefit1: 'Personalized recommendations',
@@ -583,7 +583,7 @@ export const translations = {
           benefit3: 'Inheritance Planning Guide',
           benefit4: 'Unlimited Re-downloads of your report',
           benefit5: 'One assessment only (repurchase to retake)',
-          payment1: 'Just 7.99',
+          payment1: 'Just $9.99',
           title2: 'Consultation',
           price2: '$99',
           renew2: '/session',
@@ -662,7 +662,7 @@ export const translations = {
       continueToReport: 'Continue to Report',
       paymentActivatedSubscription: 'Your monthly subscription is now active.<br/>You now have unlimited assessments, email alerts, and all advanced features.<br/>You can cancel anytime from your dashboard.',
       paymentActivatedOneTime: 'Your one-time payment is complete.<br/>You now have full access to your PDF report and recommendations.',
-      essentialRepurchaseNote: '<strong>Note:</strong> To take a new assessment, you will need to purchase Essential again ($7.99).',
+      essentialRepurchaseNote: '<strong>Note:</strong> To take a new assessment, you will need to purchase Essential again ($9.99).',
       consultationBooked: 'Your consultation session has been booked.<br/>You will receive the details and link in your email soon.',
 
       // Expired
@@ -1290,7 +1290,7 @@ export const translations = {
         essential: {
           badge: 'RECOMENDADO',
           name: 'Essential',
-          price: '$7.99',
+          price: '$9.99',
           period: '/pago único',
           features: [
             'Descarga completa del Informe en PDF',
@@ -1299,7 +1299,7 @@ export const translations = {
             'Descargas ilimitadas de tu informe',
             'Solo una evaluación (recomprar para repetir)'
           ],
-          cta: 'Obtener Essential ($7.99)'
+          cta: 'Obtener Essential ($9.99)'
         },
 
         sentinel: {
@@ -1405,7 +1405,7 @@ export const translations = {
 
       statement: {
         part1: 'Comienza Gratis – No se requiere tarjeta de crédito.',
-        part2: 'Todos los usuarios comienzan en el nivel gratuito. Mejora en cualquier momento a Essential ($7.99 pago único), Sentinel ($14.99/mes) o Consulta.',
+        part2: 'Todos los usuarios comienzan en el nivel gratuito. Mejora en cualquier momento a Essential ($9.99 pago único), Sentinel ($14.99/mes) o Consulta.',
       }
     },
 
@@ -1459,7 +1459,7 @@ export const translations = {
           recommendations: 'Todas las Recomendaciones',
           inheritance: 'Plan de Herencia'
         },
-        essentialButton: 'Obtener Essential - $7.99 pago único',
+        essentialButton: 'Obtener Essential - $9.99 pago único',
         sentinelButton: 'Suscribirse a Sentinel - $14.99/mes',
         cancelNote: 'Cancela cuando quieras',
         consultButton: 'Reservar Consulta - $99',
@@ -1757,7 +1757,7 @@ export const translations = {
         plan: {
           gridtitle: 'MÁS POPULAR',
           title1: 'Plan Esencial',
-          price1: '$7.99',
+          price1: '$9.99',
           renew1: '/pago único',
           explanation1: 'Solo un pago',
           benefit1: 'Recomendaciones personalizadas',
@@ -1765,7 +1765,7 @@ export const translations = {
           benefit3: 'Guía de planificación de herencias',
           benefit4: 'Descargas ilimitadas de tu informe',
           benefit5: 'Solo una evaluación (recomprar para repetir)',
-          payment1: 'Solo $7.99',
+          payment1: 'Solo $9.99',
           
           title2: 'Consulta Personalizada',
           price2: '$99',
@@ -1845,7 +1845,7 @@ export const translations = {
       continueToReport: 'Continuar al Reporte',
       paymentActivatedSubscription: 'Tu suscripción mensual está activa.<br/>Ahora tienes evaluaciones ilimitadas, alertas por email y todas las funciones avanzadas.<br/>Puedes cancelar cuando quieras desde tu panel.',
       paymentActivatedOneTime: 'Tu pago único se completó correctamente.<br/>Ya tienes acceso completo a tu reporte PDF y recomendaciones.',
-      essentialRepurchaseNote: '<strong>Nota:</strong> Para realizar una nueva evaluación, deberás comprar Essential nuevamente ($7.99).',
+      essentialRepurchaseNote: '<strong>Nota:</strong> Para realizar una nueva evaluación, deberás comprar Essential nuevamente ($9.99).',
       consultationBooked: 'Tu sesión de consulta ha sido reservada.<br/>Recibirás los detalles y enlace en tu correo pronto.',
 
       // Expired

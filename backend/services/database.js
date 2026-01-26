@@ -396,7 +396,7 @@ const sanitizeUser = (user) => {
 // ============================================
 
 // Upgrade subscription
-// Plans: 'essential' (one-time $7.99), 'sentinel' ($14.99/mo), 'consultation' ($99 + $49/hr)
+// Plans: 'essential' (one-time $9.99), 'sentinel' ($14.99/mo), 'consultation' ($99 + $49/hr)
 // Upgrade subscription - Versión corregida, tipada y con lógica de alertas completa
 const upgradeSubscription = async (email, newLevel) => {
   const db = initSupabase();
