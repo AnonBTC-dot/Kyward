@@ -572,6 +572,30 @@ export const translations = {
           ]
         },
 
+        plan: {
+          gridtitle: 'MOST POPULAR',
+          title1: 'Essential Plan',
+          price1: '$7.99',
+          renew1: '/one tiem',
+          explanation1: 'Just one payment',
+          benefit1: 'Personalized recommendations',
+          benefit2: 'Full PDF Report Download',
+          benefit3: 'Inheritance Planning Guide',
+          benefit4: 'Unlimited Re-downloads of your report',
+          benefit5: 'One assessment only (repurchase to retake)',
+          payment1: 'Just 7.99',
+          title2: 'Consultation',
+          price2: '$99',
+          renew2: '/session',
+          explanation2: 'Additional sessions: $49/hr',
+          benefit11: '1-hour private audit (video call)',
+          benefit21: 'Custom inheritance strategy',
+          benefit31: '30-day follow-up support',
+          benefit41: 'Unlimited Assessments',
+          benefit51: 'Priority support',
+          payment2: 'Book Consultation',
+        },
+
         urgency: {
           message: 'You have',
           issues: 'critical/high priority issues.',
@@ -1121,7 +1145,7 @@ export const translations = {
         setupMultisig: { action: 'Set up 2-of-3 multisig with Sparrow Wallet', timeframe: 'Within 2 months', cost: '$300-500 (additional hardware)' },
         implementLiana: { action: 'Implement Liana wallet for inheritance', timeframe: 'Within 3 months', cost: 'Free' },
         documentEverything: { action: 'Document everything and inform heirs (without revealing secrets)', timeframe: 'Ongoing', cost: 'Free' },
-        lianaMultisig: { action: 'Set up Liana wallet multisign 2-3 with time-locked recovery (primary + recovery key)', cost: '$300-500 (additional hardware)' },
+        lianaMultisig: { action: 'Set up Liana wallet multisig 2-3 with time-locked recovery (primary + recovery key)', cost: '$300-500 (additional hardware)' },
         lianaTimelock: { action: 'Define timelock period and test recovery simulation' }
       }
     },
@@ -1728,6 +1752,31 @@ export const translations = {
             'Estrategias de Respaldo',
             'Lista de Acciones'
           ]
+        },
+
+        plan: {
+          gridtitle: 'MÁS POPULAR',
+          title1: 'Plan Esencial',
+          price1: '$7.99',
+          renew1: '/pago único',
+          explanation1: 'Solo un pago',
+          benefit1: 'Recomendaciones personalizadas',
+          benefit2: 'Descarga completa del informe en PDF',
+          benefit3: 'Guía de planificación de herencias',
+          benefit4: 'Descargas ilimitadas de tu informe',
+          benefit5: 'Solo una evaluación (recomprar para repetir)',
+          payment1: 'Solo $7.99',
+          
+          title2: 'Consulta Personalizada',
+          price2: '$99',
+          renew2: '/sesión',
+          explanation2: 'Sesiones adicionales: $49/hora',
+          benefit11: 'Auditoría privada de 1 hora (videollamada)',
+          benefit21: 'Estrategia de herencia personalizada',
+          benefit31: 'Soporte de seguimiento durante 30 días',
+          benefit41: 'Evaluaciones ilimitadas',
+          benefit51: 'Soporte prioritario',
+          payment2: 'Reservar Consulta',
         },
 
         urgency: {

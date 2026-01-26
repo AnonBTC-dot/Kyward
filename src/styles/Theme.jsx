@@ -690,10 +690,17 @@ if (typeof document !== 'undefined') {
         font-size: 18px !important;
       }
 
-      /* Logo image smaller */
-      nav img {
+      /* Logo image - keep main logo visible, only shrink icon images */
+      nav img:not(.nav-logo-img) {
         width: 28px !important;
         height: 28px !important;
+      }
+
+      /* Main nav logo - properly sized on mobile */
+      nav .nav-logo-img {
+        width: 120px !important;
+        height: auto !important;
+        max-height: 40px !important;
       }
 
       /* Language toggle smaller */
@@ -752,9 +759,16 @@ if (typeof document !== 'undefined') {
         font-size: 16px !important;
       }
 
-      nav img {
+      nav img:not(.nav-logo-img) {
         width: 24px !important;
         height: 24px !important;
+      }
+
+      /* Main nav logo - properly sized on extra small screens */
+      nav .nav-logo-img {
+        width: 100px !important;
+        height: auto !important;
+        max-height: 35px !important;
       }
 
       /* Plan badge more compact */
