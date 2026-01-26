@@ -442,8 +442,9 @@ app.post('/api/payments/create', async (req, res) => {
     const priceData = await bitcoinService.usdToSats(usdAmount);
 
     // Generate unique payment address from XPUB
+    // Pass email for address persistence per user (30 min reuse)
     const paymentId = uuidv4();
-    const addressData = await bitcoinService.generatePaymentAddress(paymentId);
+    const addressData = await bitcoinService.generatePaymentAddress(paymentId, email);
 
     if (!addressData.success) {
       return res.status(500).json({ error: 'Failed to generate payment address: ' + addressData.error });
@@ -555,6 +556,9 @@ app.get('/api/payments/:paymentId/status', async (req, res) => {
       payment.confirmedAt = new Date().toISOString();
       paymentStore.savePayment(payment);
 
+      // Mark address as used so we advance to next address for future payments
+      bitcoinService.markAddressUsed(payment.address, payment.email);
+
       // Upgrade user subscription
       const upgradeResult = await db.upgradeSubscription(payment.email, payment.plan);
       const pdfPassword = upgradeResult.pdfPassword;
@@ -573,6 +577,18 @@ app.get('/api/payments/:paymentId/status', async (req, res) => {
         txid: txStatus.txid,
         pdfPassword,
         plan: payment.plan
+      });
+    }
+
+    // If payment was received but amount is outside tolerance, return specific error
+    if (txStatus.receivedSats > 0 && txStatus.withinTolerance === false) {
+      return res.json({
+        success: true,
+        status: 'invalid_amount',
+        receivedSats: txStatus.receivedSats,
+        expectedSats: payment.amountSats,
+        percentDifference: txStatus.percentDifference,
+        message: txStatus.message
       });
     }
 
@@ -621,6 +637,9 @@ app.post('/api/payments/:paymentId/simulate', async (req, res) => {
     payment.txid = 'demo_' + uuidv4();
     payment.confirmedAt = new Date().toISOString();
     paymentStore.savePayment(payment);
+
+    // Mark address as used so we advance to next address for future payments
+    bitcoinService.markAddressUsed(payment.address, payment.email);
 
     // Upgrade user
     const upgradeResult = await db.upgradeSubscription(payment.email, payment.plan);

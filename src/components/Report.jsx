@@ -964,17 +964,17 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                     fontSize: '12px',
                     fontWeight: '700'
                   }}>
-                    MOST POPULAR
+                    {t.report?.upgrade?.plan?.gridtitle}
                   </div>
                   <h3 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>
-                    Complete Plan
+                    {t.report?.upgrade?.plan?.title1}
                   </h3>
                   <div style={{ marginBottom: '8px' }}>
-                    <span style={{ fontSize: '48px', fontWeight: '800', color: '#F7931A' }}>$7.99</span>
-                    <span style={{ color: '#6b7280', fontSize: '14px' }}>/month</span>
+                    <span style={{ fontSize: '48px', fontWeight: '800', color: '#F7931A' }}>{t.report?.upgrade?.plan?.price1}</span>
+                    <span style={{ color: '#6b7280', fontSize: '14px' }}>{t.report?.upgrade?.plan?.renew1}</span>
                   </div>
                   <p style={{ color: '#6b7280', fontSize: '12px', marginBottom: '16px' }}>
-                    Cancel anytime. Billed monthly.
+                    {t.report?.upgrade?.plan?.explanation1}
                   </p>
                   <ul style={{
                     listStyle: 'none',
@@ -984,12 +984,11 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                     color: '#9ca3af',
                     fontSize: '14px'
                   }}>
-                    <li style={{ marginBottom: '8px' }}>✓ All {recommendations.length} recommendations</li>
-                    <li style={{ marginBottom: '8px' }}>✓ Unlimited PDF downloads</li>
-                    <li style={{ marginBottom: '8px' }}>✓ Complete inheritance plan</li>
-                    <li style={{ marginBottom: '8px' }}>✓ Sparrow & Liana guides</li>
-                    <li style={{ marginBottom: '8px' }}>✓ Unlimited re-assessments</li>
-                    <li style={{ marginBottom: '8px' }}>✓ Email delivery with password</li>
+                    <li style={{ marginBottom: '8px' }}>✓ {recommendations.length} {t.report?.upgrade?.plan?.benefit1} </li>
+                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit2}</li>
+                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit3}</li>
+                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit4}</li>
+                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit5}</li>
                   </ul>
                   <button
                     onClick={() => onUpgrade && onUpgrade('sentinel')}
@@ -1005,7 +1004,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                       cursor: 'pointer'
                     }}
                   >
-                    Subscribe Now - $14.99/mo
+                    {t.report?.upgrade?.plan?.payment1}
                   </button>
                 </div>
 
@@ -1018,14 +1017,14 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                   textAlign: 'center'
                 }}>
                   <h3 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>
-                    Consultation
+                    {t.report?.upgrade?.plan?.title2}
                   </h3>
                   <div style={{ marginBottom: '8px' }}>
-                    <span style={{ fontSize: '48px', fontWeight: '800', color: '#22c55e' }}>$99</span>
-                    <span style={{ color: '#6b7280', fontSize: '14px' }}>/session</span>
+                    <span style={{ fontSize: '48px', fontWeight: '800', color: '#22c55e' }}>{t.report?.upgrade?.plan?.price2}</span>
+                    <span style={{ color: '#6b7280', fontSize: '14px' }}>{t.report?.upgrade?.plan?.renew2}</span>
                   </div>
                   <p style={{ color: '#6b7280', fontSize: '12px', marginBottom: '16px' }}>
-                    Additional sessions: $49/hr
+                    {t.report?.upgrade?.plan?.explanation2}
                   </p>
                   <ul style={{
                     listStyle: 'none',
@@ -1035,12 +1034,11 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                     color: '#9ca3af',
                     fontSize: '14px'
                   }}>
-                    <li style={{ marginBottom: '8px' }}>✓ Everything in Complete</li>
-                    <li style={{ marginBottom: '8px' }}>✓ 1-hour video consultation</li>
-                    <li style={{ marginBottom: '8px' }}>✓ Custom inheritance strategy</li>
-                    <li style={{ marginBottom: '8px' }}>✓ Live multisig setup help</li>
-                    <li style={{ marginBottom: '8px' }}>✓ 30-day follow-up support</li>
-                    <li style={{ marginBottom: '8px' }}>✓ Priority email support</li>
+                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit11}</li>
+                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit21}</li>
+                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit31} </li>
+                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit41}</li>
+                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit51}</li>
                   </ul>
                   <button
                     onClick={() => onUpgrade && onUpgrade('consultation')}
@@ -1056,7 +1054,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                       cursor: 'pointer'
                     }}
                   >
-                    Book Consultation
+                    {t.report?.upgrade?.plan?.payment2}
                   </button>
                 </div>
               </div>
