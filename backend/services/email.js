@@ -139,36 +139,65 @@ async function verifySmtpConnection() {
 }
 
 /**
- * Send payment confirmation email
+ * Send payment confirmation email - customized per plan type
+ * @param {string} toEmail - Recipient email
+ * @param {string} plan - Plan type: essential, sentinel, consultation, consultation_additional
+ * @param {string} language - Language: 'en' or 'es' (default: 'en')
  */
-async function sendPaymentConfirmation(toEmail, plan, pdfPassword) {
-  const planNames = {
-    essential: 'Essential Plan',
-    sentinel: 'Sentinel Plan',
-    consultation: 'Consultation'
-  };
-  const planName = planNames[plan] || 'Premium Plan';
+async function sendPaymentConfirmation(toEmail, plan, language = 'en') {
+  const frontendUrl = process.env.FRONTEND_URL || 'https://kyward.com';
+  const calendarUrl = process.env.CALENDAR_URL || 'https://calendly.com/leomr20-proton/30min';
 
-  const subject = `Kyward - Your ${planName} is Ready!`;
+  // Import translations from external file
+  const { getPlanContent, getCommonTranslations } = require('./emailTranslations');
+
+  // Get translated content
+  const content = getPlanContent(plan, language);
+  const common = getCommonTranslations(language);
+
+  // Set URLs based on plan type
+  const ctaUrl = content.showCalendar ? calendarUrl : frontendUrl;
+
+  const subject = `Kyward - ${content.subject}`;
+
+  // Build features list HTML
+  const featuresHtml = content.features.map(f => `<li>${f}</li>`).join('\n        ');
+
+  // Build badge HTML if exists
+  const badgeHtml = content.badge
+    ? `<span style="display: inline-block; background: #22c55e; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-left: 12px;">${content.badge}</span>`
+    : '';
+
+  // Build calendar section for consultations (translated)
+  const calendarSection = content.showCalendar ? `
+      <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 1px solid #F7931A; border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center;">
+        <p style="color: #F7931A; font-size: 18px; font-weight: 600; margin: 0 0 8px 0;">📅 ${common.scheduleSession}</p>
+        <p style="color: #9ca3af; margin: 0 0 16px 0; font-size: 14px;">${common.scheduleSubtitle}</p>
+        <a href="${calendarUrl}" style="display: inline-block; background: #F7931A; color: #000; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">${content.ctaText}</a>
+      </div>
+  ` : '';
 
   const html = `
 <!DOCTYPE html>
 <html>
 <head>
   <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 40px; }
-    .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; }
-    .header { background: #F7931A; padding: 30px; text-align: center; }
-    .header h1 { color: #000; margin: 0; font-size: 28px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; margin: 0; padding: 40px; }
+    .container { max-width: 600px; margin: 0 auto; background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%); border-radius: 16px; overflow: hidden; border: 1px solid #2a2a2a; }
+    .header { background: linear-gradient(135deg, #F7931A 0%, #f5a623 100%); padding: 40px; text-align: center; }
+    .header h1 { color: #000; margin: 0; font-size: 32px; font-weight: 800; letter-spacing: 2px; }
     .body { padding: 40px; }
-    .body h2 { color: #333; margin-top: 0; }
-    .body p { color: #666; line-height: 1.6; }
-    .password-box { background: #fff7ed; border: 2px solid #F7931A; border-radius: 12px; padding: 24px; text-align: center; margin: 24px 0; }
-    .password { font-family: monospace; font-size: 28px; color: #F7931A; font-weight: bold; letter-spacing: 3px; }
-    .warning { background: #fee; border: 1px solid #fcc; border-radius: 8px; padding: 16px; margin: 24px 0; }
-    .warning p { color: #c00; margin: 0; font-size: 14px; }
-    .button { display: inline-block; background: #F7931A; color: #000; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 16px; }
-    .footer { background: #f8f8f8; padding: 24px; text-align: center; color: #888; font-size: 12px; }
+    .body h2 { color: #fff; margin-top: 0; font-size: 28px; display: flex; align-items: center; flex-wrap: wrap; }
+    .body p { color: #9ca3af; line-height: 1.7; font-size: 15px; }
+    .features-box { background: rgba(247, 147, 26, 0.1); border: 1px solid rgba(247, 147, 26, 0.3); border-radius: 12px; padding: 24px; margin: 24px 0; }
+    .features-box h3 { color: #F7931A; margin: 0 0 16px 0; font-size: 16px; }
+    .features-box ul { margin: 0; padding-left: 20px; }
+    .features-box li { color: #d1d5db; margin-bottom: 8px; font-size: 14px; }
+    .button { display: inline-block; background: #F7931A; color: #000; padding: 16px 40px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-top: 16px; font-size: 15px; }
+    .button:hover { background: #f5a623; }
+    .footer { background: #0a0a0a; padding: 24px; text-align: center; border-top: 1px solid #2a2a2a; }
+    .footer p { color: #6b7280; font-size: 12px; margin: 4px 0; }
+    .success-icon { font-size: 48px; margin-bottom: 16px; }
   </style>
 </head>
 <body>
@@ -177,37 +206,34 @@ async function sendPaymentConfirmation(toEmail, plan, pdfPassword) {
       <h1>KYWARD</h1>
     </div>
     <div class="body">
-      <h2>Payment Confirmed!</h2>
-      <p>Thank you for upgrading to the <strong>${planName}</strong>.</p>
-      <p>Your personalized Bitcoin Security & Inheritance Plan is now ready.</p>
+      <div class="success-icon">✅</div>
+      <h2>${content.headline}${badgeHtml}</h2>
+      <p>${content.intro}</p>
+      <p>${content.description}</p>
 
-      <div class="password-box">
-        <p style="margin: 0 0 12px 0; color: #666;">Your PDF Password:</p>
-        <div class="password">${pdfPassword}</div>
-        <p style="margin: 12px 0 0 0; color: #888; font-size: 13px;">Save this password securely</p>
+      <div class="features-box">
+        <h3>${common.whatsIncluded}</h3>
+        <ul>
+        ${featuresHtml}
+        </ul>
       </div>
 
-      <div class="warning">
-        <p><strong>Important:</strong> This password is required to open your security plan PDF. Store it separately from the PDF itself.</p>
+      ${calendarSection}
+
+      ${!content.showCalendar ? `
+      <div style="text-align: center; margin-top: 32px;">
+        <a href="${ctaUrl}" class="button">${content.ctaText}</a>
       </div>
+      ` : ''}
 
-      <p>What's included in your plan:</p>
-      <ul style="color: #666;">
-        <li>Complete security score breakdown</li>
-        <li>All personalized recommendations</li>
-        <li>Sparrow Wallet setup guide</li>
-        <li>Multi-signature configuration</li>
-        <li>Liana inheritance strategy</li>
-        <li>Step-by-step action plan</li>
-      </ul>
-
-      <p>Log in to your account to download your PDF report:</p>
-      <a href="${process.env.FRONTEND_URL || 'https://kyward.io'}" class="button">Go to Kyward</a>
+      <p style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #2a2a2a; font-size: 13px; color: #6b7280;">
+        ${common.questions} <a href="mailto:contact@kyward.com" style="color: #F7931A;">contact@kyward.com</a>
+      </p>
     </div>
     <div class="footer">
-      <p>KYWARD - Bitcoin Security Made Simple</p>
-      <p>This email was sent to ${toEmail}</p>
-      <p>Never share your seed phrase or this password with anyone.</p>
+      <p style="color: #F7931A; font-weight: 600;">KYWARD - ${common.footer}</p>
+      <p>${common.footerEmail} ${toEmail}</p>
+      <p>${common.footerWarning}</p>
     </div>
   </div>
 </body>

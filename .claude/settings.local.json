@@ -4,7 +4,8 @@
       "Bash(dir /s \"c:\\\\Users\\\\Leonardo\\\\Desktop\\\\Kyward\")",
       "Bash(npm install)",
       "Bash(dir \"C:\\\\Users\\\\Leonardo\\\\Desktop\\\\BTC Guardian\" /b)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(node:*)"
     ]
   }
 }

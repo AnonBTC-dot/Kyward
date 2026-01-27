@@ -631,8 +631,12 @@ app.get('/api/payments/:paymentId/status', async (req, res) => {
         console.error('Upgrade failed after payment confirmed:', upgradeResult);
       }
 
-      // Send confirmation email
-      await emailService.sendPaymentConfirmation(payment.email, payment.plan, pdfPassword);
+      // Get user's language preference for email
+      const user = await db.getUserByEmail(payment.email);
+      const userLanguage = user?.language_preference || user?.preferred_language || 'en';
+
+      // Send confirmation email (plan-specific, translated)
+      await emailService.sendPaymentConfirmation(payment.email, payment.plan, userLanguage);
 
       return res.json({
         success: true,
@@ -758,12 +762,12 @@ app.post('/api/webhooks/btcpay', express.raw({ type: '*/*' }), async (req, res) 
         if (upgradeResult.success) {
           console.log(`BTCPay webhook: Upgraded ${payment.email} to ${payment.plan}`);
 
-          // Send confirmation email
-          await emailService.sendPaymentConfirmation(
-            payment.email,
-            payment.plan,
-            upgradeResult.pdfPassword
-          );
+          // Get user's language preference for email
+          const user = await db.getUserByEmail(payment.email);
+          const userLanguage = user?.language_preference || user?.preferred_language || 'en';
+
+          // Send confirmation email (plan-specific, translated)
+          await emailService.sendPaymentConfirmation(payment.email, payment.plan, userLanguage);
         } else {
           console.error('BTCPay webhook: Upgrade failed:', upgradeResult);
         }
@@ -813,12 +817,12 @@ app.post('/api/webhooks/nowpayments', async (req, res) => {
         if (upgradeResult.success) {
           console.log(`NOWPayments IPN: Upgraded ${payment.email} to ${payment.plan}`);
 
-          // Send confirmation email
-          await emailService.sendPaymentConfirmation(
-            payment.email,
-            payment.plan,
-            upgradeResult.pdfPassword
-          );
+          // Get user's language preference for email
+          const user = await db.getUserByEmail(payment.email);
+          const userLanguage = user?.language_preference || user?.preferred_language || 'en';
+
+          // Send confirmation email (plan-specific, translated)
+          await emailService.sendPaymentConfirmation(payment.email, payment.plan, userLanguage);
         } else {
           console.error('NOWPayments IPN: Upgrade failed:', upgradeResult);
         }

@@ -117,11 +117,10 @@ const PaymentMethodSelector = ({
   const { t } = useLanguage();
   const [expandedMethod, setExpandedMethod] = useState(null);
 
-  // Filter to only show available methods (show all by default, including coming soon)
-  const methods = PAYMENT_METHODS.filter(m =>
-    availableMethods.length === 0 ||
-    availableMethods.some(am => am.id === m.id)
-  );
+  // Always show all payment methods - Coming Soon ones are marked with comingSoon: true
+  // The availableMethods prop is ignored for display purposes since we want to show
+  // all options with Coming Soon badges for methods not yet configured
+  const methods = PAYMENT_METHODS;
 
   // Auto-select first AVAILABLE (non-coming-soon) method if none selected
   useEffect(() => {
