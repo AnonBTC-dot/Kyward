@@ -8,6 +8,9 @@ const bitcoinService = require('./services/bitcoin');
 const emailService = require('./services/email');
 const paymentStore = require('./services/paymentStore');
 const db = require('./services/database');
+const btcpayService = require('./services/btcpay');
+const nowpaymentsService = require('./services/nowpayments');
+const paymentRouter = require('./services/paymentRouter');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -93,16 +96,21 @@ app.get('/', (req, res) => {
   `);
 });
 
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  const providerHealth = await paymentRouter.healthCheck();
+
   res.json({
     status: 'ok',
-    version: '1.0.0',
+    version: '1.1.0',
     timestamp: new Date().toISOString(),
     services: {
       database: !!process.env.SUPABASE_URL,
       email: !!process.env.SMTP_HOST,
-      bitcoin: !!process.env.XPUB
-    }
+      bitcoin: !!process.env.XPUB,
+      btcpay: btcpayService.isConfigured(),
+      nowpayments: nowpaymentsService.isConfigured()
+    },
+    paymentProviders: providerHealth
   });
 });
 
@@ -423,10 +431,24 @@ app.get('/api/price', async (req, res) => {
 // PAYMENT ENDPOINTS
 // ============================================
 
-// Create payment request
+// Get available payment methods
+app.get('/api/payments/methods', (req, res) => {
+  try {
+    const methods = paymentRouter.getAvailablePaymentMethods();
+    res.json({
+      success: true,
+      methods
+    });
+  } catch (error) {
+    console.error('Get payment methods error:', error);
+    res.status(500).json({ error: 'Failed to get payment methods' });
+  }
+});
+
+// Create payment request (unified endpoint)
 app.post('/api/payments/create', async (req, res) => {
   try {
-    const { email, plan } = req.body;
+    const { email, plan, paymentMethod, network } = req.body;
 
     // Validate plan
     if (!PRICES[plan]) {
@@ -436,50 +458,75 @@ app.post('/api/payments/create', async (req, res) => {
     // Note: Essential repurchase is always allowed - users can buy Essential again
     // after using their one-time assessment to get another assessment
 
-    const usdAmount = PRICES[plan];
-
-    // Get real BTC price and calculate amount
-    const priceData = await bitcoinService.usdToSats(usdAmount);
-
-    // Generate unique payment address from XPUB
-    // Pass email for address persistence per user (30 min reuse)
     const paymentId = uuidv4();
-    const addressData = await bitcoinService.generatePaymentAddress(paymentId, email);
 
-    if (!addressData.success) {
-      return res.status(500).json({ error: 'Failed to generate payment address: ' + addressData.error });
+    // If no payment method specified, default to 'onchain' for backwards compatibility
+    const method = paymentMethod || 'onchain';
+
+    // Use the unified payment router
+    const result = await paymentRouter.createPayment({
+      method,
+      network,
+      plan,
+      email,
+      paymentId
+    });
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
     }
 
-    // Store payment request
+    // Store payment request with provider info
     const payment = {
       id: paymentId,
       email,
       plan,
-      usdAmount,
-      amountSats: priceData.sats,
-      amountBTC: priceData.btcAmount,
-      btcPriceUsd: priceData.priceUsd,
-      address: addressData.address,
-      addressIndex: addressData.index,
+      amount: PRICES[plan],
+      provider: result.provider,
+      method: result.method,
+      network: result.network,
       status: 'pending',
       createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-      priceExpiresAt: new Date(Date.now() + priceData.priceExpiresIn * 1000).toISOString()
+      expiresAt: result.expiresAt || new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+      // Provider-specific data
+      invoiceId: result.invoiceId,
+      nowpaymentsId: result.nowpaymentsId,
+      address: result.address,
+      sats: result.sats,
+      // Full payment data for status checks
+      paymentData: result
     };
 
     paymentStore.savePayment(payment);
 
+    // Return unified response
     res.json({
       success: true,
       paymentId,
-      address: addressData.address,
-      amountBTC: priceData.btcAmount,
-      amountSats: priceData.sats,
-      usdAmount,
-      btcPriceUsd: priceData.priceUsd,
-      qrData: `bitcoin:${addressData.address}?amount=${priceData.btcAmount.toFixed(8)}`,
-      expiresAt: payment.expiresAt,
-      priceExpiresIn: priceData.priceExpiresIn
+      provider: result.provider,
+      method: result.method,
+      network: result.network,
+      // Payment details
+      address: result.address,
+      invoice: result.invoice,
+      qrData: result.qrData,
+      amount: result.amount,
+      currency: result.currency,
+      // BTC-specific
+      btcAmount: result.btcAmount,
+      sats: result.sats,
+      priceUsd: result.priceUsd,
+      // USDT-specific
+      payAmount: result.payAmount,
+      payCurrency: result.payCurrency,
+      networkName: result.networkName,
+      networkFee: result.networkFee,
+      // Links
+      checkoutLink: result.checkoutLink,
+      paymentLink: result.paymentLink,
+      // Timing
+      expiresAt: result.expiresAt,
+      reused: result.reused
     });
 
   } catch (error) {
@@ -526,7 +573,7 @@ app.post('/api/payments/:paymentId/refresh-price', async (req, res) => {
   }
 });
 
-// Check payment status
+// Check payment status (unified endpoint for all providers)
 app.get('/api/payments/:paymentId/status', async (req, res) => {
   try {
     const { paymentId } = req.params;
@@ -540,32 +587,48 @@ app.get('/api/payments/:paymentId/status', async (req, res) => {
       return res.json({
         success: true,
         status: 'confirmed',
-        txid: payment.txid
+        txid: payment.txid,
+        provider: payment.provider,
+        method: payment.method
       });
     }
 
-    // Check blockchain for payment
-    const txStatus = await bitcoinService.checkAddressPayment(
-      payment.address,
-      payment.amountSats
+    // Check payment status based on provider
+    const statusResult = await paymentRouter.checkPaymentStatus(
+      paymentId,
+      payment.provider,
+      payment.paymentData || payment
     );
 
-    if (txStatus.paid) {
-      payment.status = 'confirmed';
-      payment.txid = txStatus.txid;
-      payment.confirmedAt = new Date().toISOString();
-      paymentStore.savePayment(payment);
+    if (!statusResult.success) {
+      // Fall back to checking expired status
+      if (new Date() > new Date(payment.expiresAt)) {
+        paymentStore.updateStatus(paymentId, 'expired');
+        return res.json({ success: true, status: 'expired' });
+      }
+      return res.json({
+        success: true,
+        status: 'pending',
+        error: statusResult.error
+      });
+    }
 
-      // Mark address as used so we advance to next address for future payments
-      bitcoinService.markAddressUsed(payment.address, payment.email);
+    // Payment confirmed
+    if (statusResult.status === 'confirmed' || statusResult.paid) {
+      paymentStore.updateStatus(paymentId, 'confirmed', {
+        txid: statusResult.txid,
+        confirmedAt: new Date().toISOString()
+      });
+
+      // Mark payment as used in provider
+      paymentRouter.markPaymentUsed(payment.provider, payment.paymentData || payment, payment.email);
 
       // Upgrade user subscription
       const upgradeResult = await db.upgradeSubscription(payment.email, payment.plan);
       const pdfPassword = upgradeResult.pdfPassword;
 
       if (!upgradeResult.success) {
-        console.error('Upgrade falló después de pago confirmado:', upgradeResult);
-        // Podrías implementar rollback o notificación manual aquí en producción
+        console.error('Upgrade failed after payment confirmed:', upgradeResult);
       }
 
       // Send confirmation email
@@ -574,41 +637,39 @@ app.get('/api/payments/:paymentId/status', async (req, res) => {
       return res.json({
         success: true,
         status: 'confirmed',
-        txid: txStatus.txid,
+        txid: statusResult.txid,
         pdfPassword,
-        plan: payment.plan
+        plan: payment.plan,
+        provider: payment.provider,
+        method: payment.method
       });
     }
 
-    // If payment was received but amount is outside tolerance, return specific error
-    if (txStatus.receivedSats > 0 && txStatus.withinTolerance === false) {
+    // On-chain specific: check for invalid amount
+    if (payment.method === 'onchain' && statusResult.receivedSats > 0 && statusResult.status !== 'confirmed') {
       return res.json({
         success: true,
         status: 'invalid_amount',
-        receivedSats: txStatus.receivedSats,
-        expectedSats: payment.amountSats,
-        percentDifference: txStatus.percentDifference,
-        message: txStatus.message
+        receivedSats: statusResult.receivedSats,
+        expectedSats: statusResult.expectedSats,
+        message: 'Payment received but amount does not match'
       });
     }
 
-    if (new Date() > new Date(payment.expiresAt)) {
-      payment.status = 'expired';
-      paymentStore.savePayment(payment);
+    // Check if expired
+    if (statusResult.status === 'expired' || new Date() > new Date(payment.expiresAt)) {
+      paymentStore.updateStatus(paymentId, 'expired');
       return res.json({ success: true, status: 'expired' });
     }
 
-    const priceExpiresAt = new Date(payment.priceExpiresAt);
-    const now = new Date();
-    const priceExpiresIn = Math.max(0, Math.ceil((priceExpiresAt - now) / 1000));
-
+    // Still pending
     res.json({
       success: true,
       status: 'pending',
-      confirmations: txStatus.confirmations || 0,
-      priceExpiresIn,
-      amountBTC: payment.amountBTC,
-      amountSats: payment.amountSats
+      provider: payment.provider,
+      method: payment.method,
+      providerStatus: statusResult.providerStatus,
+      confirmations: statusResult.confirmations || 0
     });
 
   } catch (error) {
@@ -633,13 +694,13 @@ app.post('/api/payments/:paymentId/simulate', async (req, res) => {
     }
 
     // Simulate confirmation
-    payment.status = 'confirmed';
-    payment.txid = 'demo_' + uuidv4();
-    payment.confirmedAt = new Date().toISOString();
-    paymentStore.savePayment(payment);
+    paymentStore.updateStatus(paymentId, 'confirmed', {
+      txid: 'demo_' + uuidv4(),
+      confirmedAt: new Date().toISOString()
+    });
 
-    // Mark address as used so we advance to next address for future payments
-    bitcoinService.markAddressUsed(payment.address, payment.email);
+    // Mark payment as used in provider
+    paymentRouter.markPaymentUsed(payment.provider, payment.paymentData || payment, payment.email);
 
     // Upgrade user
     const upgradeResult = await db.upgradeSubscription(payment.email, payment.plan);
@@ -648,13 +709,128 @@ app.post('/api/payments/:paymentId/simulate', async (req, res) => {
     res.json({
       success: true,
       status: 'confirmed',
-      txid: payment.txid,
+      txid: 'demo_' + paymentId,
       pdfPassword
     });
 
   } catch (error) {
     console.error('Simulate payment error:', error);
     res.status(500).json({ error: 'Failed to simulate payment' });
+  }
+});
+
+// ============================================
+// PAYMENT WEBHOOKS
+// ============================================
+
+// BTCPay Server webhook (Lightning + Liquid)
+// IMPORTANT: This must be before express.json() middleware OR use raw body
+app.post('/api/webhooks/btcpay', express.raw({ type: '*/*' }), async (req, res) => {
+  try {
+    const signature = req.headers['btcpay-sig'];
+    const rawBody = req.body;
+
+    // Verify webhook signature
+    if (!btcpayService.verifyWebhookSignature(rawBody, signature)) {
+      console.warn('BTCPay webhook: Invalid signature');
+      return res.status(401).json({ error: 'Invalid signature' });
+    }
+
+    const event = JSON.parse(rawBody.toString());
+    console.log(`BTCPay webhook received: ${event.type} for invoice ${event.invoiceId}`);
+
+    // Process the event
+    const processed = btcpayService.processWebhookEvent(event);
+
+    if (processed.isPaymentComplete) {
+      // Find payment by invoice ID
+      const payment = paymentStore.getByInvoiceId(processed.invoiceId);
+
+      if (payment) {
+        // Update payment status
+        paymentStore.updateStatus(payment.id, 'confirmed', {
+          confirmedAt: new Date().toISOString()
+        });
+
+        // Upgrade user subscription
+        const upgradeResult = await db.upgradeSubscription(payment.email, payment.plan);
+
+        if (upgradeResult.success) {
+          console.log(`BTCPay webhook: Upgraded ${payment.email} to ${payment.plan}`);
+
+          // Send confirmation email
+          await emailService.sendPaymentConfirmation(
+            payment.email,
+            payment.plan,
+            upgradeResult.pdfPassword
+          );
+        } else {
+          console.error('BTCPay webhook: Upgrade failed:', upgradeResult);
+        }
+      } else {
+        console.warn(`BTCPay webhook: No payment found for invoice ${processed.invoiceId}`);
+      }
+    }
+
+    res.json({ received: true });
+  } catch (error) {
+    console.error('BTCPay webhook error:', error);
+    res.status(500).json({ error: 'Webhook processing failed' });
+  }
+});
+
+// NOWPayments IPN webhook (USDT)
+app.post('/api/webhooks/nowpayments', async (req, res) => {
+  try {
+    const signature = req.headers['x-nowpayments-sig'];
+
+    // Verify IPN signature
+    if (!nowpaymentsService.verifyIpnSignature(req.body, signature)) {
+      console.warn('NOWPayments IPN: Invalid signature');
+      return res.status(401).json({ error: 'Invalid signature' });
+    }
+
+    console.log(`NOWPayments IPN received: ${req.body.payment_status} for payment ${req.body.payment_id}`);
+
+    // Process the event
+    const processed = nowpaymentsService.processIpnEvent(req.body);
+
+    if (processed.isPaymentComplete) {
+      // Find payment by order_id (our internal paymentId)
+      const payment = paymentStore.getPayment(processed.orderId) ||
+                      paymentStore.getByNowpaymentsId(processed.paymentId);
+
+      if (payment) {
+        // Update payment status
+        paymentStore.updateStatus(payment.id, 'confirmed', {
+          confirmedAt: new Date().toISOString(),
+          actuallyPaid: processed.actuallyPaid
+        });
+
+        // Upgrade user subscription
+        const upgradeResult = await db.upgradeSubscription(payment.email, payment.plan);
+
+        if (upgradeResult.success) {
+          console.log(`NOWPayments IPN: Upgraded ${payment.email} to ${payment.plan}`);
+
+          // Send confirmation email
+          await emailService.sendPaymentConfirmation(
+            payment.email,
+            payment.plan,
+            upgradeResult.pdfPassword
+          );
+        } else {
+          console.error('NOWPayments IPN: Upgrade failed:', upgradeResult);
+        }
+      } else {
+        console.warn(`NOWPayments IPN: No payment found for order ${processed.orderId}`);
+      }
+    }
+
+    res.json({ received: true });
+  } catch (error) {
+    console.error('NOWPayments IPN error:', error);
+    res.status(500).json({ error: 'IPN processing failed' });
   }
 });
 
@@ -1112,16 +1288,32 @@ app.listen(PORT, () => {
   }
 
   if (process.env.XPUB) {
-    console.log('✅ Bitcoin XPUB: Configured');
+    console.log('✅ Bitcoin XPUB (On-chain): Configured');
   } else {
     console.log('⚠️  Bitcoin XPUB: Not configured');
   }
 
-  if (process.env.SMTP_HOST) {
-    console.log('✅ Email SMTP: Configured');
+  if (btcpayService.isConfigured()) {
+    console.log('✅ BTCPay Server (Lightning/Liquid): Configured');
   } else {
-    console.log('⚠️  Email SMTP: Not configured (emails logged to console)');
+    console.log('⚠️  BTCPay Server: Not configured');
   }
+
+  if (nowpaymentsService.isConfigured()) {
+    console.log('✅ NOWPayments (USDT): Configured');
+  } else {
+    console.log('⚠️  NOWPayments: Not configured');
+  }
+
+  if (process.env.SMTP_HOST || process.env.RESEND_API_KEY) {
+    console.log('✅ Email: Configured');
+  } else {
+    console.log('⚠️  Email: Not configured (emails logged to console)');
+  }
+
+  // Show available payment methods
+  const methods = paymentRouter.getAvailablePaymentMethods();
+  console.log(`\n💳 Available Payment Methods: ${methods.map(m => m.name).join(', ') || 'None'}`);
 
   console.log('\n');
 });

@@ -1,5 +1,6 @@
 // KYWARD PAYMENT SERVICE
-// Handles Bitcoin payment processing via backend API
+// Handles multi-provider payment processing via backend API
+// Supports: Lightning, On-chain BTC, Liquid (L-BTC/L-USDT), USDT (Tron/Polygon/BSC/ETH)
 
 // Base URL - remove trailing /api if present to avoid double prefix
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
@@ -14,13 +15,41 @@ const PAYMENT_CONFIG = {
   },
   pollInterval: 5000,             // Check payment status every 5 seconds
   maxPollAttempts: 360,           // Poll for max 30 minutes (360 × 5s = 1800s = 30min)
-  
+
   // Texto que se muestra en el modal según el tipo de plan
   planTypeLabels: {
     essential: 'One-time payment',
     sentinel: 'Monthly subscription',
     consultation: 'One-time session',
     consultation_additional: 'Additional session'
+  }
+};
+
+/**
+ * Get available payment methods from backend
+ */
+export const getPaymentMethods = async () => {
+  try {
+    const response = await fetch(`${API_URL}/payments/methods`);
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch payment methods');
+    }
+
+    const data = await response.json();
+    return {
+      success: true,
+      methods: data.methods || []
+    };
+  } catch (error) {
+    console.error('Get payment methods error:', error);
+    // Return default methods for demo/fallback
+    return {
+      success: true,
+      methods: [
+        { id: 'onchain', name: 'Bitcoin', badge: 'Private', description: 'Direct to wallet', time: '10-60 minutes' }
+      ]
+    };
   }
 };
 
@@ -78,10 +107,16 @@ export const getPriceDisplay = (plan) => {
 };
 
 /**
- * Create a new Bitcoin payment request
- * Returns payment address and QR code data
+ * Create a new payment request
+ * Supports multiple payment methods: lightning, onchain, liquid, usdt
+ * Returns payment address/invoice and QR code data
+ *
+ * @param {string} plan - Plan to purchase: essential, sentinel, consultation
+ * @param {string} userEmail - User email
+ * @param {string} paymentMethod - Payment method: lightning, onchain, liquid, usdt
+ * @param {string} network - Network for liquid/usdt: lbtc, lusdt, usdttrc20, etc.
  */
-export const createPayment = async (plan, userEmail) => {
+export const createPayment = async (plan, userEmail, paymentMethod = 'onchain', network = null) => {
 
   // Validate plan exists in config
   if (!PAYMENT_CONFIG.prices[plan]) {
@@ -97,6 +132,8 @@ export const createPayment = async (plan, userEmail) => {
       body: JSON.stringify({
         email: userEmail,
         plan,
+        paymentMethod,
+        network,
         amount: PAYMENT_CONFIG.prices[plan]
       })
     });
@@ -111,14 +148,31 @@ export const createPayment = async (plan, userEmail) => {
     return {
       success: true,
       paymentId: data.paymentId,
+      provider: data.provider,
+      method: data.method,
+      network: data.network,
+      // Payment data
       address: data.address,
-      amountBTC: data.amountBTC,
-      amountSats: data.amountSats,
-      usdAmount: data.usdAmount,
-      btcPriceUsd: data.btcPriceUsd,
+      invoice: data.invoice,
       qrData: data.qrData,
+      // BTC-specific
+      amountBTC: data.btcAmount,
+      amountSats: data.sats,
+      btcPriceUsd: data.priceUsd,
+      // USD amount
+      usdAmount: data.amount,
+      // USDT-specific
+      payAmount: data.payAmount,
+      payCurrency: data.payCurrency,
+      networkName: data.networkName,
+      networkFee: data.networkFee,
+      // Links
+      checkoutLink: data.checkoutLink,
+      paymentLink: data.paymentLink,
+      // Timing
       expiresAt: data.expiresAt,
-      priceExpiresIn: data.priceExpiresIn // seconds until price needs refresh
+      priceExpiresIn: data.priceExpiresIn || 120,
+      reused: data.reused
     };
 
   } catch (error) {
@@ -130,6 +184,8 @@ export const createPayment = async (plan, userEmail) => {
         success: true,
         demo: true,
         paymentId: `demo-${Date.now()}`,
+        provider: 'demo',
+        method: paymentMethod,
         address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
         amountBTC: PAYMENT_CONFIG.prices[plan] / 100000, // Rough estimate
         amountSats: PAYMENT_CONFIG.prices[plan] * 1000,
