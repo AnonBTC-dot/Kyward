@@ -54,6 +54,38 @@ export const getPaymentMethods = async () => {
 };
 
 /**
+ * Get consultation price based on user's last session date
+ * Returns $99 if 20+ days since last consultation (or first time), $49 otherwise
+ * @param {string} email - User email
+ */
+export const getConsultationPrice = async (email) => {
+  try {
+    const response = await fetch(`${API_URL}/payments/consultation-price?email=${encodeURIComponent(email)}`);
+
+    if (!response.ok) {
+      // Default to $99 on error
+      return {
+        success: true,
+        price: 99,
+        plan: 'consultation',
+        isFirstSession: true
+      };
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Get consultation price error:', error);
+    // Default to $99 on error
+    return {
+      success: true,
+      price: 99,
+      plan: 'consultation',
+      isFirstSession: true
+    };
+  }
+};
+
+/**
  * Get price display text and metadata for each plan
  */
 export const getPriceDisplay = (plan) => {

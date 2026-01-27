@@ -108,14 +108,15 @@ function getAvailablePaymentMethods() {
  * @param {object} options - Payment options
  * @param {string} options.method - Payment method: lightning, onchain, liquid, usdt
  * @param {string} options.network - Network for liquid/usdt: lbtc, lusdt, usdttrc20, etc.
- * @param {string} options.plan - Plan: essential, sentinel, consultation
+ * @param {string} options.plan - Plan: essential, sentinel, consultation, consultation_additional
  * @param {string} options.email - User email
  * @param {string} options.paymentId - Unique payment ID
+ * @param {number} options.amount - Optional: override price (used for dynamic consultation pricing)
  * @returns {object} Payment details
  */
-async function createPayment({ method, network, plan, email, paymentId }) {
-  // Get plan price
-  const amount = PLAN_PRICES[plan];
+async function createPayment({ method, network, plan, email, paymentId, amount: customAmount }) {
+  // Get plan price (use custom amount if provided, otherwise lookup from PLAN_PRICES)
+  const amount = customAmount || PLAN_PRICES[plan];
   if (!amount) {
     return {
       success: false,

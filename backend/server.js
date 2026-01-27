@@ -445,14 +445,50 @@ app.get('/api/payments/methods', (req, res) => {
   }
 });
 
+// Get consultation price based on user's last session date
+// Returns $99 if 20+ days since last consultation (or first time), $49 otherwise
+app.get('/api/payments/consultation-price', async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const priceInfo = await db.getConsultationPrice(email);
+
+    res.json({
+      success: true,
+      ...priceInfo
+    });
+  } catch (error) {
+    console.error('Get consultation price error:', error);
+    res.status(500).json({ error: 'Failed to get consultation price' });
+  }
+});
+
 // Create payment request (unified endpoint)
 app.post('/api/payments/create', async (req, res) => {
   try {
-    const { email, plan, paymentMethod, network } = req.body;
+    const { email, plan: requestedPlan, paymentMethod, network } = req.body;
 
-    // Validate plan
-    if (!PRICES[plan]) {
-      return res.status(400).json({ error: 'Invalid plan' });
+    // Determine actual plan and price
+    // For consultation, check last session date to determine price ($99 or $49)
+    let actualPlan = requestedPlan;
+    let actualPrice;
+
+    if (requestedPlan === 'consultation') {
+      // Get dynamic consultation price based on last session
+      const consultationInfo = await db.getConsultationPrice(email);
+      actualPlan = consultationInfo.plan; // 'consultation' ($99) or 'consultation_additional' ($49)
+      actualPrice = consultationInfo.price;
+      console.log(`Consultation price for ${email}: $${actualPrice} (${consultationInfo.reason})`);
+    } else {
+      // Validate plan
+      if (!PRICES[requestedPlan]) {
+        return res.status(400).json({ error: 'Invalid plan' });
+      }
+      actualPrice = PRICES[requestedPlan];
     }
 
     // Note: Essential repurchase is always allowed - users can buy Essential again
@@ -467,9 +503,10 @@ app.post('/api/payments/create', async (req, res) => {
     const result = await paymentRouter.createPayment({
       method,
       network,
-      plan,
+      plan: actualPlan,
       email,
-      paymentId
+      paymentId,
+      amount: actualPrice  // Pass the calculated price (important for dynamic consultation pricing)
     });
 
     if (!result.success) {
@@ -480,8 +517,8 @@ app.post('/api/payments/create', async (req, res) => {
     const payment = {
       id: paymentId,
       email,
-      plan,
-      amount: PRICES[plan],
+      plan: actualPlan,
+      amount: actualPrice,
       provider: result.provider,
       method: result.method,
       network: result.network,

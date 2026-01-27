@@ -378,6 +378,7 @@ const sanitizeUser = (user) => {
     subscriptionEnd: user.subscription_end,
     pdfPassword: user.pdf_password,
     consultationCount: user.consultation_count || 0,
+    lastConsultationDate: user.last_consultation_date || null,
     createdAt: user.created_at,
     lastLogin: user.last_login,
     languagePreference: user.language_preference || 'en',
@@ -434,17 +435,18 @@ const upgradeSubscription = async (email, newLevel) => {
         updates.email_daily_tips = true;
         updates.email_wallet_reviews = true;
       } 
-      else if (newLevel === 'consultation') {
+      else if (newLevel === 'consultation' || newLevel === 'consultation_additional') {
         updates.payment_type = 'subscription';
         const endDate = new Date();
         endDate.setMonth(endDate.getMonth() + 1);
         updates.subscription_end = endDate.toISOString();
-        
-        // Activar alertas premium + incrementar conteo de consultas
+
+        // Activar alertas premium + incrementar conteo de consultas + registrar fecha
         updates.email_hack_alerts = true;
         updates.email_daily_tips = true;
         updates.email_wallet_reviews = true;
         updates.consultation_count = db.raw('consultation_count + 1');
+        updates.last_consultation_date = new Date().toISOString();
       } 
       else {
         // Si baja a 'free' o cualquier otro (por si acaso)
@@ -487,19 +489,20 @@ const upgradeSubscription = async (email, newLevel) => {
       user.email_hack_alerts = false;
       user.email_daily_tips = false;
       user.email_wallet_reviews = false;
-    } else if (newLevel === 'sentinel' || newLevel === 'consultation') {
+    } else if (newLevel === 'sentinel' || newLevel === 'consultation' || newLevel === 'consultation_additional') {
       user.payment_type = 'subscription';
       const endDate = new Date();
       endDate.setMonth(endDate.getMonth() + 1);
       user.subscriptionEnd = endDate.toISOString();
-      
+
       // Alertas ON
       user.email_hack_alerts = true;
       user.email_daily_tips = true;
       user.email_wallet_reviews = true;
-      
-      if (newLevel === 'consultation') {
+
+      if (newLevel === 'consultation' || newLevel === 'consultation_additional') {
         user.consultationCount = (user.consultationCount || 0) + 1;
+        user.lastConsultationDate = new Date().toISOString();
       }
     } else {
       // Baja a free u otro
@@ -1592,6 +1595,78 @@ const getActiveBotUsers = async () => {
   }
 };
 
+/**
+ * Get consultation price based on user's last consultation date
+ * If last consultation was 20+ days ago (or never), charge $99 (first session)
+ * If less than 20 days, charge $49 (additional session)
+ * @param {string} email - User email
+ * @returns {object} { price: number, plan: string, isFirstSession: boolean }
+ */
+const getConsultationPrice = async (email) => {
+  const FIRST_SESSION_PRICE = 99;
+  const ADDITIONAL_SESSION_PRICE = 49;
+  const DAYS_THRESHOLD = 20;
+
+  try {
+    const user = await getUserByEmail(email);
+
+    if (!user) {
+      // New user - charge first session price
+      return {
+        price: FIRST_SESSION_PRICE,
+        plan: 'consultation',
+        isFirstSession: true,
+        reason: 'new_user'
+      };
+    }
+
+    const lastConsultationDate = user.lastConsultationDate;
+
+    if (!lastConsultationDate) {
+      // Never had a consultation - charge first session price
+      return {
+        price: FIRST_SESSION_PRICE,
+        plan: 'consultation',
+        isFirstSession: true,
+        reason: 'no_previous_consultation'
+      };
+    }
+
+    // Calculate days since last consultation
+    const lastDate = new Date(lastConsultationDate);
+    const now = new Date();
+    const daysSinceLastConsultation = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24));
+
+    if (daysSinceLastConsultation >= DAYS_THRESHOLD) {
+      // 20+ days since last consultation - charge first session price
+      return {
+        price: FIRST_SESSION_PRICE,
+        plan: 'consultation',
+        isFirstSession: true,
+        reason: `${daysSinceLastConsultation}_days_since_last_session`
+      };
+    }
+
+    // Less than 20 days - charge additional session price
+    return {
+      price: ADDITIONAL_SESSION_PRICE,
+      plan: 'consultation_additional',
+      isFirstSession: false,
+      reason: `${daysSinceLastConsultation}_days_since_last_session`,
+      daysSinceLastSession: daysSinceLastConsultation
+    };
+  } catch (error) {
+    console.error('Error getting consultation price:', error);
+    // Default to first session price on error
+    return {
+      price: FIRST_SESSION_PRICE,
+      plan: 'consultation',
+      isFirstSession: true,
+      reason: 'error_default'
+    };
+  }
+};
+
 module.exports = {
   initSupabase,
   createUser,
@@ -1611,6 +1686,8 @@ module.exports = {
   compareToAverage,
   generatePdfPassword,
   sanitizeUser,
+  // Consultation pricing
+  getConsultationPrice,
   // Telegram integration
   initiateTelegramLink,
   verifyTelegramLink,

@@ -43,7 +43,7 @@ const PAYMENT_METHODS = [
     name: 'USDT',
     icon: 'usdt',
     badge: 'Stable',
-    description: 'Tether stablecoin',
+    description: 'Tron, Polygon, BSC, Ethereum',
     time: '1-10 minutes',
     color: '#26A17B',
     comingSoon: true,  // NOWPayments required
