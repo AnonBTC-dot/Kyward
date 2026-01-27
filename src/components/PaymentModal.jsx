@@ -5,14 +5,16 @@ import {
   simulatePayment,
   refreshPaymentPrice,
   getPriceDisplay,
+  getPaymentMethods,
   paymentModalStyles as pms
 } from '../services/PaymentService';
 import { kywardDB } from '../services/Database';
 import { useLanguage } from '../i18n';
+import PaymentMethodSelector from './PaymentMethodSelector';
 
 const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
   const { t } = useLanguage();
-  const [stage, setStage] = useState('loading'); // loading, payment, success, error
+  const [stage, setStage] = useState('selecting'); // selecting, loading, payment, success, error
   const [paymentData, setPaymentData] = useState(null);
   const [status, setStatus] = useState('pending');
   const [timeLeft, setTimeLeft] = useState(30 * 60); // 30 minutes for payment
@@ -21,6 +23,9 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
   const [copied, setCopied] = useState(false);
   const [pdfPassword, setPdfPassword] = useState(null);
   const [error, setError] = useState(null);
+  const [availableMethods, setAvailableMethods] = useState([]);
+  const [selectedMethod, setSelectedMethod] = useState(null);
+  const [selectedNetwork, setSelectedNetwork] = useState(null);
 
   const stopPollingRef = useRef(null);
   const timerRef = useRef(null);
@@ -32,10 +37,27 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
   const planTypeLabel = priceInfo.typeLabel; // "One-time payment" o "Monthly subscription"
   const isSubscription = priceInfo.isSubscription;
 
-  // Initialize payment on mount
+  // Fetch available payment methods on mount
   useEffect(() => {
-    initializePayment();
+    const fetchMethods = async () => {
+      const result = await getPaymentMethods();
+      if (result.success && result.methods.length > 0) {
+        setAvailableMethods(result.methods);
+        // Auto-select first method if it doesn't have networks
+        const firstMethod = result.methods[0];
+        if (!firstMethod.networks) {
+          setSelectedMethod(firstMethod.id);
+        }
+      } else {
+        // Default to onchain if no methods available
+        setSelectedMethod('onchain');
+      }
+    };
+    fetchMethods();
+  }, []);
 
+  // Cleanup on unmount
+  useEffect(() => {
     return () => {
       // Cleanup polling and timers
       if (stopPollingRef.current) stopPollingRef.current();
@@ -87,7 +109,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
   const initializePayment = async () => {
     try {
       setStage('loading');
-      const result = await createPayment(plan, user.email);
+      const result = await createPayment(plan, user.email, selectedMethod, selectedNetwork);
 
       if (result.success) {
         setPaymentData(result);
@@ -119,6 +141,25 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
       setError(err.message);
       setStage('error');
     }
+  };
+
+  // Handle method selection
+  const handleMethodSelect = (method, network) => {
+    setSelectedMethod(method);
+    setSelectedNetwork(network);
+  };
+
+  // Proceed to payment after method selection
+  const handleProceedToPayment = () => {
+    if (!selectedMethod) return;
+
+    // Check if method requires network selection
+    const method = availableMethods.find(m => m.id === selectedMethod);
+    if (method?.networks && !selectedNetwork) {
+      return; // Need to select network first
+    }
+
+    initializePayment();
   };
 
   // Refresh BTC price
@@ -181,15 +222,21 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
   };
 
   const handleCopyAddress = () => {
-    if (paymentData?.address) {
-      navigator.clipboard.writeText(paymentData.address);
+    const toCopy = paymentData?.method === 'lightning'
+      ? paymentData?.invoice
+      : paymentData?.address;
+
+    if (toCopy) {
+      navigator.clipboard.writeText(toCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const handleCopyAmount = () => {
-    if (paymentData?.amountBTC) {
+    if (paymentData?.method === 'usdt' && paymentData?.payAmount) {
+      navigator.clipboard.writeText(paymentData.payAmount.toString());
+    } else if (paymentData?.amountBTC) {
       navigator.clipboard.writeText(paymentData.amountBTC.toString());
     }
   };
@@ -212,9 +259,79 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
     }
   };
 
+  // Get display data for selected method
+  const getMethodDisplayName = () => {
+    if (!paymentData?.method) return '';
+    const methodNames = {
+      lightning: 'Lightning',
+      onchain: 'Bitcoin',
+      liquid: selectedNetwork === 'lusdt' ? 'Liquid USDT' : 'Liquid BTC',
+      usdt: paymentData.networkName || 'USDT'
+    };
+    return methodNames[paymentData.method] || paymentData.method;
+  };
+
   // Render based on stage
   const renderContent = () => {
     switch (stage) {
+      case 'selecting':
+        return (
+          <>
+            {/* Plan Header */}
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <h2 style={{
+                color: '#F7931A',
+                fontSize: '24px',
+                margin: '0 0 8px 0',
+                fontWeight: '700'
+              }}>
+                {t.payment.title} — {planName}
+              </h2>
+
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'rgba(247,147,26,0.1)',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                color: '#F7931A'
+              }}>
+                <span>{planTypeLabel}</span>
+                <span>|</span>
+                <strong>{priceInfo.amount} {priceInfo.period}</strong>
+              </div>
+            </div>
+
+            {/* Payment Method Selector */}
+            <PaymentMethodSelector
+              availableMethods={availableMethods}
+              onSelect={handleMethodSelect}
+              selectedMethod={selectedMethod}
+              selectedNetwork={selectedNetwork}
+            />
+
+            {/* Proceed Button */}
+            <button
+              onClick={handleProceedToPayment}
+              disabled={!selectedMethod || (availableMethods.find(m => m.id === selectedMethod)?.networks && !selectedNetwork)}
+              style={{
+                ...pms.copyButton,
+                marginTop: '24px',
+                opacity: (!selectedMethod || (availableMethods.find(m => m.id === selectedMethod)?.networks && !selectedNetwork)) ? 0.5 : 1,
+                cursor: (!selectedMethod || (availableMethods.find(m => m.id === selectedMethod)?.networks && !selectedNetwork)) ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {t.payment?.continue || 'Continue to Payment'}
+            </button>
+
+            <button onClick={handleClose} style={{ ...pms.cancelButton, marginTop: '12px' }}>
+              {t.payment.cancel}
+            </button>
+          </>
+        );
+
       case 'loading':
         return (
           <>
@@ -235,38 +352,60 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
         );
 
       case 'payment':
+        const methodColor = paymentData?.method === 'usdt' ? '#26A17B' :
+                           paymentData?.method === 'liquid' ? '#00AAFF' : '#F7931A';
+        const isLightning = paymentData?.method === 'lightning';
+        const displayAddress = isLightning ? paymentData?.invoice : paymentData?.address;
+
         return (
           <>
-            {/* Bitcoin Icon */}
+            {/* Payment Method Icon */}
             <div style={{ marginBottom: '16px' }}>
-              <svg width="48" height="48" viewBox="0 0 48 48" style={{ margin: '0 auto' }}>
-                <circle cx="24" cy="24" r="22" fill="#F7931A"/>
-                <text x="24" y="32" textAnchor="middle" fill="#fff" fontSize="24" fontWeight="bold">₿</text>
-              </svg>
+              {paymentData?.method === 'lightning' ? (
+                <svg width="48" height="48" viewBox="0 0 48 48" style={{ margin: '0 auto' }}>
+                  <circle cx="24" cy="24" r="22" fill="#F7931A"/>
+                  <path d="M26 10L16 26H22L20 38L32 22H26L26 10Z" fill="#fff"/>
+                </svg>
+              ) : paymentData?.method === 'liquid' ? (
+                <svg width="48" height="48" viewBox="0 0 48 48" style={{ margin: '0 auto' }}>
+                  <circle cx="24" cy="24" r="22" fill="#00AAFF"/>
+                  <path d="M24 12C24 12 16 20 16 26C16 30.42 19.58 34 24 34C28.42 34 32 30.42 32 26C32 20 24 12 24 12Z" fill="#fff"/>
+                </svg>
+              ) : paymentData?.method === 'usdt' ? (
+                <svg width="48" height="48" viewBox="0 0 48 48" style={{ margin: '0 auto' }}>
+                  <circle cx="24" cy="24" r="22" fill="#26A17B"/>
+                  <text x="24" y="32" textAnchor="middle" fill="#fff" fontSize="20" fontWeight="bold">$</text>
+                </svg>
+              ) : (
+                <svg width="48" height="48" viewBox="0 0 48 48" style={{ margin: '0 auto' }}>
+                  <circle cx="24" cy="24" r="22" fill="#F7931A"/>
+                  <text x="24" y="32" textAnchor="middle" fill="#fff" fontSize="24" fontWeight="bold">₿</text>
+                </svg>
+              )}
             </div>
 
             <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-              <h2 style={{ 
-                color: '#F7931A', 
-                fontSize: '24px', 
+              <h2 style={{
+                color: methodColor,
+                fontSize: '24px',
                 margin: '0 0 8px 0',
                 fontWeight: '700'
               }}>
                 {t.payment.title} — {planName}
               </h2>
-              
+
               <div style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
-                background: 'rgba(247,147,26,0.1)',
+                background: `rgba(${methodColor === '#F7931A' ? '247,147,26' : methodColor === '#00AAFF' ? '0,170,255' : '38,161,123'},0.1)`,
                 padding: '6px 12px',
                 borderRadius: '6px',
                 fontSize: '14px',
-                color: '#F7931A'
+                color: methodColor
               }}>
-                <span>{planTypeLabel}</span>
-                <span>•</span>
+                <span>{getMethodDisplayName()}</span>
+                <span>|</span>
                 <strong>{priceInfo.amount} {priceInfo.period}</strong>
               </div>
             </div>
@@ -285,58 +424,84 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                 </span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                <span style={{ ...pms.amountValue, cursor: 'pointer' }} onClick={handleCopyAmount}>
-                  {paymentData.amountBTC?.toFixed(8)} BTC
-                </span>
-                <span style={{ fontSize: '11px', color: '#6b7280' }}>
-                  @ ${paymentData.btcPriceUsd?.toLocaleString() || '---'}/BTC
-                </span>
+                {paymentData?.method === 'usdt' ? (
+                  <>
+                    <span style={{ ...pms.amountValue, cursor: 'pointer', color: '#26A17B' }} onClick={handleCopyAmount}>
+                      {paymentData.payAmount} USDT
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#6b7280' }}>
+                      {paymentData.networkName}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span style={{ ...pms.amountValue, cursor: 'pointer', color: methodColor }} onClick={handleCopyAmount}>
+                      {paymentData.amountBTC?.toFixed(8)} BTC
+                    </span>
+                    <span style={{ fontSize: '11px', color: '#6b7280' }}>
+                      @ ${paymentData.btcPriceUsd?.toLocaleString() || '---'}/BTC
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 
-            {/* Price Refresh Countdown */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              padding: '10px 16px',
-              background: priceTimeLeft <= 30 ? 'rgba(239,68,68,0.1)' : 'rgba(247,147,26,0.1)',
-              border: `1px solid ${priceTimeLeft <= 30 ? 'rgba(239,68,68,0.3)' : 'rgba(247,147,26,0.3)'}`,
-              borderRadius: '8px',
-              marginBottom: '16px',
-              fontSize: '13px'
-            }}>
-              <span style={{ color: priceTimeLeft <= 30 ? '#ef4444' : '#F7931A' }}>
-                {isRefreshingPrice ? (
-                  t.payment.updatingPrice
-                ) : priceTimeLeft <= 0 ? (
-                  t.payment.priceExpired
-                ) : (
-                  <>{t.payment.priceUpdates} <strong>{formatTime(priceTimeLeft)}</strong></>
-                )}
-              </span>
-              <button
-                onClick={handleRefreshPrice}
-                disabled={isRefreshingPrice}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#F7931A',
-                  cursor: isRefreshingPrice ? 'not-allowed' : 'pointer',
-                  padding: '4px 8px',
-                  fontSize: '12px',
-                  opacity: isRefreshingPrice ? 0.5 : 1
-                }}
-              >
-                {isRefreshingPrice ? '...' : t.payment.refreshNow}
-              </button>
-            </div>
+            {/* Price Refresh Countdown - Only for BTC methods */}
+            {paymentData?.method !== 'usdt' && (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '10px 16px',
+                background: priceTimeLeft <= 30 ? 'rgba(239,68,68,0.1)' : `rgba(${methodColor === '#F7931A' ? '247,147,26' : '0,170,255'},0.1)`,
+                border: `1px solid ${priceTimeLeft <= 30 ? 'rgba(239,68,68,0.3)' : `rgba(${methodColor === '#F7931A' ? '247,147,26' : '0,170,255'},0.3)`}`,
+                borderRadius: '8px',
+                marginBottom: '16px',
+                fontSize: '13px'
+              }}>
+                <span style={{ color: priceTimeLeft <= 30 ? '#ef4444' : methodColor }}>
+                  {isRefreshingPrice ? (
+                    t.payment.updatingPrice
+                  ) : priceTimeLeft <= 0 ? (
+                    t.payment.priceExpired
+                  ) : (
+                    <>{t.payment.priceUpdates} <strong>{formatTime(priceTimeLeft)}</strong></>
+                  )}
+                </span>
+                <button
+                  onClick={handleRefreshPrice}
+                  disabled={isRefreshingPrice}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: methodColor,
+                    cursor: isRefreshingPrice ? 'not-allowed' : 'pointer',
+                    padding: '4px 8px',
+                    fontSize: '12px',
+                    opacity: isRefreshingPrice ? 0.5 : 1
+                  }}
+                >
+                  {isRefreshingPrice ? '...' : t.payment.refreshNow}
+                </button>
+              </div>
+            )}
 
-            {/* Address */}
-            <div className="address-box" style={pms.addressBox}>
-              <div style={pms.addressLabel}>{t.payment.address}</div>
-              <div className="address-text" style={pms.address}>{paymentData.address}</div>
+            {/* Address / Invoice */}
+            <div className="address-box" style={{
+              ...pms.addressBox,
+              borderColor: `rgba(${methodColor === '#F7931A' ? '247,147,26' : methodColor === '#00AAFF' ? '0,170,255' : '38,161,123'},0.3)`,
+              background: `rgba(${methodColor === '#F7931A' ? '247,147,26' : methodColor === '#00AAFF' ? '0,170,255' : '38,161,123'},0.1)`
+            }}>
+              <div style={pms.addressLabel}>
+                {isLightning ? (t.payment?.invoice || 'Lightning Invoice') : t.payment.address}
+              </div>
+              <div className="address-text" style={{ ...pms.address, color: methodColor }}>
+                {isLightning
+                  ? (displayAddress?.length > 60 ? `${displayAddress.substring(0, 30)}...${displayAddress.substring(displayAddress.length - 30)}` : displayAddress)
+                  : displayAddress
+                }
+              </div>
             </div>
 
             {/* Status */}
@@ -352,9 +517,28 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
 
             {/* Copy Button */}
             <div className="payment-buttons">
-              <button onClick={handleCopyAddress} style={pms.copyButton}>
-                {copied ? `✓ ${t.payment.copied}` : t.payment.copyAddress}
+              <button onClick={handleCopyAddress} style={{ ...pms.copyButton, backgroundColor: methodColor }}>
+                {copied
+                  ? `✓ ${t.payment.copied}`
+                  : (isLightning ? (t.payment?.copyInvoice || 'Copy Invoice') : t.payment.copyAddress)
+                }
               </button>
+
+              {/* Open in Wallet (for Lightning) */}
+              {isLightning && paymentData?.invoice && (
+                <button
+                  onClick={() => window.open(`lightning:${paymentData.invoice}`, '_blank')}
+                  style={{
+                    ...pms.copyButton,
+                    backgroundColor: 'transparent',
+                    border: `1px solid ${methodColor}`,
+                    color: methodColor,
+                    marginBottom: '12px'
+                  }}
+                >
+                  {t.payment?.openWallet || 'Open in Wallet'}
+                </button>
+              )}
 
               {/* Demo Button (if demo mode) */}
               {paymentData.demo && (
@@ -362,6 +546,18 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                   {t.payment.simulateDemo}
                 </button>
               )}
+
+              {/* Back to method selection */}
+              <button
+                onClick={() => {
+                  if (stopPollingRef.current) stopPollingRef.current();
+                  setStage('selecting');
+                  setPaymentData(null);
+                }}
+                style={{ ...pms.cancelButton, marginBottom: '8px' }}
+              >
+                {t.payment?.changeMethod || 'Change Payment Method'}
+              </button>
 
               <button onClick={handleClose} style={pms.cancelButton}>
                 {t.payment.cancel}
