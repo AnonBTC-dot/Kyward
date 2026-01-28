@@ -138,7 +138,7 @@ export const translations = {
           badge: 'EXPERT',
           name: 'Consultation',
           price: '$99',
-          period: '+ $49/hr additional',
+          period: '+ $49/hr add',
           features: [
             '1-hour private audit (video call)',
             'Personalized deep-dive recommendations',
@@ -797,12 +797,12 @@ export const translations = {
         ]
       },
 
-      coldStorage: {
-        title: 'Cold Storage Wallet Options (Bitcoin Mainnet)',
-        description: 'For long-term cold storage (minimal interaction, maximum security), consider these mobile/desktop wallets designed specifically for Bitcoin mainnet use:',
-        blueWallet: 'Mobile-first, supports watch-only mode, Lightning + on-chain, easy to use for cold storage with air-gapped signing via PSBT export/import.',
-        jade: 'Hardware wallet with strong cold storage capabilities (air-gapped via QR codes), fully open-source, integrates well with Green wallet or Sparrow for offline signing.',
-        bullBitcoin: 'Focused on non-KYC Bitcoin privacy, supports cold storage setups with strong emphasis on self-custody and Canadian-friendly features (good for geographic diversification).',
+      hotStorage: {
+        title: 'Hot Storage Wallet Options (Bitcoin Mainnet)',
+        description: 'For long-term hot storage (minimal interaction, maximum security), consider these mobile/desktop wallets designed specifically for Bitcoin mainnet use:',
+        blueWallet: 'Mobile-first, supports watch-only mode, Lightning + on-chain, easy to use for hot storage with air-gapped signing via PSBT export/import.',
+        jade: 'Hardware wallet with strong hot storage capabilities (air-gapped via QR codes), fully open-source, integrates well with Green wallet or Sparrow for offline signing.',
+        bullBitcoin: 'Focused on non-KYC Bitcoin privacy, supports hot storage setups with strong emphasis on self-custody and Canadian-friendly features (good for geographic diversification).',
         bestPractice: 'Best Practice',
         bestPracticeText: 'Use in watch-only mode on online device, sign offline/air-gapped, never expose private keys online.'
       },
@@ -1323,7 +1323,7 @@ export const translations = {
           badge: 'EXPERTO',
           name: 'Consulta',
           price: '$99',
-          period: '+ $49/hora adicional',
+          period: '+ $49/hora add',
           features: [
             'Auditoria privada de 1 hora (videollamada)',
             'Recomendaciones personalizadas en profundidad',
@@ -1981,11 +1981,11 @@ export const translations = {
       },
 
       coldStorage: {
-        title: 'Opciones de Wallet para Almacenamiento Frío (Bitcoin Mainnet)',
-        description: 'Para almacenamiento frío a largo plazo (mínima interacción, máxima seguridad), considera estas wallets móviles/escritorio diseñadas específicamente para Bitcoin mainnet:',
-        blueWallet: 'Enfocada en móvil, soporta modo watch-only, Lightning + on-chain, fácil de usar para almacenamiento frío con firma air-gapped vía exportación/importación de PSBT.',
-        jade: 'Hardware wallet con fuertes capacidades de almacenamiento frío (air-gapped vía códigos QR), completamente open-source, se integra bien con Green wallet o Sparrow para firma offline.',
-        bullBitcoin: 'Enfocada en privacidad Bitcoin sin KYC, soporta configuraciones de almacenamiento frío con fuerte énfasis en auto-custodia y características amigables para Canadá (bueno para diversificación geográfica).',
+        title: 'Opciones de Wallet para Almacenamiento Caliente (Bitcoin Mainnet)',
+        description: 'Para almacenamiento Caliente a largo plazo (mínima interacción, máxima seguridad), considera estas wallets móviles/escritorio diseñadas específicamente para Bitcoin mainnet:',
+        blueWallet: 'Enfocada en móvil, soporta modo watch-only, Lightning + on-chain, fácil de usar para almacenamiento Caliente con firma air-gapped vía exportación/importación de PSBT.',
+        jade: 'Hardware wallet con fuertes capacidades de almacenamiento Caliente (air-gapped vía códigos QR), completamente open-source, se integra bien con Green wallet o Sparrow para firma offline.',
+        bullBitcoin: 'Enfocada en privacidad Bitcoin sin KYC, soporta configuraciones de almacenamiento Caliente con fuerte énfasis en auto-custodia y características amigables para Canadá (bueno para diversificación geográfica).',
         bestPractice: 'Mejor Práctica',
         bestPracticeText: 'Usar en modo watch-only en dispositivo online, firmar offline/air-gapped, nunca exponer llaves privadas online.'
       },
