@@ -56,11 +56,11 @@ Kyward is a Bitcoin security assessment platform that helps users evaluate and i
 │                          │                                          │
 │         ┌────────────────┼────────────────┐                        │
 │         ▼                ▼                ▼                        │
-│  ┌────────────┐   ┌────────────┐   ┌────────────┐                  │
-│  │  bitcoin   │   │  btcpay    │   │nowpayments │                  │
-│  │ (HD/XPUB)  │   │ (LN/Liquid)│   │  (USDT)    │                  │
-│  └────────────┘   └────────────┘   └────────────┘                  │
-│       ✅              🔜              🔜                            │
+│  ┌────────────┐   ┌────────────┐   ┌─────────────────┐            │
+│  │  bitcoin   │   │  btcpay    │   │  tron/ethereum  │            │
+│  │ (HD/XPUB)  │   │ (LN/Liquid)│   │  (USDT direct)  │            │
+│  └────────────┘   └────────────┘   └─────────────────┘            │
+│       ✅              🔜              ✅                            │
 └───────────────────────────┬─────────────────────────────────────────┘
                             │
          ┌──────────────────┼──────────────────┐
@@ -70,8 +70,9 @@ Kyward is a Bitcoin security assessment platform that helps users evaluate and i
 │  (PostgreSQL)   │  │  (Telegram Bot) │  │   SERVICES      │
 │                 │  │                 │  │                 │
 │ • Users         │  │ • Monitoring    │  │ • BTCPay Server │
-│ • Assessments   │  │ • Alerts        │  │ • NOWPayments   │
-│ • Payments      │  │ • Charts        │  │ • Mempool.space │
+│ • Assessments   │  │ • Alerts        │  │ • TronGrid API  │
+│ • Payments      │  │ • Charts        │  │ • Etherscan API │
+│ • Telegram      │  │                 │  │ • Mempool.space │
 │ • Telegram      │  │                 │  │                 │
 └─────────────────┘  └─────────────────┘  └─────────────────┘
 
@@ -151,7 +152,7 @@ VITE_API_URL=https://kyward.onrender.com/api
 - **Framework**: Express.js
 - **Database**: Supabase (PostgreSQL)
 - **Auth**: JWT tokens
-- **Payments**: Multi-provider system (HD derivation, BTCPay, NOWPayments)
+- **Payments**: Multi-provider system (HD derivation, BTCPay, Tron/Ethereum direct)
 
 ### Directory Structure
 ```
@@ -161,7 +162,8 @@ backend/
 │   ├── database.js              # Supabase client & functions
 │   ├── bitcoin.js               # HD wallet derivation (XPUB/ZPUB)
 │   ├── btcpay.js                # BTCPay Server (Lightning/Liquid) 🔜
-│   ├── nowpayments.js           # NOWPayments (USDT) 🔜
+│   ├── tron.js                  # Tron USDT TRC20 (direct monitoring) ✅
+│   ├── ethereum.js              # Ethereum USDT ERC20 (direct monitoring) ✅
 │   ├── paymentRouter.js         # Unified payment routing
 │   ├── paymentStore.js          # In-memory payment tracking
 │   └── email.js                 # Email notifications
@@ -231,9 +233,13 @@ BTCPAY_STORE_ID=your-store-id
 BTCPAY_API_KEY=your-api-key
 BTCPAY_WEBHOOK_SECRET=your-webhook-secret
 
-# NOWPayments - USDT (Coming Soon)
-NOWPAYMENTS_API_KEY=your-api-key
-NOWPAYMENTS_IPN_SECRET=your-ipn-secret
+# Tron USDT TRC20 (Active - Direct Blockchain Monitoring)
+TRON_USDT_ADDRESS=TYourTronAddressHere
+TRONGRID_API_KEY=your-trongrid-api-key  # Optional, increases rate limits
+
+# Ethereum USDT ERC20 (Active - Direct Blockchain Monitoring)
+ETH_USDT_ADDRESS=0xYourEthereumAddressHere
+ETHERSCAN_API_KEY=your-etherscan-api-key  # Required for Etherscan API
 
 # Email
 SMTP_HOST=smtp.gmail.com
@@ -308,9 +314,10 @@ Kyward supports multiple payment methods through a unified payment router:
 | Lightning Network | BTCPay Server | Coming Soon | Instant | ~1 sat |
 | Liquid (L-BTC) | BTCPay Server | Coming Soon | 1-2 min | ~$0.01 |
 | Liquid (L-USDT) | BTCPay Server | Coming Soon | 1-2 min | ~$0.01 |
-| USDT (Tron) | NOWPayments | Coming Soon | 1-10 min | ~$1 |
-| USDT (Polygon) | NOWPayments | Coming Soon | 1-10 min | < $0.01 |
-| USDT (BSC) | NOWPayments | Coming Soon | 1-10 min | ~$0.10 |
+| USDT (Tron TRC20) | Direct via TronGrid | **Active** | 1-3 min | ~$1 |
+| USDT (Ethereum ERC20) | Direct via Etherscan | **Active** | 1-5 min | ~$5-20 |
+
+**No third-party payment processors required for USDT!** Payments are monitored directly on the blockchain using free public APIs.
 
 ### Payment Flow
 
@@ -319,11 +326,11 @@ User selects plan → Payment Method Selector → Create Payment
                            │
          ┌─────────────────┼─────────────────┐
          ▼                 ▼                 ▼
-    On-chain BTC      Lightning/Liquid      USDT
-    (HD derivation)    (BTCPay Server)   (NOWPayments)
+    On-chain BTC      Lightning/Liquid    USDT (TRC20/ERC20)
+    (HD derivation)    (BTCPay Server)   (Direct monitoring)
          │                 │                 │
          ▼                 ▼                 ▼
-    Poll mempool.space   Webhook         IPN Callback
+    Poll mempool.space   Webhook      Poll TronGrid/Etherscan
          │                 │                 │
          └─────────────────┼─────────────────┘
                            ▼
@@ -358,15 +365,30 @@ createLiquidInvoice(amount, asset, metadata) // Create Liquid invoice
 verifyWebhookSignature(payload, signature) // Verify BTCPay webhook
 ```
 
-#### nowpayments.js (Coming Soon)
-NOWPayments API integration:
-- USDT on multiple networks (Tron, Polygon, BSC, Ethereum)
-- Same invoice reuse logic
-- IPN signature verification (HMAC-SHA512)
+#### tron.js (Active)
+Direct Tron blockchain monitoring via TronGrid API:
+- USDT TRC20 payments monitored directly on-chain
+- No third-party payment processor required
+- Zero payment processing fees
+- 30-minute payment window
 
 ```javascript
-createUsdtPayment(amount, network, metadata) // Create USDT payment
-verifyIpnSignature(body, signature)          // Verify IPN callback
+createPayment(amount, metadata)              // Create payment request
+checkPayment(paymentId, expectedAmount)      // Check for payment on blockchain
+markPaymentUsed(paymentId, txid)             // Mark as processed
+```
+
+#### ethereum.js (Active)
+Direct Ethereum blockchain monitoring via Etherscan API:
+- USDT ERC20 payments monitored directly on-chain
+- No third-party payment processor required
+- Zero payment processing fees
+- 30-minute payment window
+
+```javascript
+createPayment(amount, metadata)              // Create payment request
+checkPayment(paymentId, expectedAmount)      // Check for payment on blockchain
+markPaymentUsed(paymentId, txid)             // Mark as processed
 ```
 
 #### paymentRouter.js
@@ -382,8 +404,8 @@ markPaymentUsed(provider, paymentData, email)
 
 #### PaymentMethodSelector.jsx
 Visual payment method selection with:
-- Active methods (Bitcoin on-chain)
-- Coming Soon overlay for BTCPay/NOWPayments methods
+- Active methods (Bitcoin on-chain, USDT Tron/Ethereum)
+- Coming Soon overlay for BTCPay methods (Lightning/Liquid)
 - Network sub-selection (for Liquid/USDT)
 - Animated badges and effects
 
@@ -394,12 +416,16 @@ Multi-stage payment flow:
 3. **Payment** - Show QR code and address/invoice
 4. **Success** - Display PDF password
 
-### Webhooks
+### Webhooks & Payment Monitoring
 
-| Endpoint | Provider | Purpose |
-|----------|----------|---------|
-| `POST /api/webhooks/btcpay` | BTCPay Server | Lightning/Liquid confirmations |
-| `POST /api/webhooks/nowpayments` | NOWPayments | USDT payment notifications |
+| Method | Monitoring Type | Purpose |
+|--------|-----------------|---------|
+| Bitcoin On-chain | Polling (mempool.space) | Every 5 seconds via `/api/payments/:id/status` |
+| Lightning/Liquid | Webhook `POST /api/webhooks/btcpay` | BTCPay Server notifications |
+| USDT (Tron TRC20) | Polling (TronGrid API) | Every 5 seconds via `/api/payments/:id/status` |
+| USDT (Ethereum ERC20) | Polling (Etherscan API) | Every 5 seconds via `/api/payments/:id/status` |
+
+**Note:** USDT payments are monitored by polling public blockchain APIs. No webhooks or callbacks required.
 
 ---
 
@@ -640,17 +666,33 @@ Response (Lightning - Coming Soon):
   "expiresAt": "..."
 }
 
-Response (USDT - Coming Soon):
+Response (USDT Tron):
 {
   "success": true,
   "paymentId": "uuid",
-  "provider": "nowpayments_usdttrc20",
+  "provider": "direct_tron",
   "method": "usdt",
   "network": "usdttrc20",
   "networkName": "Tron (TRC20)",
-  "address": "T...",
-  "payAmount": 9.99,
-  "payCurrency": "usdttrc20",
+  "networkFee": "~$1",
+  "address": "TYour-Tron-Address",
+  "payAmount": "9.99",
+  "payCurrency": "USDT",
+  "expiresAt": "..."
+}
+
+Response (USDT Ethereum):
+{
+  "success": true,
+  "paymentId": "uuid",
+  "provider": "direct_ethereum",
+  "method": "usdt",
+  "network": "usdterc20",
+  "networkName": "Ethereum (ERC20)",
+  "networkFee": "~$5-20",
+  "address": "0xYour-Ethereum-Address",
+  "payAmount": "9.99",
+  "payCurrency": "USDT",
   "expiresAt": "..."
 }
 ```
@@ -779,26 +821,47 @@ When ready to enable Lightning/Liquid payments:
    - Edit `src/components/PaymentMethodSelector.jsx`
    - Set `comingSoon: false` for `lightning` and `liquid`
 
-#### NOWPayments
-When ready to enable USDT payments:
+#### USDT Payments (Tron & Ethereum)
+USDT payments are already active with direct blockchain monitoring. No third-party payment processor required!
 
-1. **Create NOWPayments Account**
-   - Sign up at [nowpayments.io](https://nowpayments.io)
-   - Complete KYC if processing >$1000/day
+**To enable Tron USDT (TRC20):**
 
-2. **Configure IPN**
-   - Set IPN callback URL: `https://kyward.onrender.com/api/webhooks/nowpayments`
-   - Copy IPN secret
+1. **Get a Tron Wallet Address**
+   - Use any Tron wallet: Trust Wallet, Ledger, Trezor, or create via TronLink
+   - Make sure it's a mainnet address (starts with `T`)
+
+2. **Optional: Get TronGrid API Key** (recommended for production)
+   - Sign up at [trongrid.io](https://www.trongrid.io/)
+   - Create API key (increases rate limits from 15 to 100+ req/sec)
 
 3. **Add to Render Environment**
    ```env
-   NOWPAYMENTS_API_KEY=your-api-key
-   NOWPAYMENTS_IPN_SECRET=your-ipn-secret
+   TRON_USDT_ADDRESS=TYourTronAddressHere
+   TRONGRID_API_KEY=your-api-key    # Optional but recommended
    ```
 
-4. **Remove Coming Soon flag**
-   - Edit `src/components/PaymentMethodSelector.jsx`
-   - Set `comingSoon: false` for `usdt`
+**To enable Ethereum USDT (ERC20):**
+
+1. **Get an Ethereum Wallet Address**
+   - Use any Ethereum wallet: MetaMask, Ledger, Trezor
+   - Make sure it's a mainnet address (starts with `0x`)
+
+2. **Get Etherscan API Key** (required)
+   - Sign up at [etherscan.io](https://etherscan.io/apis)
+   - Create free API key (5 req/sec limit, sufficient for payments)
+
+3. **Add to Render Environment**
+   ```env
+   ETH_USDT_ADDRESS=0xYourEthereumAddressHere
+   ETHERSCAN_API_KEY=your-etherscan-api-key
+   ```
+
+**Benefits of Direct Blockchain Monitoring:**
+- **Zero payment processing fees** (only network fees paid by customer)
+- **No third-party registration** (just use your own wallet)
+- **No KYC required** for any volume
+- **Full custody** - funds go directly to your wallet
+- **Decentralized** - no single point of failure
 
 ---
 
@@ -818,11 +881,11 @@ When ready to enable USDT payments:
 - **HD Derivation**: XPUB stored server-side, private keys never exposed
 - **Address Reuse Prevention**: 30-minute assignment window per user/email
 - **Anti-Spam**: Same address/invoice reused within window to prevent waste
-- **Amount Tolerance**: ±1% tolerance for on-chain payments (price volatility)
-- **Webhook Verification**:
-  - BTCPay: HMAC-SHA256 signature verification
-  - NOWPayments: HMAC-SHA512 signature verification
+- **Amount Tolerance**: ±$0.01 tolerance for USDT, ±1% for BTC (price volatility)
+- **Transaction Deduplication**: Used transactions are tracked to prevent double-crediting
+- **Webhook Verification** (BTCPay): HMAC-SHA256 signature verification
 - **Timing-Safe Comparison**: Used for all signature verifications
+- **Direct Custody**: USDT payments go directly to your wallet (no intermediary)
 
 ### Telegram Linking
 - Verification codes: 6 characters, alphanumeric

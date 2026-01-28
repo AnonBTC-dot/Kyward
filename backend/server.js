@@ -9,7 +9,8 @@ const emailService = require('./services/email');
 const paymentStore = require('./services/paymentStore');
 const db = require('./services/database');
 const btcpayService = require('./services/btcpay');
-const nowpaymentsService = require('./services/nowpayments');
+const tronService = require('./services/tron');
+const ethereumService = require('./services/ethereum');
 const paymentRouter = require('./services/paymentRouter');
 
 const app = express();
@@ -101,14 +102,15 @@ app.get('/api/health', async (req, res) => {
 
   res.json({
     status: 'ok',
-    version: '1.1.0',
+    version: '1.2.0',
     timestamp: new Date().toISOString(),
     services: {
       database: !!process.env.SUPABASE_URL,
       email: !!process.env.SMTP_HOST,
       bitcoin: !!process.env.XPUB,
       btcpay: btcpayService.isConfigured(),
-      nowpayments: nowpaymentsService.isConfigured()
+      tron: tronService.isConfigured(),
+      ethereum: ethereumService.isConfigured()
     },
     paymentProviders: providerHealth
   });
@@ -820,60 +822,8 @@ app.post('/api/webhooks/btcpay', express.raw({ type: '*/*' }), async (req, res) 
   }
 });
 
-// NOWPayments IPN webhook (USDT)
-app.post('/api/webhooks/nowpayments', async (req, res) => {
-  try {
-    const signature = req.headers['x-nowpayments-sig'];
-
-    // Verify IPN signature
-    if (!nowpaymentsService.verifyIpnSignature(req.body, signature)) {
-      console.warn('NOWPayments IPN: Invalid signature');
-      return res.status(401).json({ error: 'Invalid signature' });
-    }
-
-    console.log(`NOWPayments IPN received: ${req.body.payment_status} for payment ${req.body.payment_id}`);
-
-    // Process the event
-    const processed = nowpaymentsService.processIpnEvent(req.body);
-
-    if (processed.isPaymentComplete) {
-      // Find payment by order_id (our internal paymentId)
-      const payment = paymentStore.getPayment(processed.orderId) ||
-                      paymentStore.getByNowpaymentsId(processed.paymentId);
-
-      if (payment) {
-        // Update payment status
-        paymentStore.updateStatus(payment.id, 'confirmed', {
-          confirmedAt: new Date().toISOString(),
-          actuallyPaid: processed.actuallyPaid
-        });
-
-        // Upgrade user subscription
-        const upgradeResult = await db.upgradeSubscription(payment.email, payment.plan);
-
-        if (upgradeResult.success) {
-          console.log(`NOWPayments IPN: Upgraded ${payment.email} to ${payment.plan}`);
-
-          // Get user's language preference for email
-          const user = await db.getUserByEmail(payment.email);
-          const userLanguage = user?.language_preference || user?.preferred_language || 'en';
-
-          // Send confirmation email (plan-specific, translated)
-          await emailService.sendPaymentConfirmation(payment.email, payment.plan, userLanguage);
-        } else {
-          console.error('NOWPayments IPN: Upgrade failed:', upgradeResult);
-        }
-      } else {
-        console.warn(`NOWPayments IPN: No payment found for order ${processed.orderId}`);
-      }
-    }
-
-    res.json({ received: true });
-  } catch (error) {
-    console.error('NOWPayments IPN error:', error);
-    res.status(500).json({ error: 'IPN processing failed' });
-  }
-});
+// Note: USDT payments (Tron/Ethereum) are monitored via direct blockchain polling
+// No webhook needed - status is checked via the /api/payments/:paymentId/status endpoint
 
 // ============================================
 // EMAIL ENDPOINTS
@@ -1340,10 +1290,16 @@ app.listen(PORT, () => {
     console.log('⚠️  BTCPay Server: Not configured');
   }
 
-  if (nowpaymentsService.isConfigured()) {
-    console.log('✅ NOWPayments (USDT): Configured');
+  if (tronService.isConfigured()) {
+    console.log('✅ Tron USDT (TRC20): Configured');
   } else {
-    console.log('⚠️  NOWPayments: Not configured');
+    console.log('⚠️  Tron USDT: Not configured (set TRON_USDT_ADDRESS)');
+  }
+
+  if (ethereumService.isConfigured()) {
+    console.log('✅ Ethereum USDT (ERC20): Configured');
+  } else {
+    console.log('⚠️  Ethereum USDT: Not configured (set ETH_USDT_ADDRESS and ETHERSCAN_API_KEY)');
   }
 
   if (process.env.SMTP_HOST || process.env.RESEND_API_KEY) {

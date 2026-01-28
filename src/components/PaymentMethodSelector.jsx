@@ -43,15 +43,13 @@ const PAYMENT_METHODS = [
     name: 'USDT',
     icon: 'usdt',
     badge: 'Stable',
-    description: 'Tron, Polygon, BSC, Ethereum',
+    description: 'Tron (TRC20) or Ethereum (ERC20)',
     time: '1-10 minutes',
     color: '#26A17B',
-    comingSoon: true,  // NOWPayments required
+    comingSoon: true,  // Direct blockchain monitoring - no third party
     networks: [
       { id: 'usdttrc20', name: 'Tron (TRC20)', fee: '~$1' },
-      { id: 'usdtmatic', name: 'Polygon', fee: '< $0.01' },
-      { id: 'usdtbsc', name: 'BSC', fee: '~$0.10' },
-      { id: 'usdterc20', name: 'Ethereum', fee: '~$5-20' }
+      { id: 'usdterc20', name: 'Ethereum (ERC20)', fee: '~$5-20' }
     ]
   }
 ];

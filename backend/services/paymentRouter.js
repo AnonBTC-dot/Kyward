@@ -1,10 +1,11 @@
 // KYWARD PAYMENT ROUTER
 // Unified interface for all payment providers
-// Routes to: BTCPay (Lightning/Liquid), HD Derivation (On-chain), NOWPayments (USDT)
+// Routes to: BTCPay (Lightning/Liquid), HD Derivation (On-chain), Tron/Ethereum (USDT)
 
 const btcpay = require('./btcpay');
 const bitcoin = require('./bitcoin');
-const nowpayments = require('./nowpayments');
+const tron = require('./tron');
+const ethereum = require('./ethereum');
 
 // Payment providers
 const PROVIDERS = {
@@ -12,10 +13,8 @@ const PROVIDERS = {
   LIQUID_BTC: 'btcpay_liquid_lbtc',
   LIQUID_USDT: 'btcpay_liquid_lusdt',
   ONCHAIN: 'direct_btc',
-  USDT_TRC20: 'nowpayments_usdttrc20',
-  USDT_POLYGON: 'nowpayments_usdtmatic',
-  USDT_BSC: 'nowpayments_usdtbsc',
-  USDT_ERC20: 'nowpayments_usdterc20'
+  USDT_TRC20: 'direct_tron',
+  USDT_ERC20: 'direct_ethereum'
 };
 
 // Payment methods shown to users
@@ -55,12 +54,10 @@ const PAYMENT_METHODS = {
     name: 'USDT',
     icon: '💵',
     badge: 'Stable',
-    description: 'Tether stablecoin',
+    description: 'Tron (TRC20) or Ethereum (ERC20)',
     time: '1-10 minutes',
     networks: [
       { id: 'usdttrc20', name: 'Tron (TRC20)', fee: '~$1', provider: PROVIDERS.USDT_TRC20 },
-      { id: 'usdtmatic', name: 'Polygon', fee: '< $0.01', provider: PROVIDERS.USDT_POLYGON },
-      { id: 'usdtbsc', name: 'BSC', fee: '~$0.10', provider: PROVIDERS.USDT_BSC },
       { id: 'usdterc20', name: 'Ethereum (ERC20)', fee: '~$5-20', provider: PROVIDERS.USDT_ERC20 }
     ]
   }
@@ -95,9 +92,18 @@ function getAvailablePaymentMethods() {
     methods.push(PAYMENT_METHODS.liquid);
   }
 
-  // USDT - requires NOWPayments
-  if (nowpayments.isConfigured()) {
-    methods.push(PAYMENT_METHODS.usdt);
+  // USDT - requires at least one of Tron or Ethereum configured
+  if (tron.isConfigured() || ethereum.isConfigured()) {
+    // Filter networks based on what's configured
+    const usdtMethod = { ...PAYMENT_METHODS.usdt };
+    usdtMethod.networks = usdtMethod.networks.filter(n => {
+      if (n.id === 'usdttrc20') return tron.isConfigured();
+      if (n.id === 'usdterc20') return ethereum.isConfigured();
+      return false;
+    });
+    if (usdtMethod.networks.length > 0) {
+      methods.push(usdtMethod);
+    }
   }
 
   return methods;
@@ -264,46 +270,73 @@ async function createLiquidPayment(amount, asset, metadata) {
 }
 
 /**
- * Create USDT payment via NOWPayments
+ * Create USDT payment via direct blockchain monitoring (Tron or Ethereum)
  */
 async function createUsdtPayment(amount, network, metadata) {
-  if (!nowpayments.isConfigured()) {
-    return { success: false, error: 'USDT payments not configured' };
+  // Route to appropriate blockchain service
+  if (network === 'usdttrc20') {
+    if (!tron.isConfigured()) {
+      return { success: false, error: 'Tron USDT payments not configured. Set TRON_USDT_ADDRESS.' };
+    }
+
+    const result = await tron.createPayment(amount, metadata);
+
+    if (!result.success) {
+      return result;
+    }
+
+    return {
+      success: true,
+      provider: PROVIDERS.USDT_TRC20,
+      method: 'usdt',
+      network: network,
+      networkName: result.networkName,
+      networkFee: result.networkFee,
+      paymentId: metadata.paymentId,
+      // Payment data
+      address: result.address,
+      qrData: result.qrData,
+      amount: amount,
+      currency: 'USD',
+      payAmount: result.payAmount,
+      payCurrency: result.payCurrency,
+      expiresAt: result.expiresAt,
+      reused: result.reused
+    };
   }
 
-  const result = await nowpayments.createUsdtPayment(amount, network, metadata);
+  if (network === 'usdterc20') {
+    if (!ethereum.isConfigured()) {
+      return { success: false, error: 'Ethereum USDT payments not configured. Set ETH_USDT_ADDRESS and ETHERSCAN_API_KEY.' };
+    }
 
-  if (!result.success) {
-    return result;
+    const result = await ethereum.createPayment(amount, metadata);
+
+    if (!result.success) {
+      return result;
+    }
+
+    return {
+      success: true,
+      provider: PROVIDERS.USDT_ERC20,
+      method: 'usdt',
+      network: network,
+      networkName: result.networkName,
+      networkFee: result.networkFee,
+      paymentId: metadata.paymentId,
+      // Payment data
+      address: result.address,
+      qrData: result.qrData,
+      amount: amount,
+      currency: 'USD',
+      payAmount: result.payAmount,
+      payCurrency: result.payCurrency,
+      expiresAt: result.expiresAt,
+      reused: result.reused
+    };
   }
 
-  // Map network to provider
-  const providerMap = {
-    'usdttrc20': PROVIDERS.USDT_TRC20,
-    'usdtmatic': PROVIDERS.USDT_POLYGON,
-    'usdtbsc': PROVIDERS.USDT_BSC,
-    'usdterc20': PROVIDERS.USDT_ERC20
-  };
-
-  return {
-    success: true,
-    provider: providerMap[network] || PROVIDERS.USDT_TRC20,
-    method: 'usdt',
-    network: network,
-    networkName: result.networkName,
-    networkFee: result.networkFee,
-    paymentId: metadata.paymentId,
-    nowpaymentsId: result.paymentId,
-    // Payment data
-    address: result.address,
-    qrData: result.qrData,
-    amount: amount,
-    currency: 'USD',
-    payAmount: result.payAmount,
-    payCurrency: result.payCurrency,
-    expiresAt: result.expiresAt,
-    reused: result.reused
-  };
+  return { success: false, error: `Unsupported USDT network: ${network}. Supported: usdttrc20, usdterc20` };
 }
 
 /**
@@ -353,21 +386,26 @@ async function checkPaymentStatus(paymentId, provider, paymentData) {
         };
 
       case PROVIDERS.USDT_TRC20:
-      case PROVIDERS.USDT_POLYGON:
-      case PROVIDERS.USDT_BSC:
-      case PROVIDERS.USDT_ERC20:
-        // NOWPayments
-        if (!paymentData.nowpaymentsId) {
-          return { success: false, error: 'Missing nowpaymentsId' };
-        }
-        const nowStatus = await nowpayments.getPaymentStatus(paymentData.nowpaymentsId);
+        // Tron USDT - direct blockchain monitoring
+        const tronStatus = await tron.checkPayment(paymentId, paymentData.amount);
         return {
           success: true,
           provider,
-          status: nowStatus.status,
-          providerStatus: nowStatus.nowpaymentsStatus,
-          amount: nowStatus.amount,
-          actuallyPaid: nowStatus.actuallyPaid
+          status: tronStatus.status,
+          txid: tronStatus.txid,
+          amount: tronStatus.amount
+        };
+
+      case PROVIDERS.USDT_ERC20:
+        // Ethereum USDT - direct blockchain monitoring
+        const ethStatus = await ethereum.checkPayment(paymentId, paymentData.amount);
+        return {
+          success: true,
+          provider,
+          status: ethStatus.status,
+          txid: ethStatus.txid,
+          amount: ethStatus.amount,
+          confirmations: ethStatus.confirmations
         };
 
       default:
@@ -402,11 +440,14 @@ function markPaymentUsed(provider, paymentData, email) {
       break;
 
     case PROVIDERS.USDT_TRC20:
-    case PROVIDERS.USDT_POLYGON:
-    case PROVIDERS.USDT_BSC:
+      if (paymentData.paymentId) {
+        tron.markPaymentUsed(paymentData.paymentId, paymentData.txid);
+      }
+      break;
+
     case PROVIDERS.USDT_ERC20:
-      if (paymentData.nowpaymentsId) {
-        nowpayments.markInvoiceUsed(paymentData.nowpaymentsId, email);
+      if (paymentData.paymentId) {
+        ethereum.markPaymentUsed(paymentData.paymentId, paymentData.txid);
       }
       break;
   }
@@ -421,7 +462,8 @@ function getProviderStats() {
     bitcoin: {
       configured: !!process.env.XPUB
     },
-    nowpayments: nowpayments.isConfigured() ? nowpayments.getAssignmentStats() : null
+    tron: tron.getStats(),
+    ethereum: ethereum.getStats()
   };
 }
 
@@ -452,21 +494,17 @@ async function healthCheck() {
     status: process.env.XPUB ? 'ok' : 'not_configured'
   };
 
-  // NOWPayments
-  if (nowpayments.isConfigured()) {
-    try {
-      const apiStatus = await nowpayments.getApiStatus();
-      results.nowpayments = {
-        status: apiStatus.success ? 'ok' : 'error',
-        message: apiStatus.message,
-        error: apiStatus.error
-      };
-    } catch (e) {
-      results.nowpayments = { status: 'error', error: e.message };
-    }
-  } else {
-    results.nowpayments = { status: 'not_configured' };
-  }
+  // Tron USDT
+  results.tron = {
+    status: tron.isConfigured() ? 'ok' : 'not_configured',
+    ...tron.getStats()
+  };
+
+  // Ethereum USDT
+  results.ethereum = {
+    status: ethereum.isConfigured() ? 'ok' : 'not_configured',
+    ...ethereum.getStats()
+  };
 
   return results;
 }
