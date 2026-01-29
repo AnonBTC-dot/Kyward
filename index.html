@@ -17,10 +17,14 @@
     <!-- Canonical URL -->
     <link rel="canonical" href="https://kyward.com/" />
 
-    <!-- Favicon Configuration -->
-    <link rel="icon" type="image/svg+xml" href="/viteb.svg" />
+    <!-- Favicon Configuration - Adaptive for dark/light mode -->
+    <!-- Light mode browsers (light tabs) → black logo -->
+    <link rel="icon" type="image/svg+xml" href="/viteb.svg" media="(prefers-color-scheme: light)" />
+    <!-- Dark mode browsers (dark tabs) → white logo (LAST = priority) -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" media="(prefers-color-scheme: dark)" />
     <link rel="apple-touch-icon" href="/viteb.svg" />
-    <meta name="theme-color" content="#F7931A" />
+    <meta name="theme-color" content="#F7931A" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
     <meta name="msapplication-TileColor" content="#F7931A" />
 
     <!-- Open Graph / Facebook -->
