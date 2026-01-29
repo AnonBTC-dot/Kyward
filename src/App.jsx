@@ -15,31 +15,22 @@ const KywardApp = () => {
   const [paymentModal, setPaymentModal] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check for existing session on app load
+  // Clear any existing session on app load - always start fresh on landing page
   useEffect(() => {
-    const restoreSession = async () => {
+    const clearSessionOnLoad = async () => {
       try {
-        // Force refresh from API to get latest subscription data
-        const existingUser = await kywardDB.validateSession();
-        if (existingUser) {
-          // Get fresh user data with assessments
-          const freshUser = await kywardDB.getUser(true);
-          if (freshUser) {
-            const assessments = await kywardDB.getUserAssessments();
-            freshUser.assessments = assessments;
-            setUser(freshUser);
-            setCurrentPage('dashboard');
-            console.log('Session restored:', freshUser.subscriptionLevel);
-          }
-        }
+        // Always logout and clear session - users should start fresh
+        await kywardDB.logout();
+        setUser(null);
+        setCurrentPage('landing');
       } catch (error) {
-        console.error('Failed to restore session:', error);
+        console.error('Failed to clear session:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    restoreSession();
+    clearSessionOnLoad();
   }, []);
 
   const handleAssessmentComplete = (results) => {
