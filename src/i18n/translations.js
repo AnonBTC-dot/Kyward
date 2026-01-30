@@ -16,15 +16,15 @@ export const translations = {
     // Landing Page
     landing: {
       // Hero Section
-      heroBadge: '₿ITCOIN SECURITY MADE SIMPLE',
-      heroLine1: 'Stop Guessing.',
-      heroLine2: 'Secure Your Sats',
-      heroLine3: 'The Right Way.',
-      heroSubtitle: 'A questionnaire-based assessment that shows you exactly how to protect your private keys. No BS. No wallet recommendations. Just honest security advice from fellow Bitcoiners.',
-      heroCta: 'Start Free Assessment',
-      heroSecondaryCta: 'See How It Works',
+      heroBadge: 'SELF-CUSTODY ₿ITCOIN SECURITY ASSESSMENT',
+      heroLine1: 'Not Your Keys,',
+      heroLine2: 'Not Your Bitcoin.',
+      heroLine3: 'Secure Them Now.',
+      heroSubtitle: 'The #1 Bitcoin self-custody security assessment. Protect your private keys, seed phrase, and cold storage setup with personalized recommendations from security experts. No wallet sales. No KYC. Just honest Bitcoin security guidance.',
+      heroCta: 'Get Your Free Security Score',
+      heroSecondaryCta: 'How Self-Custody Works',
       heroStats: {
-        nonCustodial: 'Non-Custodial',
+        nonCustodial: 'Self-Custody',
         nonCustodialValue: '100%',
         dataStored: 'Data Stored',
         dataStoredValue: '0',
@@ -34,60 +34,60 @@ export const translations = {
 
       // Mockup Card
       mockup: {
-        title: 'Your Security Score',
-        rec1: 'Hardware wallet detected',
-        rec2: 'Consider multi-sig setup',
-        rec3: 'Backup strategy solid'
+        title: 'Your Bitcoin Security Score',
+        rec1: 'Hardware wallet cold storage verified',
+        rec2: 'Multi-signature setup recommended',
+        rec3: 'Seed phrase backup strategy solid'
       },
 
       // Why Kyward Section (PVU)
-      whyTitle: 'What Makes Kyward Different?',
-      whySubtitle: "We're not trying to sell you a wallet. We're here to educate you on securing what's already yours.",
+      whyTitle: 'Why Choose Kyward for Bitcoin Self-Custody?',
+      whySubtitle: "We don't sell hardware wallets or custody services. We teach you how to truly own your Bitcoin with proper self-custody security practices.",
       whyCards: {
         personalized: {
-          title: 'Personalized Assessment',
-          description: 'Answer 15 questions about your current setup. Get a custom security score and actionable recommendations tailored to YOUR situation.'
+          title: 'Bitcoin Security Assessment',
+          description: 'Answer 15 questions about your hardware wallet, seed phrase backup, and cold storage setup. Get a personalized security score with actionable self-custody recommendations.'
         },
         zeroData: {
           title: 'Zero Data Storage',
-          description: 'Your answers never leave your device. We don\'t store, track, or sell your data. Ever.'
+          description: 'True self-custody means privacy. Your answers never leave your device. We don\'t store, track, or sell your data. Ever. No KYC required.'
         },
         education: {
-          title: 'Education First',
-          description: 'Learn WHY each recommendation matters. Understand the trade-offs. Make informed decisions.'
+          title: 'Self-Custody Education',
+          description: 'Learn WHY each Bitcoin security recommendation matters. Understand hardware wallets, multi-signature setups, and inheritance planning.'
         },
         noWallet: {
-          title: 'No Wallet Pushing',
-          description: 'We\'re not affiliated with any wallet provider. Our recommendations are based purely on security best practices.'
+          title: 'No Wallet Sales',
+          description: 'We\'re not affiliated with any hardware wallet provider. Our Bitcoin security recommendations are based purely on best practices.'
         }
       },
 
       // How It Works Section
-      howTitle: 'How It Works',
-      howSubtitle: 'Three simple steps to better security',
+      howTitle: 'How Bitcoin Self-Custody Security Works',
+      howSubtitle: 'Three steps to protect your private keys and secure your Bitcoin',
       howSteps: {
         step1: {
           number: '01',
-          title: 'Take the Assessment',
-          description: 'Answer questions about your current Bitcoin storage methods and security habits. Takes just 5 minutes.'
+          title: 'Take the Security Assessment',
+          description: 'Answer questions about your hardware wallet, seed phrase storage, cold storage setup, and Bitcoin security habits. Takes just 5 minutes.'
         },
         step2: {
           number: '02',
-          title: 'Get Your Score',
-          description: 'Receive a personalized security score from 0-100 with a detailed breakdown of your strengths and weaknesses.'
+          title: 'Get Your Bitcoin Security Score',
+          description: 'Receive a personalized self-custody security score from 0-100 with detailed breakdown of your private key protection and backup strategies.'
         },
         step3: {
           number: '03',
-          title: 'Follow the Plan',
-          description: 'Get a step-by-step action plan with prioritized recommendations tailored to your security level.'
+          title: 'Secure Your Bitcoin',
+          description: 'Get a step-by-step action plan covering hardware wallets, multi-signature setup, seed phrase backup, and Bitcoin inheritance planning.'
         }
       },
 
       // Pricing Section
-      pricingTitle: 'Simple, Honest Pricing',
-      pricingSubtitle: 'No hidden fees. No subscriptions. Pay once, own forever.',
+      pricingTitle: 'Bitcoin Security Plans',
+      pricingSubtitle: 'Protect your self-custody setup. No hidden fees. Pay with Bitcoin.',
       plans: {
-        subtitle: 'Choose the plan that fits your security needs', // en /es → ver abajo
+        subtitle: 'Choose the self-custody security plan that fits your needs',
 
         free: {
           badge: 'FREE',
@@ -95,24 +95,24 @@ export const translations = {
           price: '$0',
           period: '/forever',
           features: [
-            'Security Questionnaire',
-            'Your Security Score',
-            '1 Most Critical Security Tip'
+            'Bitcoin Security Assessment',
+            'Self-Custody Security Score',
+            '1 Critical Security Recommendation'
           ],
-          cta: 'Start Free Assessment'
+          cta: 'Start Free Security Assessment'
         },
 
         essential: {
-          badge: 'RECOMMENDED',
+          badge: 'MOST POPULAR',
           name: 'Essential',
           price: '$9.99',
           period: '/one-time',
           features: [
-            'Full PDF Report Download',
-            'All Personalized Recommendations',
-            'Inheritance Planning Guide',
-            'Unlimited Re-downloads of your report',
-            'One assessment only (repurchase to retake)'
+            'Complete PDF Security Report',
+            'All Self-Custody Recommendations',
+            'Bitcoin Inheritance Planning Guide',
+            'Multi-Signature Setup Tutorial',
+            'Seed Phrase Backup Strategies'
           ],
           cta: 'Get Essential ($9.99)'
         },
@@ -123,10 +123,10 @@ export const translations = {
           price: '$14.99',
           period: '/month',
           features: [
-            'Unlimited Assessments',
+            'Unlimited Security Assessments',
             'BTC Guardian Telegram Bot',
-            'Real-time wallet balance alerts',
-            'Transaction notifications',
+            'Real-time Bitcoin wallet alerts',
+            'Transaction monitoring',
             'BTC price milestone alerts',
             'All Essential features',
             'Cancel anytime'
@@ -140,32 +140,32 @@ export const translations = {
           price: '$99',
           period: '+ $49/hr add',
           features: [
-            '1-hour private audit (video call)',
-            'Personalized deep-dive recommendations',
-            'Priority support',
-            'Unlimited Assessments',
-            'Full PDF Reports',
+            '1-hour private security audit',
+            'Custom self-custody strategy',
+            'Multi-sig implementation help',
+            'Inheritance planning assistance',
+            'Hardware wallet setup guidance',
             'Additional hours at $49/hr'
           ],
           note: 'Does not include BTC Guardian bot (Sentinel exclusive)',
-          cta: 'Book Your Consultation'
+          cta: 'Book Security Consultation'
         }
       },
 
       // Footer
       footer: {
-        tagline: 'Built by Bitcoiners for Bitcoiners',
-        copyright: '© 2025 Kyward. Built by Bitcoiners.'
+        tagline: 'Bitcoin Self-Custody Security by Bitcoiners',
+        copyright: '© 2025 Kyward. Bitcoin Security Assessment Platform.'
       }
     },
 
     // Auth Form
     auth: {
       loginTitle: 'Welcome Back',
-      loginSubtitle: 'Enter your details to access your dashboard',
-      signupTitle: 'Create Account',
-      signupSubtitle: 'Join Kyward and secure your Bitcoin legacy',
-      signupSuccess: 'Account created successfully! Welcome to the Free tier. You can upgrade to Essential, Sentinel or Consultation anytime from your Dashboard.',
+      loginSubtitle: 'Access your Bitcoin security dashboard',
+      signupTitle: 'Start Securing Your Bitcoin',
+      signupSubtitle: 'Join Kyward and protect your self-custody setup',
+      signupSuccess: 'Account created! Welcome to Kyward. Start your free Bitcoin security assessment now. Upgrade anytime for full self-custody recommendations.',
       forgotTitle: 'Forgot Password',
       forgotSubtitle: 'Enter your email to reset your password',
       resetTitle: 'Reset Password',
@@ -230,7 +230,7 @@ export const translations = {
     dashboard: {
       welcome: 'Welcome back,',
       welcomeUser: 'Bitcoiner',
-      subtitle: 'Track your Bitcoin security progress',
+      subtitle: 'Track your self-custody security progress',
 
       stats: {
         securityScore: 'Security Score',
@@ -268,13 +268,13 @@ export const translations = {
       },
 
       upgrade: {
-        title: 'Unlock Your Full Security Plan',
-        description: 'Get unlimited assessments, download your personalized PDF report, and access your complete inheritance plan.',
+        title: 'Unlock Your Complete Self-Custody Plan',
+        description: 'Get unlimited assessments, download your Bitcoin security PDF with multi-sig setup guides, and access complete inheritance planning.',
         features: {
-          pdf: 'Download PDF Report',
+          pdf: 'Download Security PDF',
           email: 'Email Report',
-          recommendations: 'All Recommendations',
-          inheritance: 'Inheritance Plan'
+          recommendations: 'All Self-Custody Tips',
+          inheritance: 'Bitcoin Inheritance Plan'
         },
         essentialButton: 'Get Essential - $9.99 one-time',
         sentinelButton: 'Subscribe Sentinel - $14.99/month',
@@ -446,20 +446,20 @@ export const translations = {
 
     // Report
     report: {
-      title: 'Your Security Report',
-      subtitle: "Based on your answers, here's your personalized Bitcoin security analysis.",
-      badge: 'Security Assessment Complete',
+      title: 'Your Bitcoin Self-Custody Report',
+      subtitle: "Based on your answers, here's your personalized self-custody security analysis with actionable recommendations.",
+      badge: 'Bitcoin Security Assessment Complete',
 
       score: {
-        label: 'Security Score',
+        label: 'Self-Custody Score',
         outOf: '/100',
-        excellent: 'Excellent Security',
+        excellent: 'Excellent Self-Custody',
         good: 'Moderate Security',
         needsWork: 'Needs Improvement',
-        critical: 'Critical',
-        excellentDesc: 'Your Bitcoin security practices are excellent. Focus on optimization and inheritance planning.',
-        goodDesc: 'You have a solid foundation, but there are important areas to improve.',
-        needsWorkDesc: 'Your Bitcoin is at significant risk. Follow the recommendations below immediately.'
+        critical: 'Critical Risk',
+        excellentDesc: 'Your Bitcoin self-custody practices are excellent. Focus on multi-signature optimization and inheritance planning.',
+        goodDesc: 'You have a solid self-custody foundation. Improve your hardware wallet setup and seed phrase backup strategy.',
+        needsWorkDesc: 'Your Bitcoin is at significant risk. Implement proper cold storage and seed phrase backup immediately.'
       },
 
       comparison: {
@@ -527,33 +527,33 @@ export const translations = {
       },
 
       upgrade: {
-        title: 'Unlock Your Complete Security & Inheritance Plan',
-        subtitle: "Don't just know your score - know exactly how to fix every issue and protect your Bitcoin for generations.",
+        title: 'Unlock Your Complete Self-Custody & Inheritance Plan',
+        subtitle: "Don't just know your score - get the complete Bitcoin security roadmap to protect your private keys for generations.",
 
         benefits: {
           recommendations: {
-            title: 'All Recommendations',
-            description: 'Detailed step-by-step instructions for every security improvement, prioritized by urgency.'
+            title: 'All Self-Custody Recommendations',
+            description: 'Detailed step-by-step instructions for hardware wallets, cold storage, and seed phrase security.'
           },
           pdf: {
-            title: 'Password-Protected PDF',
-            description: 'Download or receive by email a secure document you can save offline and reference anytime.'
+            title: 'Password-Protected Security PDF',
+            description: 'Download your complete Bitcoin self-custody guide offline. Reference anytime, no internet needed.'
           },
           inheritance: {
-            title: 'Complete Inheritance Plan',
-            description: 'Step-by-step guide to ensure your Bitcoin passes to your heirs safely using Liana time-locks.'
+            title: 'Bitcoin Inheritance Planning',
+            description: 'Step-by-step guide to pass your Bitcoin to heirs safely using Liana time-locks and multi-sig.'
           },
           multisig: {
             title: 'Multi-Signature Setup Guide',
-            description: 'Learn how to set up 2-of-3 multisig for maximum security with Sparrow Wallet.'
+            description: 'Learn 2-of-3 multisig setup with Sparrow Wallet. Eliminate single points of failure in your self-custody.'
           },
           sparrow: {
             title: 'Sparrow Wallet Tutorial',
-            description: 'Complete guide to setting up and using Sparrow Wallet for maximum sovereignty.'
+            description: 'Complete guide to setting up Sparrow Wallet for maximum Bitcoin sovereignty and privacy.'
           },
           unlimited: {
-            title: 'Unlimited Re-Assessments',
-            description: 'Track your progress over time. Retake the assessment whenever you want.'
+            title: 'Unlimited Security Assessments',
+            description: 'Track your self-custody progress over time. Retake the assessment as you improve your setup.'
           }
         },
 
@@ -1201,15 +1201,15 @@ export const translations = {
     // Landing Page
     landing: {
       // Hero Section
-      heroBadge: 'SEGURIDAD ₿ITCOIN SIMPLIFICADA',
-      heroLine1: 'Deja de Adivinar.',
-      heroLine2: 'Asegura Tus Sats',
-      heroLine3: 'De la Forma Correcta.',
-      heroSubtitle: 'Una evaluación basada en cuestionario que te muestra exactamente cómo proteger tus llaves privadas. Sin tonterías. Sin recomendaciones de wallets. Solo consejos honestos de seguridad de compañeros Bitcoiners.',
-      heroCta: 'Iniciar Evaluación Gratis',
-      heroSecondaryCta: 'Ver Cómo Funciona',
+      heroBadge: 'EVALUACIÓN DE SEGURIDAD ₿ITCOIN AUTO-CUSTODIA',
+      heroLine1: 'No Son Tus Llaves,',
+      heroLine2: 'No Es Tu Bitcoin.',
+      heroLine3: 'Asegúralas Ahora.',
+      heroSubtitle: 'La evaluación #1 de seguridad Bitcoin auto-custodia. Protege tus llaves privadas, frase semilla y almacenamiento frío con recomendaciones personalizadas de expertos en seguridad. Sin venta de wallets. Sin KYC. Solo guía honesta de seguridad Bitcoin.',
+      heroCta: 'Obtén Tu Puntuación Gratis',
+      heroSecondaryCta: 'Cómo Funciona la Auto-Custodia',
       heroStats: {
-        nonCustodial: 'Sin Custodia',
+        nonCustodial: 'Auto-Custodia',
         nonCustodialValue: '100%',
         dataStored: 'Datos Almacenados',
         dataStoredValue: '0',
@@ -1219,60 +1219,60 @@ export const translations = {
 
       // Mockup Card
       mockup: {
-        title: 'Tu Puntuación de Seguridad',
-        rec1: 'Hardware wallet detectada',
-        rec2: 'Considera configuración multi-sig',
-        rec3: 'Estrategia de respaldo sólida'
+        title: 'Tu Puntuación de Seguridad Bitcoin',
+        rec1: 'Hardware wallet y cold storage verificado',
+        rec2: 'Configuración multi-firma recomendada',
+        rec3: 'Estrategia de respaldo de frase semilla sólida'
       },
 
       // Why Kyward Section (PVU)
-      whyTitle: '¿Qué Hace Diferente a Kyward?',
-      whySubtitle: 'No intentamos venderte una wallet. Estamos aquí para educarte sobre cómo asegurar lo que ya es tuyo.',
+      whyTitle: '¿Por Qué Elegir Kyward para Auto-Custodia Bitcoin?',
+      whySubtitle: 'No vendemos hardware wallets ni servicios de custodia. Te enseñamos a ser verdadero dueño de tu Bitcoin con prácticas de seguridad auto-custodia.',
       whyCards: {
         personalized: {
-          title: 'Evaluación Personalizada',
-          description: 'Responde 15 preguntas sobre tu configuración actual. Obtén una puntuación de seguridad personalizada y recomendaciones adaptadas a TU situación.'
+          title: 'Evaluación de Seguridad Bitcoin',
+          description: 'Responde 15 preguntas sobre tu hardware wallet, respaldo de frase semilla y configuración de almacenamiento frío. Obtén una puntuación de seguridad personalizada con recomendaciones de auto-custodia.'
         },
         zeroData: {
           title: 'Cero Almacenamiento de Datos',
-          description: 'Tus respuestas nunca salen de tu dispositivo. No almacenamos, rastreamos ni vendemos tus datos. Nunca.'
+          description: 'Auto-custodia real significa privacidad. Tus respuestas nunca salen de tu dispositivo. No almacenamos ni vendemos tus datos. Sin KYC requerido.'
         },
         education: {
-          title: 'Educación Primero',
-          description: 'Aprende POR QUÉ cada recomendación importa. Entiende las compensaciones. Toma decisiones informadas.'
+          title: 'Educación Auto-Custodia',
+          description: 'Aprende POR QUÉ cada recomendación de seguridad Bitcoin importa. Entiende hardware wallets, configuraciones multi-firma y planificación de herencia.'
         },
         noWallet: {
-          title: 'Sin Promoción de Wallets',
-          description: 'No estamos afiliados a ningún proveedor de wallets. Nuestras recomendaciones se basan únicamente en las mejores prácticas de seguridad.'
+          title: 'Sin Venta de Wallets',
+          description: 'No estamos afiliados a ningún proveedor de hardware wallets. Nuestras recomendaciones de seguridad Bitcoin se basan únicamente en mejores prácticas.'
         }
       },
 
       // How It Works Section
-      howTitle: 'Cómo Funciona',
-      howSubtitle: 'Tres simples pasos hacia mejor seguridad',
+      howTitle: 'Cómo Funciona la Seguridad Auto-Custodia Bitcoin',
+      howSubtitle: 'Tres pasos para proteger tus llaves privadas y asegurar tu Bitcoin',
       howSteps: {
         step1: {
           number: '01',
-          title: 'Toma la Evaluación',
-          description: 'Responde preguntas sobre tus métodos actuales de almacenamiento de Bitcoin y hábitos de seguridad. Solo toma 5 minutos.'
+          title: 'Toma la Evaluación de Seguridad',
+          description: 'Responde preguntas sobre tu hardware wallet, almacenamiento de frase semilla, configuración de cold storage y hábitos de seguridad Bitcoin. Solo 5 minutos.'
         },
         step2: {
           number: '02',
-          title: 'Obtén Tu Puntuación',
-          description: 'Recibe una puntuación de seguridad personalizada del 0-100 con un desglose detallado de tus fortalezas y debilidades.'
+          title: 'Obtén Tu Puntuación de Seguridad Bitcoin',
+          description: 'Recibe una puntuación personalizada de auto-custodia del 0-100 con desglose detallado de tu protección de llaves privadas y estrategias de respaldo.'
         },
         step3: {
           number: '03',
-          title: 'Sigue el Plan',
-          description: 'Obtén un plan de acción paso a paso con recomendaciones priorizadas adaptadas a tu nivel de seguridad.'
+          title: 'Asegura Tu Bitcoin',
+          description: 'Obtén un plan de acción paso a paso cubriendo hardware wallets, configuración multi-firma, respaldo de frase semilla y planificación de herencia Bitcoin.'
         }
       },
 
       // Pricing Section
-      pricingTitle: 'Precios Simples y Honestos',
-      pricingSubtitle: 'Sin cargos ocultos. Sin suscripciones sorpresa. Paga una vez, tuyo para siempre.',
+      pricingTitle: 'Planes de Seguridad Bitcoin',
+      pricingSubtitle: 'Protege tu configuración auto-custodia. Sin cargos ocultos. Paga con Bitcoin.',
       plans: {
-        subtitle: 'Elige el plan que mejor se adapta a tus necesidades de seguridad',
+        subtitle: 'Elige el plan de seguridad auto-custodia que mejor se adapte a ti',
 
         free: {
           badge: 'GRATIS',
@@ -1280,24 +1280,24 @@ export const translations = {
           price: '$0',
           period: '/siempre',
           features: [
-            'Cuestionario de Seguridad',
-            'Tu Puntaje de Seguridad',
-            '1 Consejo de Seguridad Más Crítico'
+            'Evaluación de Seguridad Bitcoin',
+            'Puntuación de Seguridad Auto-Custodia',
+            '1 Recomendación Crítica de Seguridad'
           ],
-          cta: 'Comenzar Evaluación Gratis'
+          cta: 'Iniciar Evaluación de Seguridad Gratis'
         },
 
         essential: {
-          badge: 'RECOMENDADO',
+          badge: 'MÁS POPULAR',
           name: 'Essential',
           price: '$9.99',
           period: '/pago único',
           features: [
-            'Descarga completa del Informe en PDF',
-            'Todas las Recomendaciones Personalizadas',
-            'Guía de Planificación de Herencia',
-            'Descargas ilimitadas de tu informe',
-            'Solo una evaluación (recomprar para repetir)'
+            'Reporte PDF de Seguridad Completo',
+            'Todas las Recomendaciones Auto-Custodia',
+            'Guía de Planificación de Herencia Bitcoin',
+            'Tutorial de Configuración Multi-Firma',
+            'Estrategias de Respaldo de Frase Semilla'
           ],
           cta: 'Obtener Essential ($9.99)'
         },
@@ -1308,12 +1308,12 @@ export const translations = {
           price: '$14.99',
           period: '/mes',
           features: [
-            'Evaluaciones Ilimitadas',
+            'Evaluaciones de Seguridad Ilimitadas',
             'Bot de Telegram BTC Guardian',
-            'Alertas de balance en tiempo real',
-            'Notificaciones de transacciones',
+            'Alertas de wallet Bitcoin en tiempo real',
+            'Monitoreo de transacciones',
             'Alertas de hitos de precio BTC',
-            'Todas las caracteristicas de Essential',
+            'Todas las características de Essential',
             'Cancelar cuando quieras'
           ],
           cta: 'Suscribirse a Sentinel'
@@ -1325,31 +1325,31 @@ export const translations = {
           price: '$99',
           period: '+ $49/hora add',
           features: [
-            'Auditoria privada de 1 hora (videollamada)',
-            'Recomendaciones personalizadas en profundidad',
-            'Soporte prioritario',
-            'Evaluaciones Ilimitadas',
-            'Reportes PDF completos',
+            'Auditoría de seguridad privada de 1 hora',
+            'Estrategia personalizada de auto-custodia',
+            'Ayuda con implementación multi-firma',
+            'Asistencia en planificación de herencia',
+            'Guía de configuración de hardware wallet',
             'Horas adicionales a $49/hora'
           ],
           note: 'No incluye el bot BTC Guardian (exclusivo de Sentinel)',
-          cta: 'Reservar tu Consulta'
+          cta: 'Reservar Consulta de Seguridad'
         }
       },
 
       footer: {
-        tagline: 'Creado por Bitcoiners para Bitcoiners.',
-        copyright: '© 2025 Kyward. Creado por Bitcoiners.'
+        tagline: 'Seguridad Bitcoin Auto-Custodia por Bitcoiners',
+        copyright: '© 2025 Kyward. Plataforma de Evaluación de Seguridad Bitcoin.'
       }
     },
 
     // Auth Form
     auth: {
       loginTitle: 'Bienvenido de Nuevo',
-      loginSubtitle: 'Ingresa tus datos para acceder a tu panel',
-      signupTitle: 'Crear Cuenta',
-      signupSubtitle: 'Únete a Kyward y asegura tu legado Bitcoin',
-      signupSuccess: '¡Cuenta creada exitosamente! Bienvenido al nivel Gratis. Puedes mejorar a Essential, Sentinel o Consulta en cualquier momento desde tu Panel.',
+      loginSubtitle: 'Accede a tu panel de seguridad Bitcoin',
+      signupTitle: 'Comienza a Asegurar Tu Bitcoin',
+      signupSubtitle: 'Únete a Kyward y protege tu configuración auto-custodia',
+      signupSuccess: '¡Cuenta creada! Bienvenido a Kyward. Inicia tu evaluación gratuita de seguridad Bitcoin. Mejora cuando quieras para recomendaciones completas de auto-custodia.',
       forgotTitle: 'Olvidé mi Contraseña',
       forgotSubtitle: 'Ingresa tu email para restablecer tu contraseña',
       resetTitle: 'Restablecer Contraseña',
@@ -1413,7 +1413,7 @@ export const translations = {
     dashboard: {
       welcome: 'Bienvenido de nuevo,',
       welcomeUser: 'Bitcoiner',
-      subtitle: 'Sigue tu progreso de seguridad Bitcoin',
+      subtitle: 'Sigue tu progreso de seguridad auto-custodia',
 
       stats: {
         securityScore: 'Puntuación de Seguridad',
@@ -1451,13 +1451,13 @@ export const translations = {
       },
 
       upgrade: {
-        title: 'Desbloquea Tu Plan Completo de Seguridad',
-        description: 'Obtén evaluaciones ilimitadas, descarga tu reporte PDF personalizado y accede a tu plan completo de herencia.',
+        title: 'Desbloquea Tu Plan Completo de Auto-Custodia',
+        description: 'Obtén evaluaciones ilimitadas, descarga tu PDF de seguridad Bitcoin con guías de configuración multi-firma y planificación de herencia completa.',
         features: {
-          pdf: 'Descargar Reporte PDF',
+          pdf: 'Descargar PDF de Seguridad',
           email: 'Enviar Reporte por Email',
-          recommendations: 'Todas las Recomendaciones',
-          inheritance: 'Plan de Herencia'
+          recommendations: 'Todos los Tips Auto-Custodia',
+          inheritance: 'Plan de Herencia Bitcoin'
         },
         essentialButton: 'Obtener Essential - $9.99 pago único',
         sentinelButton: 'Suscribirse a Sentinel - $14.99/mes',
@@ -1628,20 +1628,20 @@ export const translations = {
 
     // Report
     report: {
-      title: 'Tu Reporte de Seguridad',
-      subtitle: 'Basado en tus respuestas, aquí está tu análisis personalizado de seguridad Bitcoin.',
-      badge: 'Evaluación de Seguridad Completada',
+      title: 'Tu Reporte de Auto-Custodia Bitcoin',
+      subtitle: 'Basado en tus respuestas, aquí está tu análisis personalizado de seguridad auto-custodia con recomendaciones accionables.',
+      badge: 'Evaluación de Seguridad Bitcoin Completada',
 
       score: {
-        label: 'Puntuación de Seguridad',
+        label: 'Puntuación Auto-Custodia',
         outOf: '/100',
-        excellent: 'Seguridad Excelente',
+        excellent: 'Auto-Custodia Excelente',
         good: 'Seguridad Moderada',
         needsWork: 'Necesita Mejoras',
-        critical: 'Crítico',
-        excellentDesc: 'Tus prácticas de seguridad Bitcoin son excelentes. Enfócate en optimización y planificación de herencia.',
-        goodDesc: 'Tienes una base sólida, pero hay áreas importantes por mejorar.',
-        needsWorkDesc: 'Tu Bitcoin está en riesgo significativo. Sigue las recomendaciones a continuación inmediatamente.'
+        critical: 'Riesgo Crítico',
+        excellentDesc: 'Tus prácticas de auto-custodia Bitcoin son excelentes. Enfócate en optimización multi-firma y planificación de herencia.',
+        goodDesc: 'Tienes una base sólida de auto-custodia. Mejora tu configuración de hardware wallet y estrategia de respaldo de frase semilla.',
+        needsWorkDesc: 'Tu Bitcoin está en riesgo significativo. Implementa almacenamiento frío y respaldo de frase semilla adecuado inmediatamente.'
       },
 
       comparison: {
@@ -1709,33 +1709,33 @@ export const translations = {
       },
 
       upgrade: {
-        title: 'Desbloquea Tu Plan Completo de Seguridad y Herencia',
-        subtitle: 'No solo conozcas tu puntuación - aprende exactamente cómo solucionar cada problema y proteger tu Bitcoin por generaciones.',
+        title: 'Desbloquea Tu Plan Completo de Auto-Custodia y Herencia',
+        subtitle: 'No solo conozcas tu puntuación - obtén la hoja de ruta completa de seguridad Bitcoin para proteger tus llaves privadas por generaciones.',
 
         benefits: {
           recommendations: {
-            title: 'Todas las Recomendaciones',
-            description: 'Instrucciones detalladas paso a paso para cada mejora de seguridad, priorizadas por urgencia.'
+            title: 'Todas las Recomendaciones Auto-Custodia',
+            description: 'Instrucciones detalladas paso a paso para hardware wallets, almacenamiento frío y seguridad de frase semilla.'
           },
           pdf: {
-            title: 'PDF Protegido con Contraseña',
-            description: 'Descarga o recibe por email un documento seguro que puedes guardar offline y consultar cuando quieras.'
+            title: 'PDF de Seguridad Protegido',
+            description: 'Descarga tu guía completa de auto-custodia Bitcoin offline. Consúltala cuando quieras, sin internet.'
           },
           inheritance: {
-            title: 'Plan de Herencia Completo',
-            description: 'Guía paso a paso para asegurar que tu Bitcoin pase a tus herederos de forma segura usando Liana time-locks.'
+            title: 'Planificación de Herencia Bitcoin',
+            description: 'Guía paso a paso para pasar tu Bitcoin a herederos de forma segura usando Liana time-locks y multi-firma.'
           },
           multisig: {
             title: 'Guía de Configuración Multi-Firma',
-            description: 'Aprende a configurar multisig 2-de-3 para máxima seguridad con Sparrow Wallet.'
+            description: 'Aprende configuración multisig 2-de-3 con Sparrow Wallet. Elimina puntos únicos de falla en tu auto-custodia.'
           },
           sparrow: {
             title: 'Tutorial de Sparrow Wallet',
-            description: 'Guía completa para configurar y usar Sparrow Wallet para máxima soberanía.'
+            description: 'Guía completa para configurar Sparrow Wallet para máxima soberanía y privacidad Bitcoin.'
           },
           unlimited: {
-            title: 'Re-Evaluaciones Ilimitadas',
-            description: 'Sigue tu progreso a lo largo del tiempo. Repite la evaluación cuando quieras.'
+            title: 'Evaluaciones de Seguridad Ilimitadas',
+            description: 'Sigue tu progreso de auto-custodia a lo largo del tiempo. Repite la evaluación mientras mejoras tu configuración.'
           }
         },
 
