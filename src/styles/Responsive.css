@@ -90,23 +90,31 @@
     max-width: 320px !important;
   }
 
+  /* NAVIGATION - Keep buttons on single line */
   .nav-content {
-    padding: 10px 12px !important; /* Reduce márgenes laterales para ganar espacio */
+    padding: 10px 12px !important;
     justify-content: space-between !important;
   }
 
   .nav-logo-img {
-    width: 130px !important; /* Ajusta el ancho para que sea visible pero no gigante */
+    width: 100px !important;
     height: auto !important;
+    flex-shrink: 0 !important;
   }
 
   .nav-buttons {
-    gap: 8px !important; /* Estrecha la separación entre botones */
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    align-items: center !important;
   }
 
   .nav-button {
-    padding: 6px 12px !important; /* Botones más compactos */
-    font-size: 13px !important; /* Fuente un poco más pequeña para ahorrar espacio */
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
 }
 

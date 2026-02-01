@@ -614,7 +614,7 @@ if (typeof document !== 'undefined') {
 
       nav .nav-content,
       nav > div:first-child {
-        flex-wrap: wrap !important;
+        flex-wrap: nowrap !important;
         gap: 8px !important;
         padding: 8px 12px !important;
         justify-content: space-between !important;
@@ -629,15 +629,15 @@ if (typeof document !== 'undefined') {
         gap: 8px !important;
       }
 
-      /* Nav buttons container - flex row wrap */
+      /* Nav buttons container - single row, no wrap */
       nav .nav-buttons,
       .navButtons {
         display: flex !important;
-        flex-wrap: wrap !important;
+        flex-wrap: nowrap !important;
         gap: 6px !important;
         justify-content: flex-end !important;
         align-items: center !important;
-        flex: 1 !important;
+        flex: 0 0 auto !important;
       }
 
       /* User email - hidden on mobile to save space */
