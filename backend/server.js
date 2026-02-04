@@ -1046,20 +1046,57 @@ app.get('/api/wallets/:telegram_user_id', async (req, res) => {
   }
 });
 
-// Add a monitored wallet
+// Add a monitored wallet (supports single, xpub, and multisig wallets)
 app.post('/api/wallets', async (req, res) => {
   try {
-    const { telegramUserId, address, label, addressType } = req.body;
+    const {
+      telegramUserId,
+      address,
+      label,
+      addressType,
+      // Multisig-specific fields
+      isMultisig,
+      xpubs,
+      requiredSignatures,
+      totalKeys,
+      witnessType
+    } = req.body;
 
     if (!telegramUserId || !address) {
       return res.status(400).json({ error: 'Telegram user ID and address are required' });
     }
 
+    // Validate multisig parameters if this is a multisig wallet
+    if (isMultisig) {
+      if (!xpubs || !Array.isArray(xpubs) || xpubs.length < 2) {
+        return res.status(400).json({ error: 'Multisig wallets require at least 2 xpubs' });
+      }
+      if (!requiredSignatures || !totalKeys) {
+        return res.status(400).json({ error: 'Multisig wallets require requiredSignatures and totalKeys' });
+      }
+      if (requiredSignatures > totalKeys || requiredSignatures < 1 || totalKeys < 2) {
+        return res.status(400).json({ error: 'Invalid multisig parameters: requiredSignatures must be between 1 and totalKeys' });
+      }
+      if (xpubs.length !== totalKeys) {
+        return res.status(400).json({ error: 'Number of xpubs must match totalKeys' });
+      }
+    }
+
+    // Build multisig config object (null for non-multisig wallets)
+    const multisigConfig = isMultisig ? {
+      isMultisig: true,
+      xpubs: xpubs,
+      requiredSignatures: requiredSignatures,
+      totalKeys: totalKeys,
+      witnessType: witnessType || 'legacy'
+    } : null;
+
     const result = await db.addMonitoredWallet(
       telegramUserId,
       address,
       label || '',
-      addressType || 'single'
+      addressType || 'single',
+      multisigConfig
     );
 
     if (!result.success) {
@@ -1120,6 +1157,49 @@ app.put('/api/wallets/:telegram_user_id/:address/balance', async (req, res) => {
   } catch (error) {
     console.error('Update balance error:', error);
     res.status(500).json({ error: 'Failed to update balance' });
+  }
+});
+
+// Update multisig wallet configuration
+app.put('/api/wallets/:telegram_user_id/:address/multisig', async (req, res) => {
+  try {
+    const telegramUserId = parseInt(req.params.telegram_user_id);
+    const address = req.params.address;
+    const { xpubs, requiredSignatures, totalKeys, witnessType } = req.body;
+
+    if (isNaN(telegramUserId)) {
+      return res.status(400).json({ error: 'Invalid Telegram user ID' });
+    }
+
+    // Validate multisig parameters
+    if (!xpubs || !Array.isArray(xpubs) || xpubs.length < 2) {
+      return res.status(400).json({ error: 'Multisig wallets require at least 2 xpubs' });
+    }
+    if (!requiredSignatures || !totalKeys) {
+      return res.status(400).json({ error: 'Multisig wallets require requiredSignatures and totalKeys' });
+    }
+    if (requiredSignatures > totalKeys || requiredSignatures < 1 || totalKeys < 2) {
+      return res.status(400).json({ error: 'Invalid multisig parameters: 1 <= requiredSignatures <= totalKeys' });
+    }
+    if (xpubs.length !== totalKeys) {
+      return res.status(400).json({ error: 'Number of xpubs must match totalKeys' });
+    }
+
+    const result = await db.updateMultisigWallet(telegramUserId, address, {
+      xpubs,
+      requiredSignatures,
+      totalKeys,
+      witnessType: witnessType || 'legacy'
+    });
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.message });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Update multisig wallet error:', error);
+    res.status(500).json({ error: 'Failed to update multisig wallet' });
   }
 });
 
