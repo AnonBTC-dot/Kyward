@@ -178,7 +178,7 @@ export const translations = {
           },
           {
             name: 'Ana M.',
-            role: 'Crypto Enthusiast',
+            role: 'Bitcoin Enthusiast',
             stars: 5,
             text: 'Zero data storage policy convinced me to try it. The multi-sig tutorial was clear and easy to follow. Best investment in my Bitcoin security.'
           },
@@ -1501,7 +1501,7 @@ export const translations = {
           },
           {
             name: 'Ana M.',
-            role: 'Entusiasta Crypto',
+            role: 'Entusiasta Bitcoin',
             stars: 5,
             text: 'La política de cero almacenamiento de datos me convenció de probarlo. El tutorial de multi-firma fue claro y fácil de seguir. La mejor inversión en mi seguridad Bitcoin.'
           },
