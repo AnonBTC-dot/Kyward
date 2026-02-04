@@ -3,10 +3,10 @@
 export const styles = {
   landingContainer: { backgroundColor: '#000', color: '#E5E5E5', minHeight: '100vh', fontFamily: '"Space Grotesk", sans-serif' },
   nav: { position: 'fixed', top: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #1a1a1a', zIndex: 1000, padding: '16px 0', overflow: 'hidden' },
-  navContent: { maxWidth: '1200px', margin: '0 auto', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  navLogo: { display: 'flex', alignItems: 'center', gap: '12px' },
+  navContent: { maxWidth: '1200px', margin: '0 auto', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' },
+  navLogo: { display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 },
   navLogoText: { fontSize: '24px', fontWeight: '700', color: '#F7931A' },
-  navButtons: { display: 'flex', gap: '12px' },
+  navButtons: { display: 'flex', gap: '12px', alignItems: 'center', flexShrink: 0 },
   navButtonLogin: { padding: '10px 20px', backgroundColor: 'transparent', border: '1px solid #3a3a3a', color: '#E5E5E5', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s' },
   navButtonSignup: { padding: '10px 24px', backgroundColor: '#F7931A', border: 'none', color: '#000', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s' },
   hero: { paddingTop: '140px', paddingBottom: '100px', minHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '60px', position: 'relative', overflow: 'hidden', maxWidth: '1400px', margin: '0 auto', padding: '140px 24px 100px' },
@@ -481,21 +481,21 @@ if (typeof document !== 'undefined') {
       /* Navigation */
       .nav-content {
         padding: 0 12px !important;
-        overflow: hidden !important;
+        gap: 8px !important;
       }
       .nav-logo-text {
         font-size: 20px !important;
       }
       .nav-logo-img {
         width: 90px !important;
+        max-width: 90px !important;
         height: auto !important;
       }
       .nav-buttons {
         gap: 4px !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        flex-shrink: 1 !important;
-        min-width: 0 !important;
+        flex-shrink: 0 !important;
       }
       .nav-button {
         padding: 6px 8px !important;
@@ -507,6 +507,7 @@ if (typeof document !== 'undefined') {
         padding: 5px 8px !important;
         font-size: 10px !important;
         gap: 4px !important;
+        flex-shrink: 0 !important;
       }
       .language-toggle svg {
         width: 14px !important;
@@ -663,9 +664,11 @@ if (typeof document !== 'undefined') {
       /* Extra small nav adjustments */
       .nav-content {
         padding: 0 8px !important;
+        gap: 6px !important;
       }
       .nav-logo-img {
         width: 70px !important;
+        max-width: 70px !important;
       }
       .nav-buttons {
         gap: 3px !important;
@@ -687,8 +690,12 @@ if (typeof document !== 'undefined') {
 
     /* Very small screens (320px) */
     @media (max-width: 360px) {
+      .nav-content {
+        gap: 4px !important;
+      }
       .nav-logo-img {
-        width: 60px !important;
+        width: 55px !important;
+        max-width: 55px !important;
       }
       .nav-button {
         padding: 4px 5px !important;
