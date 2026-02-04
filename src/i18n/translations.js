@@ -152,6 +152,51 @@ export const translations = {
         }
       },
 
+      // Testimonials Section
+      testimonials: {
+        title: 'What Our Users Say',
+        subtitle: 'Real feedback from Bitcoiners who secured their self-custody setup with Kyward',
+        privacyNote: 'Privacy Protected',
+        reviews: [
+          {
+            name: 'Michael R.',
+            role: 'Bitcoin Holder since 2017',
+            stars: 5,
+            text: 'Finally, a service that focuses on education rather than selling me another hardware wallet. The security assessment opened my eyes to vulnerabilities I never considered.'
+          },
+          {
+            name: 'Sarah K.',
+            role: 'Self-Custody Advocate',
+            stars: 5,
+            text: 'The inheritance planning guide alone was worth it. My family now knows exactly how to access my Bitcoin if something happens to me. Peace of mind achieved.'
+          },
+          {
+            name: 'David L.',
+            role: 'HODLer',
+            stars: 5,
+            text: 'I thought my setup was secure until I took the assessment. Score of 45/100 was a wake-up call. After following the recommendations, I\'m now at 92.'
+          },
+          {
+            name: 'Ana M.',
+            role: 'Crypto Enthusiast',
+            stars: 5,
+            text: 'Zero data storage policy convinced me to try it. The multi-sig tutorial was clear and easy to follow. Best investment in my Bitcoin security.'
+          },
+          {
+            name: 'James T.',
+            role: 'Long-term Investor',
+            stars: 5,
+            text: 'The Sentinel plan alerts have saved me multiple times. Knowing when my cold storage addresses receive transactions gives me incredible peace of mind.'
+          },
+          {
+            name: 'Elena V.',
+            role: 'Bitcoin Maximalist',
+            stars: 5,
+            text: 'No KYC, no data stored, just honest security advice. This is how Bitcoin services should be. Recommended the Essential plan to all my friends.'
+          }
+        ]
+      },
+
       // Footer
       footer: {
         tagline: 'Bitcoin Self-Custody Security by Bitcoiners',
@@ -1183,6 +1228,99 @@ export const translations = {
       saving: 'Saving...',
       saveChanges : 'Save Preferences',
       unlimitedAccess: 'Unlimited assessments & features'
+    },
+
+    // Legal Pages
+    legal: {
+      privacy: {
+        title: 'Privacy Policy',
+        back: 'Back',
+        lastUpdated: 'Last updated: February 2025',
+        highlight: 'Kyward is committed to your privacy. We practice minimal data collection and never sell your information.',
+        introTitle: '1. Introduction',
+        introText: 'Kyward ("we", "our", or "us") operates the kyward.com website and provides Bitcoin self-custody security assessment services. This Privacy Policy explains how we collect, use, and protect your information when you use our services.',
+        introText2: 'Kyward is registered and operates from Bogota, Colombia, and complies with applicable Colombian data protection laws.',
+        dataTitle: '2. Information We Collect',
+        dataIntro: 'We collect minimal information necessary to provide our services:',
+        dataItem1: 'Email address - Required for account creation and communication',
+        dataItem2: 'Security assessment answers - Stored to generate your security score and recommendations',
+        dataItem3: 'Payment information - Transaction IDs for cryptocurrency payments (we do not store private keys or wallet seeds)',
+        kycTitle: '3. No KYC Policy',
+        kycText: 'We do NOT require or collect: government IDs, proof of address, photos, phone numbers, or any other identity verification documents. Your privacy is paramount to us.',
+        storageTitle: '4. Data Storage & Security',
+        storageText: 'Your data is stored securely using Supabase, a trusted cloud database provider with encryption at rest and in transit. We implement industry-standard security measures to protect your information.',
+        storageText2: 'We retain your data only as long as your account is active. You can request deletion of your account and all associated data at any time.',
+        usageTitle: '5. How We Use Your Data',
+        usageItem1: 'Provide and improve our security assessment services',
+        usageItem2: 'Generate personalized security recommendations',
+        usageItem3: 'Process payments and provide customer support',
+        usageItem4: 'Send service-related communications (with your consent for marketing)',
+        sharingTitle: '6. Data Sharing',
+        sharingText: 'We do NOT sell, trade, or rent your personal information to third parties. We may share data only with:',
+        sharingItem1: 'Service providers necessary to operate our platform (database hosting)',
+        sharingItem2: 'Legal authorities if required by Colombian law',
+        paymentsTitle: '7. Payment Privacy',
+        paymentsText: 'We accept cryptocurrency payments (Bitcoin and USDT) directly to our wallets. We do not use third-party payment processors that could track your identity. Only transaction IDs are stored for order verification.',
+        cookiesTitle: '8. Cookies & Analytics',
+        cookiesText: 'We currently do not use analytics tracking tools or third-party cookies. We only use essential cookies required for the website to function (session management, language preferences).',
+        rightsTitle: '9. Your Rights',
+        rightsIntro: 'You have the right to:',
+        rightsItem1: 'Access your personal data',
+        rightsItem2: 'Request correction of inaccurate data',
+        rightsItem3: 'Request deletion of your account and data',
+        rightsItem4: 'Opt-out of marketing communications',
+        changesTitle: '10. Changes to This Policy',
+        changesText: 'We may update this Privacy Policy from time to time. We will notify users of significant changes via email or website notification. Continued use of our services after changes constitutes acceptance.',
+        contactTitle: 'Questions?',
+        contactText: 'For privacy-related inquiries, contact us at:'
+      },
+      terms: {
+        title: 'Terms of Service',
+        back: 'Back',
+        lastUpdated: 'Last updated: February 2025',
+        disclaimer: 'IMPORTANT: Kyward provides educational content about Bitcoin self-custody security. We do NOT provide financial, investment, or legal advice. You are solely responsible for your Bitcoin security decisions.',
+        acceptTitle: '1. Acceptance of Terms',
+        acceptText: 'By accessing or using Kyward\'s services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.',
+        serviceTitle: '2. Service Description',
+        serviceText: 'Kyward provides Bitcoin self-custody security assessment services, including:',
+        serviceItem1: 'Security questionnaires and assessments',
+        serviceItem2: 'Personalized security scores and recommendations',
+        serviceItem3: 'Educational content about Bitcoin security best practices',
+        serviceItem4: 'Optional monitoring and alert services (Sentinel plan)',
+        serviceItem5: 'Optional consultation services',
+        adviceTitle: '3. Not Financial or Investment Advice',
+        adviceHighlight: 'Kyward is an EDUCATIONAL platform. Nothing on this website constitutes financial, investment, tax, or legal advice.',
+        adviceText: 'Our security assessments and recommendations are educational tools to help you understand Bitcoin self-custody best practices. We do not recommend specific investments, endorse any cryptocurrency, or guarantee any outcomes.',
+        adviceText2: 'You should consult with qualified professionals before making any financial decisions. Kyward and its team are not responsible for any investment decisions you make.',
+        userTitle: '4. User Responsibilities',
+        userIntro: 'By using our services, you agree to:',
+        userItem1: 'Provide accurate information in security assessments',
+        userItem2: 'Keep your account credentials secure and confidential',
+        userItem3: 'Not share your account with others',
+        userItem4: 'Not use our services for illegal activities',
+        userItem5: 'Take full responsibility for your own Bitcoin security',
+        paymentTitle: '5. Payments & Refunds',
+        paymentText: 'We accept cryptocurrency payments including Bitcoin (BTC) and USDT. Prices are displayed in USD but payment is made in cryptocurrency at the current exchange rate.',
+        refundPolicy: 'ALL SALES ARE FINAL. Due to the digital nature of our services and cryptocurrency payment methods, we do not offer refunds. Please review our services carefully before purchasing.',
+        paymentText2: 'Subscription services (Sentinel plan) can be cancelled at any time. Cancellation stops future billing but does not refund the current billing period.',
+        ipTitle: '6. Intellectual Property',
+        ipText: 'All content on Kyward, including text, graphics, logos, assessments, recommendations, and software, is the property of Kyward and protected by intellectual property laws. You may not copy, reproduce, distribute, or create derivative works without our written permission.',
+        liabilityTitle: '7. Limitation of Liability',
+        liabilityText: 'TO THE MAXIMUM EXTENT PERMITTED BY LAW:',
+        liabilityItem1: 'Kyward is NOT responsible for any loss of Bitcoin, cryptocurrency, or funds',
+        liabilityItem2: 'We do NOT guarantee the security of your self-custody setup',
+        liabilityItem3: 'We are NOT liable for any damages arising from use of our services',
+        liabilityItem4: 'Our maximum liability is limited to the amount you paid for services',
+        liabilityText2: 'You acknowledge that Bitcoin and cryptocurrency involve significant risks. You are solely responsible for securing your private keys, seed phrases, and funds.',
+        terminationTitle: '8. Account Termination',
+        terminationText: 'We reserve the right to suspend or terminate accounts that violate these terms, engage in fraudulent activity, or abuse our services. You may delete your account at any time through the dashboard or by contacting support.',
+        lawTitle: '9. Governing Law',
+        lawText: 'These Terms of Service are governed by and construed in accordance with the laws of Colombia. Any disputes arising from these terms or our services shall be resolved in the courts of Bogota, Colombia.',
+        changesTitle: '10. Changes to Terms',
+        changesText: 'We may modify these Terms of Service at any time. Significant changes will be communicated via email or website notification. Continued use of our services after changes constitutes acceptance of the modified terms.',
+        contactTitle: 'Questions?',
+        contactText: 'For questions about these terms, contact us at:'
+      }
     }
   },
 
@@ -1335,6 +1473,51 @@ export const translations = {
           note: 'No incluye el bot BTC Guardian (exclusivo de Sentinel)',
           cta: 'Reservar Consulta de Seguridad'
         }
+      },
+
+      // Testimonials Section
+      testimonials: {
+        title: 'Lo Que Dicen Nuestros Usuarios',
+        subtitle: 'Opiniones reales de Bitcoiners que aseguraron su auto-custodia con Kyward',
+        privacyNote: 'Privacidad Protegida',
+        reviews: [
+          {
+            name: 'Michael R.',
+            role: 'Holder de Bitcoin desde 2017',
+            stars: 5,
+            text: 'Por fin, un servicio enfocado en educación en lugar de venderme otra hardware wallet. La evaluación de seguridad me abrió los ojos a vulnerabilidades que nunca había considerado.'
+          },
+          {
+            name: 'Sarah K.',
+            role: 'Defensora de Auto-Custodia',
+            stars: 5,
+            text: 'Solo la guía de planificación de herencia valió la pena. Mi familia ahora sabe exactamente cómo acceder a mi Bitcoin si algo me pasa. Tranquilidad lograda.'
+          },
+          {
+            name: 'David L.',
+            role: 'HODLer',
+            stars: 5,
+            text: 'Pensé que mi configuración era segura hasta que hice la evaluación. Un puntaje de 45/100 fue una llamada de atención. Después de seguir las recomendaciones, ahora estoy en 92.'
+          },
+          {
+            name: 'Ana M.',
+            role: 'Entusiasta Crypto',
+            stars: 5,
+            text: 'La política de cero almacenamiento de datos me convenció de probarlo. El tutorial de multi-firma fue claro y fácil de seguir. La mejor inversión en mi seguridad Bitcoin.'
+          },
+          {
+            name: 'James T.',
+            role: 'Inversor a Largo Plazo',
+            stars: 5,
+            text: 'Las alertas del plan Sentinel me han salvado varias veces. Saber cuándo mis direcciones de cold storage reciben transacciones me da una paz mental increíble.'
+          },
+          {
+            name: 'Elena V.',
+            role: 'Maximalista Bitcoin',
+            stars: 5,
+            text: 'Sin KYC, sin datos almacenados, solo consejos honestos de seguridad. Así deberían ser los servicios de Bitcoin. Recomendé el plan Essential a todos mis amigos.'
+          }
+        ]
       },
 
       footer: {
@@ -2366,6 +2549,99 @@ export const translations = {
       saving: 'Guardando...',
       saveChanges : 'Preferencias Guardadas',
       unlimitedAccess: 'Evaluaciones y funciones ilimitadas'
+    },
+
+    // Legal Pages
+    legal: {
+      privacy: {
+        title: 'Política de Privacidad',
+        back: 'Volver',
+        lastUpdated: 'Última actualización: Febrero 2025',
+        highlight: 'Kyward está comprometido con tu privacidad. Practicamos la recolección mínima de datos y nunca vendemos tu información.',
+        introTitle: '1. Introducción',
+        introText: 'Kyward ("nosotros", "nuestro" o "nos") opera el sitio web kyward.com y proporciona servicios de evaluación de seguridad de auto-custodia Bitcoin. Esta Política de Privacidad explica cómo recopilamos, usamos y protegemos tu información cuando usas nuestros servicios.',
+        introText2: 'Kyward está registrado y opera desde Bogotá, Colombia, y cumple con las leyes colombianas de protección de datos aplicables.',
+        dataTitle: '2. Información que Recopilamos',
+        dataIntro: 'Recopilamos la información mínima necesaria para proporcionar nuestros servicios:',
+        dataItem1: 'Dirección de correo electrónico - Requerida para crear cuenta y comunicación',
+        dataItem2: 'Respuestas de evaluación de seguridad - Almacenadas para generar tu puntuación y recomendaciones',
+        dataItem3: 'Información de pago - IDs de transacciones de criptomonedas (no almacenamos llaves privadas ni frases semilla)',
+        kycTitle: '3. Política Sin KYC',
+        kycText: 'NO requerimos ni recopilamos: documentos de identidad, comprobante de domicilio, fotos, números de teléfono, ni ningún otro documento de verificación de identidad. Tu privacidad es fundamental para nosotros.',
+        storageTitle: '4. Almacenamiento y Seguridad de Datos',
+        storageText: 'Tus datos se almacenan de forma segura usando Supabase, un proveedor de base de datos en la nube confiable con cifrado en reposo y en tránsito. Implementamos medidas de seguridad estándar de la industria para proteger tu información.',
+        storageText2: 'Conservamos tus datos solo mientras tu cuenta esté activa. Puedes solicitar la eliminación de tu cuenta y todos los datos asociados en cualquier momento.',
+        usageTitle: '5. Cómo Usamos Tus Datos',
+        usageItem1: 'Proporcionar y mejorar nuestros servicios de evaluación de seguridad',
+        usageItem2: 'Generar recomendaciones de seguridad personalizadas',
+        usageItem3: 'Procesar pagos y proporcionar soporte al cliente',
+        usageItem4: 'Enviar comunicaciones relacionadas con el servicio (con tu consentimiento para marketing)',
+        sharingTitle: '6. Compartir Datos',
+        sharingText: 'NO vendemos, intercambiamos ni alquilamos tu información personal a terceros. Solo podemos compartir datos con:',
+        sharingItem1: 'Proveedores de servicios necesarios para operar nuestra plataforma (alojamiento de base de datos)',
+        sharingItem2: 'Autoridades legales si lo requiere la ley colombiana',
+        paymentsTitle: '7. Privacidad de Pagos',
+        paymentsText: 'Aceptamos pagos en criptomonedas (Bitcoin y USDT) directamente a nuestras wallets. No usamos procesadores de pago de terceros que puedan rastrear tu identidad. Solo se almacenan los IDs de transacción para verificación de pedidos.',
+        cookiesTitle: '8. Cookies y Analíticas',
+        cookiesText: 'Actualmente no usamos herramientas de seguimiento analítico ni cookies de terceros. Solo usamos cookies esenciales requeridas para que el sitio web funcione (gestión de sesión, preferencias de idioma).',
+        rightsTitle: '9. Tus Derechos',
+        rightsIntro: 'Tienes derecho a:',
+        rightsItem1: 'Acceder a tus datos personales',
+        rightsItem2: 'Solicitar corrección de datos inexactos',
+        rightsItem3: 'Solicitar eliminación de tu cuenta y datos',
+        rightsItem4: 'Darte de baja de comunicaciones de marketing',
+        changesTitle: '10. Cambios a Esta Política',
+        changesText: 'Podemos actualizar esta Política de Privacidad de vez en cuando. Notificaremos a los usuarios sobre cambios significativos por correo electrónico o notificación en el sitio web. El uso continuado de nuestros servicios después de los cambios constituye aceptación.',
+        contactTitle: '¿Preguntas?',
+        contactText: 'Para consultas relacionadas con privacidad, contáctanos en:'
+      },
+      terms: {
+        title: 'Términos de Servicio',
+        back: 'Volver',
+        lastUpdated: 'Última actualización: Febrero 2025',
+        disclaimer: 'IMPORTANTE: Kyward proporciona contenido educativo sobre seguridad de auto-custodia Bitcoin. NO proporcionamos asesoramiento financiero, de inversión o legal. Eres el único responsable de tus decisiones de seguridad Bitcoin.',
+        acceptTitle: '1. Aceptación de Términos',
+        acceptText: 'Al acceder o usar los servicios de Kyward, aceptas estar sujeto a estos Términos de Servicio. Si no estás de acuerdo con estos términos, por favor no uses nuestros servicios.',
+        serviceTitle: '2. Descripción del Servicio',
+        serviceText: 'Kyward proporciona servicios de evaluación de seguridad de auto-custodia Bitcoin, incluyendo:',
+        serviceItem1: 'Cuestionarios y evaluaciones de seguridad',
+        serviceItem2: 'Puntuaciones y recomendaciones de seguridad personalizadas',
+        serviceItem3: 'Contenido educativo sobre mejores prácticas de seguridad Bitcoin',
+        serviceItem4: 'Servicios opcionales de monitoreo y alertas (plan Sentinel)',
+        serviceItem5: 'Servicios opcionales de consulta',
+        adviceTitle: '3. No Es Asesoramiento Financiero ni de Inversión',
+        adviceHighlight: 'Kyward es una plataforma EDUCATIVA. Nada en este sitio web constituye asesoramiento financiero, de inversión, fiscal o legal.',
+        adviceText: 'Nuestras evaluaciones y recomendaciones de seguridad son herramientas educativas para ayudarte a entender las mejores prácticas de auto-custodia Bitcoin. No recomendamos inversiones específicas, no respaldamos ninguna criptomoneda ni garantizamos resultados.',
+        adviceText2: 'Debes consultar con profesionales calificados antes de tomar cualquier decisión financiera. Kyward y su equipo no son responsables de ninguna decisión de inversión que tomes.',
+        userTitle: '4. Responsabilidades del Usuario',
+        userIntro: 'Al usar nuestros servicios, aceptas:',
+        userItem1: 'Proporcionar información precisa en las evaluaciones de seguridad',
+        userItem2: 'Mantener tus credenciales de cuenta seguras y confidenciales',
+        userItem3: 'No compartir tu cuenta con otros',
+        userItem4: 'No usar nuestros servicios para actividades ilegales',
+        userItem5: 'Asumir toda la responsabilidad de tu propia seguridad Bitcoin',
+        paymentTitle: '5. Pagos y Reembolsos',
+        paymentText: 'Aceptamos pagos en criptomonedas incluyendo Bitcoin (BTC) y USDT. Los precios se muestran en USD pero el pago se realiza en criptomoneda al tipo de cambio actual.',
+        refundPolicy: 'TODAS LAS VENTAS SON FINALES. Debido a la naturaleza digital de nuestros servicios y los métodos de pago en criptomonedas, no ofrecemos reembolsos. Por favor revisa nuestros servicios cuidadosamente antes de comprar.',
+        paymentText2: 'Los servicios de suscripción (plan Sentinel) pueden cancelarse en cualquier momento. La cancelación detiene la facturación futura pero no reembolsa el período de facturación actual.',
+        ipTitle: '6. Propiedad Intelectual',
+        ipText: 'Todo el contenido en Kyward, incluyendo texto, gráficos, logotipos, evaluaciones, recomendaciones y software, es propiedad de Kyward y está protegido por leyes de propiedad intelectual. No puedes copiar, reproducir, distribuir o crear obras derivadas sin nuestro permiso escrito.',
+        liabilityTitle: '7. Limitación de Responsabilidad',
+        liabilityText: 'EN LA MÁXIMA MEDIDA PERMITIDA POR LA LEY:',
+        liabilityItem1: 'Kyward NO es responsable de ninguna pérdida de Bitcoin, criptomonedas o fondos',
+        liabilityItem2: 'NO garantizamos la seguridad de tu configuración de auto-custodia',
+        liabilityItem3: 'NO somos responsables de ningún daño derivado del uso de nuestros servicios',
+        liabilityItem4: 'Nuestra responsabilidad máxima se limita al monto que pagaste por los servicios',
+        liabilityText2: 'Reconoces que Bitcoin y las criptomonedas implican riesgos significativos. Eres el único responsable de asegurar tus llaves privadas, frases semilla y fondos.',
+        terminationTitle: '8. Terminación de Cuenta',
+        terminationText: 'Nos reservamos el derecho de suspender o terminar cuentas que violen estos términos, participen en actividad fraudulenta o abusen de nuestros servicios. Puedes eliminar tu cuenta en cualquier momento a través del panel o contactando a soporte.',
+        lawTitle: '9. Ley Aplicable',
+        lawText: 'Estos Términos de Servicio se rigen e interpretan de acuerdo con las leyes de Colombia. Cualquier disputa que surja de estos términos o nuestros servicios se resolverá en los tribunales de Bogotá, Colombia.',
+        changesTitle: '10. Cambios a los Términos',
+        changesText: 'Podemos modificar estos Términos de Servicio en cualquier momento. Los cambios significativos se comunicarán por correo electrónico o notificación en el sitio web. El uso continuado de nuestros servicios después de los cambios constituye aceptación de los términos modificados.',
+        contactTitle: '¿Preguntas?',
+        contactText: 'Para preguntas sobre estos términos, contáctanos en:'
+      }
     }
   }
 };

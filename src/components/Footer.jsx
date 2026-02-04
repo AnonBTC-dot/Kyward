@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLanguage } from '../i18n';
 
-const Footer = () => {
+const Footer = ({ onPrivacyPolicy, onTermsOfService }) => {
   const { t } = useLanguage();
 
   const footerStyles = {
@@ -210,8 +210,12 @@ const Footer = () => {
             {t?.landing?.footer?.copyright || `© ${new Date().getFullYear()} Kyward. All rights reserved.`}
           </p>
           <div style={footerStyles.bottomLinks}>
-            <span style={footerStyles.bottomLink} className="footer-link">Privacy Policy</span>
-            <span style={footerStyles.bottomLink} className="footer-link">Terms of Service</span>
+            <span style={footerStyles.bottomLink} className="footer-link" onClick={onPrivacyPolicy}>
+              {t?.legal?.privacy?.title || 'Privacy Policy'}
+            </span>
+            <span style={footerStyles.bottomLink} className="footer-link" onClick={onTermsOfService}>
+              {t?.legal?.terms?.title || 'Terms of Service'}
+            </span>
           </div>
         </div>
       </div>
