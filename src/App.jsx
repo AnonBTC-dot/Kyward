@@ -5,6 +5,8 @@ import Dashboard from './components/Dashboard';
 import Questionnaire from './components/Questionnaire';
 import Report from './components/Report';
 import PaymentModal from './components/PaymentModal';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import TermsOfService from './components/TermsOfService';
 import { kywardDB } from './services/Database';
 import { LanguageProvider } from './i18n';
 
@@ -13,7 +15,7 @@ const KywardApp = () => {
   const [user, setUser] = useState(null);
   const [lastResults, setLastResults] = useState(null);
   const [paymentModal, setPaymentModal] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Clear any existing session on app load - always start fresh on landing page
   useEffect(() => {
@@ -22,11 +24,8 @@ const KywardApp = () => {
         // Always logout and clear session - users should start fresh
         await kywardDB.logout();
         setUser(null);
-        setCurrentPage('landing');
       } catch (error) {
         console.error('Failed to clear session:', error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -82,7 +81,20 @@ const KywardApp = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'landing':
-        return <LandingPage onLogin={() => setCurrentPage('login')} onSignup={() => setCurrentPage('signup')} />;
+        return (
+          <LandingPage
+            onLogin={() => setCurrentPage('login')}
+            onSignup={() => setCurrentPage('signup')}
+            onPrivacyPolicy={() => setCurrentPage('privacy')}
+            onTermsOfService={() => setCurrentPage('terms')}
+          />
+        );
+
+      case 'privacy':
+        return <PrivacyPolicy onBack={() => setCurrentPage('landing')} />;
+
+      case 'terms':
+        return <TermsOfService onBack={() => setCurrentPage('landing')} />;
 
       case 'login':
       case 'signup':

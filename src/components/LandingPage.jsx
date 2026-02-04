@@ -3,7 +3,7 @@ import { styles } from '../styles/Theme';
 import { useLanguage, LanguageToggle } from '../i18n';
 import Footer from './Footer';
 
-const LandingPage = ({ onLogin, onSignup }) => {
+const LandingPage = ({ onLogin, onSignup, onPrivacyPolicy, onTermsOfService }) => {
   const { t } = useLanguage();
   return (
     <div style={styles.landingContainer}>
@@ -288,6 +288,71 @@ const LandingPage = ({ onLogin, onSignup }) => {
         </div>
       </section>
 
+      {/* TESTIMONIALS SECTION */}
+      <section className="testimonials-section" style={styles.testimonialsSection}>
+        <div style={styles.testimonialsSectionGlow} />
+        <div style={styles.testimonialsSectionGlow2} />
+        <div style={styles.sectionContent}>
+          <h2 className="section-title" style={styles.sectionTitle}>{t.landing.testimonials.title}</h2>
+          <p className="section-subtitle" style={styles.sectionSubtitle}>{t.landing.testimonials.subtitle}</p>
+
+          <div style={styles.testimonialsGrid}>
+            <div className="testimonials-track" style={styles.testimonialsTrack}>
+              {/* First set of testimonials */}
+              {t.landing.testimonials.reviews.map((review, idx) => (
+                <div key={idx} className="testimonial-card" style={styles.testimonialCard}>
+                  <div style={styles.testimonialQuote}>"</div>
+                  <div style={styles.testimonialCardHeader}>
+                    <div className="testimonial-avatar" style={styles.testimonialAvatar}>
+                      <svg width="50" height="50" viewBox="0 0 24 24" fill="none" style={{opacity: 0.7}}>
+                        <circle cx="12" cy="8" r="4" stroke="#9ca3af" strokeWidth="1.8"/>
+                        <path d="M4 20C4 16.6863 7.58172 14 12 14C16.4183 14 20 16.6863 20 20" stroke="#9ca3af" strokeWidth="1.8" strokeLinecap="round"/>
+                      </svg>
+                      <div style={styles.testimonialPrivacyBadge}>?</div>
+                    </div>
+                    <div style={styles.testimonialInfo}>
+                      <div className="testimonial-name" style={styles.testimonialName}>{review.name}</div>
+                      <div style={styles.testimonialRole}>{review.role}</div>
+                    </div>
+                  </div>
+                  <div style={styles.testimonialStars}>
+                    {[...Array(review.stars)].map((_, i) => (
+                      <span key={i} style={styles.testimonialStar}>★</span>
+                    ))}
+                  </div>
+                  <p className="testimonial-text" style={styles.testimonialText}>"{review.text}"</p>
+                </div>
+              ))}
+              {/* Duplicate set for infinite scroll effect */}
+              {t.landing.testimonials.reviews.map((review, idx) => (
+                <div key={`dup-${idx}`} className="testimonial-card" style={styles.testimonialCard}>
+                  <div style={styles.testimonialQuote}>"</div>
+                  <div style={styles.testimonialCardHeader}>
+                    <div className="testimonial-avatar" style={styles.testimonialAvatar}>
+                      <svg width="50" height="50" viewBox="0 0 24 24" fill="none" style={{opacity: 0.7}}>
+                        <circle cx="12" cy="8" r="4" stroke="#9ca3af" strokeWidth="1.8"/>
+                        <path d="M4 20C4 16.6863 7.58172 14 12 14C16.4183 14 20 16.6863 20 20" stroke="#9ca3af" strokeWidth="1.8" strokeLinecap="round"/>
+                      </svg>
+                      <div style={styles.testimonialPrivacyBadge}>?</div>
+                    </div>
+                    <div style={styles.testimonialInfo}>
+                      <div className="testimonial-name" style={styles.testimonialName}>{review.name}</div>
+                      <div style={styles.testimonialRole}>{review.role}</div>
+                    </div>
+                  </div>
+                  <div style={styles.testimonialStars}>
+                    {[...Array(review.stars)].map((_, i) => (
+                      <span key={i} style={styles.testimonialStar}>★</span>
+                    ))}
+                  </div>
+                  <p className="testimonial-text" style={styles.testimonialText}>"{review.text}"</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
 {/* PRICING SECTION */}
 <section style={styles.pricingSection}>
   <div style={styles.pricingSectionGlow} />
@@ -481,7 +546,7 @@ const LandingPage = ({ onLogin, onSignup }) => {
 </section>
 
       {/* FOOTER */}
-      <Footer />
+      <Footer onPrivacyPolicy={onPrivacyPolicy} onTermsOfService={onTermsOfService} />
     </div>
   );
 };

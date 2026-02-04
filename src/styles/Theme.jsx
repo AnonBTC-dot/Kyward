@@ -91,6 +91,25 @@ export const styles = {
   benefitIcon: { fontSize: '32px' },
   benefitItemTitle: { fontSize: '18px', fontWeight: '700', color: '#fff', marginBottom: '6px' },
   benefitItemText: { fontSize: '14px', color: '#9ca3af' },
+  // Testimonials Section
+  testimonialsSection: { padding: '100px 0', backgroundColor: '#0a0a0a', position: 'relative', overflow: 'hidden' },
+  testimonialsSectionGlow: { position: 'absolute', top: '30%', left: '20%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(247,147,26,0.06) 0%, transparent 70%)', pointerEvents: 'none' },
+  testimonialsSectionGlow2: { position: 'absolute', bottom: '20%', right: '10%', width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(34,197,94,0.05) 0%, transparent 70%)', pointerEvents: 'none' },
+  testimonialsGrid: { position: 'relative', overflow: 'hidden', margin: '0 -24px', padding: '20px 0' },
+  testimonialsTrack: { display: 'flex', gap: '24px', animation: 'scrollTestimonials 30s linear infinite', width: 'fit-content' },
+  testimonialCard: { background: 'linear-gradient(180deg, #1a1a1a 0%, #111111 100%)', border: '1px solid #2a2a2a', borderRadius: '20px', padding: '28px', minWidth: '340px', maxWidth: '340px', flex: '0 0 340px', position: 'relative', transition: 'all 0.3s ease' },
+  testimonialCardHeader: { display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' },
+  testimonialAvatar: { width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#2a2a2a', border: '2px solid #3a3a3a', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' },
+  testimonialAvatarPlaceholder: { fontSize: '24px', color: '#6b7280' },
+  testimonialPrivacyBadge: { position: 'absolute', top: '60%', left: '50%', transform: 'translate(-50%, -50%)', width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'rgba(247,147,26,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: '800', color: '#000', zIndex: 2 },
+  testimonialInfo: { flex: 1 },
+  testimonialName: { fontSize: '17px', fontWeight: '700', color: '#fff', marginBottom: '4px' },
+  testimonialRole: { fontSize: '13px', color: '#6b7280' },
+  testimonialStars: { display: 'flex', gap: '4px', marginBottom: '16px' },
+  testimonialStar: { fontSize: '18px', color: '#F7931A' },
+  testimonialText: { fontSize: '15px', color: '#9ca3af', lineHeight: '1.7', fontStyle: 'italic' },
+  testimonialQuote: { position: 'absolute', top: '20px', right: '24px', fontSize: '48px', color: 'rgba(247,147,26,0.15)', fontFamily: 'Georgia, serif', lineHeight: '1' },
+
   pricingSection: { padding: '100px 0', backgroundColor: '#000', position: 'relative', overflow: 'visible' },
   pricingSectionGlow: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '900px', height: '900px', background: 'radial-gradient(circle, rgba(247,147,26,0.06) 0%, transparent 70%)', pointerEvents: 'none' },
   pricingGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', maxWidth: '1100px', margin: '0 auto', position: 'relative' },
@@ -386,6 +405,10 @@ if (typeof document !== 'undefined') {
     @keyframes float { 0%, 100% { transform: translateY(0px) rotate(var(--rotate, 0deg)); } 50% { transform: translateY(-10px) rotate(var(--rotate, 0deg)); } }
     @keyframes floatSlow { 0%, 100% { transform: translateY(0px) rotate(var(--rotate, 0deg)); } 50% { transform: translateY(-6px) rotate(var(--rotate, 0deg)); } }
     @keyframes glowPulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.1); } }
+    @keyframes scrollTestimonials { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .testimonials-track { animation: scrollTestimonials 40s linear infinite; }
+    .testimonials-track:hover { animation-play-state: paused; }
+    .testimonial-card:hover { transform: translateY(-6px); box-shadow: 0 16px 32px rgba(247,147,26,0.15); border-color: #3a3a3a; }
     .step-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(247,147,26,0.15); }
     .pvu-card:hover { transform: translateY(-6px); box-shadow: 0 16px 32px rgba(247,147,26,0.12); }
     .pricing-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
@@ -492,6 +515,35 @@ if (typeof document !== 'undefined') {
       .steps-grid {
         grid-template-columns: 1fr !important;
         gap: 16px !important;
+      }
+
+      /* Testimonials Grid - Mobile */
+      .testimonials-section {
+        padding: 60px 0 !important;
+      }
+      .testimonials-track {
+        animation-duration: 25s !important;
+        gap: 16px !important;
+      }
+      .testimonial-card {
+        min-width: 280px !important;
+        max-width: 280px !important;
+        padding: 20px !important;
+      }
+      .testimonial-avatar {
+        width: 48px !important;
+        height: 48px !important;
+      }
+      .testimonial-name {
+        font-size: 15px !important;
+      }
+      .testimonial-text {
+        font-size: 14px !important;
+      }
+      .testimonial-quote {
+        font-size: 36px !important;
+        top: 16px !important;
+        right: 16px !important;
       }
 
       /* ============================================
