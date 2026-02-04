@@ -1200,8 +1200,8 @@ const compareToAverage = async (userScore) => {
 // WALLET MANAGEMENT (for BTC Guardian)
 // ============================================
 
-// Add a monitored wallet
-const addMonitoredWallet = async (telegramUserId, address, label = '', addressType = 'single') => {
+// Add a monitored wallet (supports both single/xpub and multisig wallets)
+const addMonitoredWallet = async (telegramUserId, address, label = '', addressType = 'single', multisigConfig = null) => {
   const db = initSupabase();
 
   if (!db) {
@@ -1233,17 +1233,26 @@ const addMonitoredWallet = async (telegramUserId, address, label = '', addressTy
       return { success: false, message: 'Wallet already exists', duplicate: true };
     }
 
+    // Build wallet data object
+    const walletData = {
+      user_id: link.user_id,
+      telegram_user_id: telegramUserId,
+      address: address,
+      label: label || null,
+      address_type: addressType,
+      created_at: new Date().toISOString(),
+      // Multisig fields (will be null/false for non-multisig wallets)
+      is_multisig: multisigConfig?.isMultisig || false,
+      xpubs: multisigConfig?.xpubs || null,
+      required_signatures: multisigConfig?.requiredSignatures || null,
+      total_keys: multisigConfig?.totalKeys || null,
+      witness_type: multisigConfig?.witnessType || 'legacy'
+    };
+
     // Insert wallet
     const { data, error } = await db
       .from('monitored_wallets')
-      .insert([{
-        user_id: link.user_id,
-        telegram_user_id: telegramUserId,
-        address: address,
-        label: label || null,
-        address_type: addressType,
-        created_at: new Date().toISOString()
-      }])
+      .insert([walletData])
       .select()
       .single();
 
@@ -1323,6 +1332,49 @@ const updateWalletBalance = async (telegramUserId, address, btcBalance, usdBalan
   } catch (error) {
     console.error('Update wallet balance error:', error);
     return false;
+  }
+};
+
+// Update multisig wallet configuration
+const updateMultisigWallet = async (telegramUserId, address, multisigConfig) => {
+  const db = initSupabase();
+
+  if (!db) {
+    return { success: false, message: 'Database not configured' };
+  }
+
+  try {
+    // Validate multisig parameters
+    if (!multisigConfig.xpubs || !Array.isArray(multisigConfig.xpubs) || multisigConfig.xpubs.length < 2) {
+      return { success: false, message: 'Multisig wallets require at least 2 xpubs' };
+    }
+    if (!multisigConfig.requiredSignatures || !multisigConfig.totalKeys) {
+      return { success: false, message: 'Multisig wallets require requiredSignatures and totalKeys' };
+    }
+    if (multisigConfig.requiredSignatures > multisigConfig.totalKeys || multisigConfig.requiredSignatures < 1) {
+      return { success: false, message: 'Invalid multisig parameters: requiredSignatures must be between 1 and totalKeys' };
+    }
+    if (multisigConfig.xpubs.length !== multisigConfig.totalKeys) {
+      return { success: false, message: 'Number of xpubs must match totalKeys' };
+    }
+
+    const { error } = await db
+      .from('monitored_wallets')
+      .update({
+        is_multisig: true,
+        xpubs: multisigConfig.xpubs,
+        required_signatures: multisigConfig.requiredSignatures,
+        total_keys: multisigConfig.totalKeys,
+        witness_type: multisigConfig.witnessType || 'legacy'
+      })
+      .eq('telegram_user_id', telegramUserId)
+      .ilike('address', address);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Update multisig wallet error:', error);
+    return { success: false, message: 'Failed to update multisig wallet' };
   }
 };
 
@@ -1700,6 +1752,7 @@ module.exports = {
   getMonitoredWallets,
   removeMonitoredWallet,
   updateWalletBalance,
+  updateMultisigWallet,
   // Bot preferences
   getBotPreferences,
   updateBotPreferences,

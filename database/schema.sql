@@ -217,7 +217,15 @@ CREATE TABLE IF NOT EXISTS monitored_wallets (
   telegram_user_id BIGINT NOT NULL,
   address TEXT NOT NULL,
   label VARCHAR(100),
-  address_type VARCHAR(20) DEFAULT 'single', -- 'single', 'xpub', 'ypub', 'zpub'
+  address_type VARCHAR(20) DEFAULT 'single', -- 'single', 'xpub', 'ypub', 'zpub', 'multisig'
+
+  -- Multisig-specific fields (NULL for non-multisig wallets)
+  is_multisig BOOLEAN DEFAULT FALSE,
+  xpubs TEXT[] DEFAULT NULL,                    -- Array of extended public keys for multisig
+  required_signatures INTEGER DEFAULT NULL,      -- m (number of signatures required)
+  total_keys INTEGER DEFAULT NULL,               -- n (total number of keys)
+  witness_type VARCHAR(20) DEFAULT 'legacy',     -- 'legacy', 'p2sh-segwit', 'segwit'
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   last_balance_btc DECIMAL(18, 8),
   last_balance_usd DECIMAL(18, 2),
@@ -227,6 +235,7 @@ CREATE TABLE IF NOT EXISTS monitored_wallets (
 
 CREATE INDEX IF NOT EXISTS idx_monitored_wallets_user_id ON monitored_wallets(user_id);
 CREATE INDEX IF NOT EXISTS idx_monitored_wallets_telegram_user_id ON monitored_wallets(telegram_user_id);
+CREATE INDEX IF NOT EXISTS idx_monitored_wallets_is_multisig ON monitored_wallets(is_multisig);
 
 -- Transaction alerts seen (deduplication)
 CREATE TABLE IF NOT EXISTS transactions_seen (
