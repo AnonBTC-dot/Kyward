@@ -2,7 +2,7 @@
 
 export const styles = {
   landingContainer: { backgroundColor: '#000', color: '#E5E5E5', minHeight: '100vh', fontFamily: '"Space Grotesk", sans-serif' },
-  nav: { position: 'fixed', top: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #1a1a1a', zIndex: 1000, padding: '16px 0' },
+  nav: { position: 'fixed', top: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #1a1a1a', zIndex: 1000, padding: '16px 0', overflow: 'hidden' },
   navContent: { maxWidth: '1200px', margin: '0 auto', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   navLogo: { display: 'flex', alignItems: 'center', gap: '12px' },
   navLogoText: { fontSize: '24px', fontWeight: '700', color: '#F7931A' },
@@ -480,20 +480,37 @@ if (typeof document !== 'undefined') {
 
       /* Navigation */
       .nav-content {
-        padding: 0 16px !important;
+        padding: 0 12px !important;
+        overflow: hidden !important;
       }
       .nav-logo-text {
         font-size: 20px !important;
       }
+      .nav-logo-img {
+        width: 90px !important;
+        height: auto !important;
+      }
       .nav-buttons {
-        gap: 6px !important;
+        gap: 4px !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
+        flex-shrink: 1 !important;
+        min-width: 0 !important;
       }
       .nav-button {
-        padding: 6px 10px !important;
-        font-size: 11px !important;
+        padding: 6px 8px !important;
+        font-size: 10px !important;
         white-space: nowrap !important;
+        flex-shrink: 0 !important;
+      }
+      .language-toggle {
+        padding: 5px 8px !important;
+        font-size: 10px !important;
+        gap: 4px !important;
+      }
+      .language-toggle svg {
+        width: 14px !important;
+        height: 14px !important;
       }
 
       /* Section Titles */
@@ -643,6 +660,48 @@ if (typeof document !== 'undefined') {
       .mockup-card {
         width: 95% !important;
       }
+      /* Extra small nav adjustments */
+      .nav-content {
+        padding: 0 8px !important;
+      }
+      .nav-logo-img {
+        width: 70px !important;
+      }
+      .nav-buttons {
+        gap: 3px !important;
+      }
+      .nav-button {
+        padding: 5px 6px !important;
+        font-size: 9px !important;
+      }
+      .language-toggle {
+        padding: 4px 6px !important;
+        font-size: 9px !important;
+        gap: 3px !important;
+      }
+      .language-toggle svg {
+        width: 12px !important;
+        height: 12px !important;
+      }
+    }
+
+    /* Very small screens (320px) */
+    @media (max-width: 360px) {
+      .nav-logo-img {
+        width: 60px !important;
+      }
+      .nav-button {
+        padding: 4px 5px !important;
+        font-size: 8px !important;
+      }
+      .language-toggle {
+        padding: 3px 5px !important;
+        font-size: 8px !important;
+      }
+      .language-toggle svg {
+        width: 10px !important;
+        height: 10px !important;
+      }
     }
 
     /* Footer responsive */
@@ -686,10 +745,12 @@ if (typeof document !== 'undefined') {
       .navButtons {
         display: flex !important;
         flex-wrap: nowrap !important;
-        gap: 6px !important;
+        gap: 4px !important;
         justify-content: flex-end !important;
         align-items: center !important;
-        flex: 0 0 auto !important;
+        flex-shrink: 1 !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
       }
 
       /* User email - hidden on mobile to save space */

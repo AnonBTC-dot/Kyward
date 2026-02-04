@@ -5,7 +5,8 @@
       "Bash(npm install)",
       "Bash(dir \"C:\\\\Users\\\\Leonardo\\\\Desktop\\\\BTC Guardian\" /b)",
       "Bash(grep:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }

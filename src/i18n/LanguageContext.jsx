@@ -95,6 +95,7 @@ export const LanguageToggle = ({ style = {} }) => {
   return (
     <button
       onClick={toggleLanguage}
+      className="language-toggle"
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -108,6 +109,7 @@ export const LanguageToggle = ({ style = {} }) => {
         fontWeight: '600',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
+        flexShrink: 0,
         ...style
       }}
       onMouseEnter={(e) => {
