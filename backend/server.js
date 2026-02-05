@@ -1244,6 +1244,150 @@ app.put('/api/bot/preferences/:telegram_user_id', async (req, res) => {
   }
 });
 
+// ============================================
+// CUSTOM PRICE ALERTS ENDPOINTS
+// ============================================
+
+// Get custom price alerts for a user
+app.get('/api/bot/price-alerts/:telegram_user_id', async (req, res) => {
+  try {
+    const telegramUserId = parseInt(req.params.telegram_user_id);
+    if (isNaN(telegramUserId)) {
+      return res.status(400).json({ error: 'Invalid Telegram user ID' });
+    }
+
+    const alerts = await db.getCustomPriceAlerts(telegramUserId);
+    res.json({ success: true, alerts });
+  } catch (error) {
+    console.error('Get price alerts error:', error);
+    res.status(500).json({ error: 'Failed to get price alerts' });
+  }
+});
+
+// Add a custom price alert
+app.post('/api/bot/price-alerts/:telegram_user_id', async (req, res) => {
+  try {
+    const telegramUserId = parseInt(req.params.telegram_user_id);
+    const { targetPrice, direction } = req.body;
+
+    if (isNaN(telegramUserId)) {
+      return res.status(400).json({ error: 'Invalid Telegram user ID' });
+    }
+
+    if (!targetPrice || isNaN(targetPrice) || targetPrice <= 0) {
+      return res.status(400).json({ error: 'Invalid target price' });
+    }
+
+    if (direction && !['above', 'below'].includes(direction)) {
+      return res.status(400).json({ error: 'Direction must be "above" or "below"' });
+    }
+
+    const result = await db.addCustomPriceAlert(telegramUserId, targetPrice, direction || 'above');
+
+    if (!result.success) {
+      if (result.duplicate) {
+        return res.status(409).json({ error: result.message, duplicate: true });
+      }
+      return res.status(400).json({ error: result.message });
+    }
+
+    res.json({ success: true, alert: result.alert });
+  } catch (error) {
+    console.error('Add price alert error:', error);
+    res.status(500).json({ error: 'Failed to add price alert' });
+  }
+});
+
+// Remove a custom price alert
+app.delete('/api/bot/price-alerts/:telegram_user_id/:alert_id', async (req, res) => {
+  try {
+    const telegramUserId = parseInt(req.params.telegram_user_id);
+    const alertId = req.params.alert_id;
+
+    if (isNaN(telegramUserId)) {
+      return res.status(400).json({ error: 'Invalid Telegram user ID' });
+    }
+
+    const result = await db.removeCustomPriceAlert(telegramUserId, alertId);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.message });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Remove price alert error:', error);
+    res.status(500).json({ error: 'Failed to remove price alert' });
+  }
+});
+
+// Reactivate a custom price alert
+app.put('/api/bot/price-alerts/:telegram_user_id/:alert_id/reactivate', async (req, res) => {
+  try {
+    const telegramUserId = parseInt(req.params.telegram_user_id);
+    const alertId = req.params.alert_id;
+
+    if (isNaN(telegramUserId)) {
+      return res.status(400).json({ error: 'Invalid Telegram user ID' });
+    }
+
+    const result = await db.reactivateCustomPriceAlert(telegramUserId, alertId);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.message });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Reactivate price alert error:', error);
+    res.status(500).json({ error: 'Failed to reactivate price alert' });
+  }
+});
+
+// Get all active custom price alerts (for bot monitoring)
+app.get('/api/bot/price-alerts/all/active', async (req, res) => {
+  try {
+    // Verify bot API key
+    const apiKey = req.headers['x-bot-api-key'];
+    const expectedKey = process.env.BOT_API_KEY;
+
+    if (!apiKey || apiKey !== expectedKey) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const alerts = await db.getAllActiveCustomPriceAlerts();
+    res.json({ success: true, alerts });
+  } catch (error) {
+    console.error('Get all active price alerts error:', error);
+    res.status(500).json({ error: 'Failed to get active price alerts' });
+  }
+});
+
+// Mark a custom price alert as triggered
+app.put('/api/bot/price-alerts/trigger/:alert_id', async (req, res) => {
+  try {
+    // Verify bot API key
+    const apiKey = req.headers['x-bot-api-key'];
+    const expectedKey = process.env.BOT_API_KEY;
+
+    if (!apiKey || apiKey !== expectedKey) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const alertId = req.params.alert_id;
+    const success = await db.markCustomPriceAlertTriggered(alertId);
+
+    if (!success) {
+      return res.status(400).json({ error: 'Failed to mark alert as triggered' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Mark price alert triggered error:', error);
+    res.status(500).json({ error: 'Failed to mark alert as triggered' });
+  }
+});
+
 // Get all active bot users (for monitoring)
 app.get('/api/bot/active-users', async (req, res) => {
   try {

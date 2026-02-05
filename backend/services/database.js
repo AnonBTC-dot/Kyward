@@ -1391,7 +1391,14 @@ const getBotPreferences = async (telegramUserId) => {
     transaction_alerts: true,
     price_alerts: true,
     report_frequency: 'weekly',
-    preferred_language: 'en'
+    preferred_language: 'en',
+    // Milestone preferences (all enabled by default)
+    milestone_1k: true,
+    milestone_5k: true,
+    milestone_10k: true,
+    milestone_20k: true,
+    milestone_50k: true,
+    milestone_100k: true
   };
 
   if (!db) return defaults;
@@ -1404,7 +1411,8 @@ const getBotPreferences = async (telegramUserId) => {
       .single();
 
     if (error || !data) return defaults;
-    return data;
+    // Merge with defaults to ensure new fields have values
+    return { ...defaults, ...data };
   } catch (error) {
     return defaults;
   }
@@ -1430,23 +1438,203 @@ const updateBotPreferences = async (telegramUserId, preferences) => {
       return { success: false, message: 'Telegram not linked' };
     }
 
+    // Build update object with all preferences
+    const updateData = {
+      user_id: link.user_id,
+      telegram_user_id: telegramUserId,
+      daily_updates: preferences.daily_updates ?? false,
+      transaction_alerts: preferences.transaction_alerts ?? true,
+      price_alerts: preferences.price_alerts ?? true,
+      report_frequency: preferences.report_frequency || 'weekly',
+      preferred_language: preferences.preferred_language || 'en',
+      // Milestone preferences
+      milestone_1k: preferences.milestone_1k ?? true,
+      milestone_5k: preferences.milestone_5k ?? true,
+      milestone_10k: preferences.milestone_10k ?? true,
+      milestone_20k: preferences.milestone_20k ?? true,
+      milestone_50k: preferences.milestone_50k ?? true,
+      milestone_100k: preferences.milestone_100k ?? true
+    };
+
     const { error } = await db
       .from('bot_preferences')
-      .upsert({
-        user_id: link.user_id,
-        telegram_user_id: telegramUserId,
-        daily_updates: preferences.daily_updates ?? false,
-        transaction_alerts: preferences.transaction_alerts ?? true,
-        price_alerts: preferences.price_alerts ?? true,
-        report_frequency: preferences.report_frequency || 'weekly',
-        preferred_language: preferences.preferred_language || 'en'
-      }, { onConflict: 'telegram_user_id' });
+      .upsert(updateData, { onConflict: 'telegram_user_id' });
 
     if (error) throw error;
     return { success: true };
   } catch (error) {
     console.error('Update bot preferences error:', error);
     return { success: false, message: 'Failed to update preferences' };
+  }
+};
+
+// ============================================
+// CUSTOM PRICE ALERTS
+// ============================================
+
+// Add a custom price alert
+const addCustomPriceAlert = async (telegramUserId, targetPrice, direction = 'above') => {
+  const db = initSupabase();
+
+  if (!db) {
+    return { success: false, message: 'Database not configured' };
+  }
+
+  try {
+    const { data: link } = await db
+      .from('telegram_links')
+      .select('user_id')
+      .eq('telegram_user_id', telegramUserId)
+      .eq('is_verified', true)
+      .single();
+
+    if (!link) {
+      return { success: false, message: 'Telegram not linked' };
+    }
+
+    // Check if alert already exists
+    const { data: existing } = await db
+      .from('custom_price_alerts')
+      .select('id')
+      .eq('user_id', link.user_id)
+      .eq('target_price', targetPrice)
+      .eq('direction', direction)
+      .single();
+
+    if (existing) {
+      return { success: false, message: 'Alert already exists', duplicate: true };
+    }
+
+    const { data, error } = await db
+      .from('custom_price_alerts')
+      .insert([{
+        user_id: link.user_id,
+        telegram_user_id: telegramUserId,
+        target_price: targetPrice,
+        direction: direction,
+        is_active: true,
+        created_at: new Date().toISOString()
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { success: true, alert: data };
+  } catch (error) {
+    console.error('Add custom price alert error:', error);
+    return { success: false, message: 'Failed to add price alert' };
+  }
+};
+
+// Remove a custom price alert
+const removeCustomPriceAlert = async (telegramUserId, alertId) => {
+  const db = initSupabase();
+
+  if (!db) {
+    return { success: false, message: 'Database not configured' };
+  }
+
+  try {
+    const { error } = await db
+      .from('custom_price_alerts')
+      .delete()
+      .eq('telegram_user_id', telegramUserId)
+      .eq('id', alertId);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Remove custom price alert error:', error);
+    return { success: false, message: 'Failed to remove price alert' };
+  }
+};
+
+// Get all custom price alerts for a user
+const getCustomPriceAlerts = async (telegramUserId) => {
+  const db = initSupabase();
+
+  if (!db) return [];
+
+  try {
+    const { data, error } = await db
+      .from('custom_price_alerts')
+      .select('*')
+      .eq('telegram_user_id', telegramUserId)
+      .order('target_price', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Get custom price alerts error:', error);
+    return [];
+  }
+};
+
+// Get all active custom price alerts (for checking)
+const getAllActiveCustomPriceAlerts = async () => {
+  const db = initSupabase();
+
+  if (!db) return [];
+
+  try {
+    const { data, error } = await db
+      .from('custom_price_alerts')
+      .select('*')
+      .eq('is_active', true);
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Get all active custom price alerts error:', error);
+    return [];
+  }
+};
+
+// Mark a custom price alert as triggered
+const markCustomPriceAlertTriggered = async (alertId) => {
+  const db = initSupabase();
+
+  if (!db) return false;
+
+  try {
+    const { error } = await db
+      .from('custom_price_alerts')
+      .update({
+        is_active: false,
+        last_triggered_at: new Date().toISOString()
+      })
+      .eq('id', alertId);
+
+    return !error;
+  } catch (error) {
+    console.error('Mark custom price alert triggered error:', error);
+    return false;
+  }
+};
+
+// Reactivate a custom price alert
+const reactivateCustomPriceAlert = async (telegramUserId, alertId) => {
+  const db = initSupabase();
+
+  if (!db) {
+    return { success: false, message: 'Database not configured' };
+  }
+
+  try {
+    const { error } = await db
+      .from('custom_price_alerts')
+      .update({
+        is_active: true,
+        last_triggered_at: null
+      })
+      .eq('telegram_user_id', telegramUserId)
+      .eq('id', alertId);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('Reactivate custom price alert error:', error);
+    return { success: false, message: 'Failed to reactivate price alert' };
   }
 };
 
@@ -1756,6 +1944,13 @@ module.exports = {
   // Bot preferences
   getBotPreferences,
   updateBotPreferences,
+  // Custom price alerts
+  addCustomPriceAlert,
+  removeCustomPriceAlert,
+  getCustomPriceAlerts,
+  getAllActiveCustomPriceAlerts,
+  markCustomPriceAlertTriggered,
+  reactivateCustomPriceAlert,
   // Transaction tracking
   isTransactionSeen,
   markTransactionSeen,

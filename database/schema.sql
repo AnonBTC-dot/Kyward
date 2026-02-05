@@ -274,10 +274,34 @@ CREATE TABLE IF NOT EXISTS bot_preferences (
   preferred_language VARCHAR(5) DEFAULT 'en', -- 'en', 'es', 'pt'
   last_report_sent TIMESTAMP WITH TIME ZONE,
   price_alerts BOOLEAN DEFAULT TRUE,
-  transaction_alerts BOOLEAN DEFAULT TRUE
+  transaction_alerts BOOLEAN DEFAULT TRUE,
+
+  -- Individual milestone preferences (granular control)
+  milestone_1k BOOLEAN DEFAULT TRUE,    -- $1,000 milestones
+  milestone_5k BOOLEAN DEFAULT TRUE,    -- $5,000 milestones
+  milestone_10k BOOLEAN DEFAULT TRUE,   -- $10,000 milestones
+  milestone_20k BOOLEAN DEFAULT TRUE,   -- $20,000 milestones
+  milestone_50k BOOLEAN DEFAULT TRUE,   -- $50,000 milestones
+  milestone_100k BOOLEAN DEFAULT TRUE   -- $100,000 milestones
 );
 
 CREATE INDEX IF NOT EXISTS idx_bot_preferences_telegram_user_id ON bot_preferences(telegram_user_id);
+
+-- Custom price alerts (user-defined price notifications)
+CREATE TABLE IF NOT EXISTS custom_price_alerts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  telegram_user_id BIGINT NOT NULL,
+  target_price DECIMAL(18, 2) NOT NULL,
+  direction VARCHAR(10) DEFAULT 'above', -- 'above' or 'below'
+  is_active BOOLEAN DEFAULT TRUE,
+  last_triggered_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(user_id, target_price, direction)
+);
+
+CREATE INDEX IF NOT EXISTS idx_custom_price_alerts_telegram_user_id ON custom_price_alerts(telegram_user_id);
+CREATE INDEX IF NOT EXISTS idx_custom_price_alerts_active ON custom_price_alerts(is_active) WHERE is_active = TRUE;
 
 -- XPUB address derivation cache
 CREATE TABLE IF NOT EXISTS xpub_cache (
@@ -309,6 +333,7 @@ ALTER TABLE historical_balances ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bot_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE xpub_cache ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bot_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE custom_price_alerts ENABLE ROW LEVEL SECURITY;
 
 -- Policies for new tables (service role full access)
 CREATE POLICY "Full access for service role" ON telegram_links FOR ALL USING (true);
@@ -318,3 +343,4 @@ CREATE POLICY "Full access for service role" ON historical_balances FOR ALL USIN
 CREATE POLICY "Full access for service role" ON bot_preferences FOR ALL USING (true);
 CREATE POLICY "Full access for service role" ON xpub_cache FOR ALL USING (true);
 CREATE POLICY "Full access for service role" ON bot_config FOR ALL USING (true);
+CREATE POLICY "Full access for service role" ON custom_price_alerts FOR ALL USING (true);
