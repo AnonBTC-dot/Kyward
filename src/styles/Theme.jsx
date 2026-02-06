@@ -781,14 +781,14 @@ if (typeof document !== 'undefined') {
         display: none !important;
       }
 
-      /* LOGOUT BUTTON - Only logout button gets red styling */
+      /* LOGOUT BUTTON - Keep consistent with desktop styling */
       nav .logout-btn {
         padding: 8px 14px !important;
         font-size: 12px !important;
         white-space: nowrap !important;
-        background-color: #ef4444 !important;
-        border: none !important;
-        color: #fff !important;
+        background-color: transparent !important;
+        border: 1px solid #2a2a2a !important;
+        color: #9ca3af !important;
         border-radius: 6px !important;
         font-weight: 600 !important;
         min-width: 60px !important;
