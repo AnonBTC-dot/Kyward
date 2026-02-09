@@ -266,7 +266,8 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
       lightning: 'Lightning',
       onchain: 'Bitcoin',
       liquid: selectedNetwork === 'lusdt' ? 'Liquid USDT' : 'Liquid BTC',
-      usdt: paymentData.networkName || 'USDT'
+      usdt: paymentData.networkName || 'USDT',
+      lemonsqueezy: 'Credit/Debit Card'
     };
     return methodNames[paymentData.method] || paymentData.method;
   };
@@ -353,8 +354,10 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
 
       case 'payment':
         const methodColor = paymentData?.method === 'usdt' ? '#26A17B' :
-                           paymentData?.method === 'liquid' ? '#00AAFF' : '#F7931A';
+                           paymentData?.method === 'liquid' ? '#00AAFF' :
+                           paymentData?.method === 'lemonsqueezy' ? '#7c3aed' : '#F7931A';
         const isLightning = paymentData?.method === 'lightning';
+        const isRedirectPayment = paymentData?.useRedirect;
         const displayAddress = isLightning ? paymentData?.invoice : paymentData?.address;
 
         return (
@@ -375,6 +378,14 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                 <svg width="48" height="48" viewBox="0 0 48 48" style={{ margin: '0 auto' }}>
                   <circle cx="24" cy="24" r="22" fill="#26A17B"/>
                   <text x="24" y="32" textAnchor="middle" fill="#fff" fontSize="20" fontWeight="bold">$</text>
+                </svg>
+              ) : paymentData?.method === 'lemonsqueezy' ? (
+                <svg width="48" height="48" viewBox="0 0 48 48" style={{ margin: '0 auto' }}>
+                  <rect x="4" y="10" width="40" height="28" rx="4" fill="#7c3aed"/>
+                  <rect x="4" y="16" width="40" height="6" fill="#5b21b6"/>
+                  <rect x="10" y="28" width="12" height="4" rx="2" fill="#fff" opacity="0.8"/>
+                  <circle cx="34" cy="30" r="4" fill="#fff" opacity="0.6"/>
+                  <circle cx="38" cy="30" r="4" fill="#fff" opacity="0.4"/>
                 </svg>
               ) : (
                 <svg width="48" height="48" viewBox="0 0 48 48" style={{ margin: '0 auto' }}>
@@ -410,13 +421,99 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
               </div>
             </div>
 
-            {/* QR Code */}
-            <div className="qr-container" style={pms.qrContainer}>
-              <QRCode data={paymentData.qrData} size={180} />
-            </div>
+            {/* Redirect Payment (Lemon Squeezy) */}
+            {isRedirectPayment ? (
+              <>
+                <div style={{
+                  background: 'rgba(124,58,237,0.1)',
+                  border: '1px solid rgba(124,58,237,0.3)',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  marginBottom: '24px',
+                  textAlign: 'center'
+                }}>
+                  <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '16px' }}>
+                    {t.payment?.redirectInfo || 'You will be redirected to our secure payment provider to complete your purchase.'}
+                  </p>
 
-            {/* Amount with USD equivalent */}
-            <div className="amount-box" style={pms.amountBox}>
+                  <div style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    marginBottom: '16px'
+                  }}>
+                    <span style={{ fontSize: '13px', color: '#6b7280' }}>Total</span>
+                    <p style={{ fontSize: '24px', fontWeight: '700', color: '#7c3aed', margin: '4px 0' }}>
+                      ${paymentData.amount} USD
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => window.open(paymentData.checkoutUrl, '_blank')}
+                    style={{
+                      width: '100%',
+                      padding: '16px 24px',
+                      background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+                      border: 'none',
+                      borderRadius: '12px',
+                      color: '#fff',
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '10px'
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M2 8H18" stroke="currentColor" strokeWidth="2"/>
+                    </svg>
+                    {t.payment?.proceedToCheckout || 'Proceed to Secure Checkout'}
+                  </button>
+
+                  <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '12px' }}>
+                    {t.payment?.securePayment || 'Secured by Lemon Squeezy. We accept Visa, Mastercard, PayPal & more.'}
+                  </p>
+                </div>
+
+                {/* Status */}
+                <div style={pms.status}>
+                  <div style={pms.spinner} />
+                  <span style={pms.statusText}>{t.payment?.waitingForPayment || 'Waiting for payment confirmation...'}</span>
+                </div>
+
+                {/* Payment Timer */}
+                <div style={pms.timer}>
+                  {t.payment.expiresIn} <strong>{formatTime(timeLeft)}</strong>
+                </div>
+
+                {/* Back to method selection */}
+                <button
+                  onClick={() => {
+                    if (stopPollingRef.current) stopPollingRef.current();
+                    setStage('selecting');
+                    setPaymentData(null);
+                  }}
+                  style={{ ...pms.cancelButton, marginBottom: '8px' }}
+                >
+                  {t.payment?.changeMethod || 'Change Payment Method'}
+                </button>
+
+                <button onClick={handleClose} style={pms.cancelButton}>
+                  {t.payment.cancel}
+                </button>
+              </>
+            ) : (
+              <>
+                {/* QR Code */}
+                <div className="qr-container" style={pms.qrContainer}>
+                  <QRCode data={paymentData.qrData} size={180} />
+                </div>
+
+                {/* Amount with USD equivalent */}
+                <div className="amount-box" style={pms.amountBox}>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <span style={pms.amountLabel}>{t.payment.amount}</span>
                 <span style={{ fontSize: '12px', color: '#6b7280' }}>
@@ -563,6 +660,8 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                 {t.payment.cancel}
               </button>
             </div>
+              </>
+            )}
           </>
         );
 

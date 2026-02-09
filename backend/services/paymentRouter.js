@@ -6,6 +6,7 @@ const btcpay = require('./btcpay');
 const bitcoin = require('./bitcoin');
 const tron = require('./tron');
 const ethereum = require('./ethereum');
+const lemonsqueezy = require('./lemonsqueezy');
 
 // Payment providers
 const PROVIDERS = {
@@ -14,7 +15,8 @@ const PROVIDERS = {
   LIQUID_USDT: 'btcpay_liquid_lusdt',
   ONCHAIN: 'direct_btc',
   USDT_TRC20: 'direct_tron',
-  USDT_ERC20: 'direct_ethereum'
+  USDT_ERC20: 'direct_ethereum',
+  LEMONSQUEEZY: 'lemonsqueezy_fiat'
 };
 
 // Payment methods shown to users
@@ -60,6 +62,15 @@ const PAYMENT_METHODS = {
       { id: 'usdttrc20', name: 'Tron (TRC20)', fee: '~$1', provider: PROVIDERS.USDT_TRC20 },
       { id: 'usdterc20', name: 'Ethereum (ERC20)', fee: '~$5-20', provider: PROVIDERS.USDT_ERC20 }
     ]
+  },
+  lemonsqueezy: {
+    id: 'lemonsqueezy',
+    name: 'Credit/Debit Card',
+    icon: '💳',
+    badge: 'Secure',
+    description: 'Visa, Mastercard, PayPal & more',
+    time: '< 1 minute',
+    provider: PROVIDERS.LEMONSQUEEZY
   }
 };
 
@@ -106,6 +117,11 @@ function getAvailablePaymentMethods() {
     }
   }
 
+  // Lemon Squeezy (FIAT) - requires API key and store ID
+  if (lemonsqueezy.isConfigured()) {
+    methods.push(PAYMENT_METHODS.lemonsqueezy);
+  }
+
   return methods;
 }
 
@@ -145,6 +161,9 @@ async function createPayment({ method, network, plan, email, paymentId, amount: 
 
       case 'usdt':
         return await createUsdtPayment(amount, network || 'usdttrc20', metadata);
+
+      case 'lemonsqueezy':
+        return await createLemonsqueezyPayment(amount, metadata);
 
       default:
         return {
@@ -340,6 +359,36 @@ async function createUsdtPayment(amount, network, metadata) {
 }
 
 /**
+ * Create Lemon Squeezy (FIAT) payment
+ */
+async function createLemonsqueezyPayment(amount, metadata) {
+  if (!lemonsqueezy.isConfigured()) {
+    return { success: false, error: 'Lemon Squeezy payments not configured' };
+  }
+
+  const result = await lemonsqueezy.createPayment(amount, metadata);
+
+  if (!result.success) {
+    return result;
+  }
+
+  return {
+    success: true,
+    provider: PROVIDERS.LEMONSQUEEZY,
+    method: 'lemonsqueezy',
+    paymentId: metadata.paymentId,
+    // Payment data - redirect to Lemon Squeezy checkout
+    checkoutUrl: result.checkoutUrl,
+    checkoutId: result.checkoutId,
+    amount: amount,
+    currency: 'USD',
+    expiresAt: result.expiresAt,
+    // For FIAT, we use redirect instead of QR
+    useRedirect: true
+  };
+}
+
+/**
  * Check payment status across all providers
  * @param {string} paymentId - Internal payment ID
  * @param {string} provider - Provider that was used
@@ -408,6 +457,17 @@ async function checkPaymentStatus(paymentId, provider, paymentData) {
           confirmations: ethStatus.confirmations
         };
 
+      case PROVIDERS.LEMONSQUEEZY:
+        // Lemon Squeezy FIAT - status updated via webhook
+        const lsStatus = await lemonsqueezy.checkPayment(paymentId);
+        return {
+          success: true,
+          provider,
+          status: lsStatus.status,
+          orderId: lsStatus.orderId,
+          amount: lsStatus.amount
+        };
+
       default:
         return { success: false, error: `Unknown provider: ${provider}` };
     }
@@ -448,6 +508,12 @@ function markPaymentUsed(provider, paymentData, email) {
     case PROVIDERS.USDT_ERC20:
       if (paymentData.paymentId) {
         ethereum.markPaymentUsed(paymentData.paymentId, paymentData.txid);
+      }
+      break;
+
+    case PROVIDERS.LEMONSQUEEZY:
+      if (paymentData.paymentId) {
+        lemonsqueezy.markPaymentUsed(paymentData.paymentId, paymentData.orderId);
       }
       break;
   }
@@ -504,6 +570,12 @@ async function healthCheck() {
   results.ethereum = {
     status: ethereum.isConfigured() ? 'ok' : 'not_configured',
     ...ethereum.getStats()
+  };
+
+  // Lemon Squeezy (FIAT)
+  results.lemonsqueezy = {
+    status: lemonsqueezy.isConfigured() ? 'ok' : 'not_configured',
+    ...lemonsqueezy.getStats()
   };
 
   return results;
