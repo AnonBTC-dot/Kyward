@@ -825,6 +825,63 @@ app.post('/api/webhooks/btcpay', express.raw({ type: '*/*' }), async (req, res) 
 // Note: USDT payments (Tron/Ethereum) are monitored via direct blockchain polling
 // No webhook needed - status is checked via the /api/payments/:paymentId/status endpoint
 
+// Lemon Squeezy webhook (FIAT payments)
+app.post('/api/webhooks/lemonsqueezy', express.raw({ type: '*/*' }), async (req, res) => {
+  try {
+    const signature = req.headers['x-signature'];
+    const rawBody = req.body;
+
+    // Verify webhook signature
+    const lemonsqueezy = require('./services/lemonsqueezy');
+    if (!lemonsqueezy.verifyWebhookSignature(rawBody.toString(), signature)) {
+      console.warn('Lemon Squeezy webhook: Invalid signature');
+      return res.status(401).json({ error: 'Invalid signature' });
+    }
+
+    const event = JSON.parse(rawBody.toString());
+    const eventName = event.meta?.event_name;
+    console.log(`Lemon Squeezy webhook received: ${eventName}`);
+
+    // Process the event
+    const result = lemonsqueezy.handleWebhook(eventName, event);
+
+    if (result.success && result.status === 'confirmed') {
+      // Find payment by ID
+      const payment = paymentStore.getPayment(result.paymentId);
+
+      if (payment) {
+        // Mark payment as confirmed
+        paymentStore.updatePaymentStatus(result.paymentId, 'confirmed', {
+          orderId: result.orderId
+        });
+
+        // Upgrade user subscription
+        const upgradeResult = await db.upgradeSubscription(payment.email, payment.plan);
+
+        if (upgradeResult.success) {
+          console.log(`Lemon Squeezy webhook: Upgraded ${payment.email} to ${payment.plan}`);
+
+          // Get user's language preference for email
+          const user = await db.getUserByEmail(payment.email);
+          const userLanguage = user?.preferences?.language || 'en';
+
+          // Send confirmation email
+          await emailService.sendPaymentConfirmation(payment.email, payment.plan, userLanguage);
+        } else {
+          console.error('Lemon Squeezy webhook: Upgrade failed:', upgradeResult);
+        }
+      } else {
+        console.warn(`Lemon Squeezy webhook: No payment found for ID ${result.paymentId}`);
+      }
+    }
+
+    res.json({ received: true });
+  } catch (error) {
+    console.error('Lemon Squeezy webhook error:', error);
+    res.status(500).json({ error: 'Webhook processing failed' });
+  }
+});
+
 // ============================================
 // EMAIL ENDPOINTS
 // ============================================

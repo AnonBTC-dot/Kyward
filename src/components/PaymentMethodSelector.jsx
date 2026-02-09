@@ -51,6 +51,16 @@ const PAYMENT_METHODS = [
       { id: 'usdttrc20', name: 'Tron (TRC20)', fee: '~$1' },
       { id: 'usdterc20', name: 'Ethereum (ERC20)', fee: '~$5-20' }
     ]
+  },
+  {
+    id: 'lemonsqueezy',
+    name: 'Credit/Debit Card',
+    icon: 'card',
+    badge: 'Secure',
+    description: 'Visa, Mastercard, PayPal & more',
+    time: '< 1 minute',
+    color: '#7c3aed',
+    comingSoon: true  // Waiting for Lemon Squeezy account setup
   }
 ];
 
@@ -97,6 +107,18 @@ const PaymentIcon = ({ type, size = 32 }) => {
           <svg width={size} height={size} viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10" fill="#26A17B"/>
             <text x="12" y="16" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">$</text>
+          </svg>
+        </div>
+      );
+    case 'card':
+      return (
+        <div style={iconStyle}>
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+            <rect x="2" y="4" width="20" height="16" rx="2" fill="#7c3aed"/>
+            <rect x="2" y="8" width="20" height="3" fill="#5b21b6"/>
+            <rect x="5" y="14" width="6" height="2" rx="1" fill="#fff" opacity="0.8"/>
+            <circle cx="17" cy="15" r="2" fill="#fff" opacity="0.6"/>
+            <circle cx="19" cy="15" r="2" fill="#fff" opacity="0.4"/>
           </svg>
         </div>
       );
