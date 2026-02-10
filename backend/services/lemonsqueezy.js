@@ -1,6 +1,6 @@
-// KYWARD LEMON SQUEEZY SERVICE
-// FIAT payment processing via Lemon Squeezy
-// Documentation: https://docs.lemonsqueezy.com/
+// Lemon Squeezy FIAT Payment Service
+// API Docs: https://docs.lemonsqueezy.com/
+// Deployment Guide: See LEMONSQUEEZY_DEPLOYMENT.md in project root
 
 const crypto = require('crypto');
 
