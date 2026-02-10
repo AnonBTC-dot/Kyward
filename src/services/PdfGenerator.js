@@ -4,33 +4,23 @@
 import { generateInheritancePlan, generateRecommendations } from './Recommendations';
 import { translations } from '../i18n/translations';
 
-// Get translated recommendation text (with defensive fallbacks)
+// Get translated recommendation text
 const getTranslatedRecommendation = (rec, t) => {
-  // Defensive: ensure rec exists and has required properties
-  if (!rec || typeof rec !== 'object') {
+  if (!rec || !rec.id) return rec;
+  const translatedRec = t?.pdfRecommendations?.[rec.id];
+  if (translatedRec) {
     return {
-      id: 'unknown',
-      priority: 'medium',
-      title: 'Security Recommendation',
-      shortTip: 'Review your security setup.'
+      ...rec,
+      title: translatedRec.title || rec.title,
+      shortTip: translatedRec.shortTip || rec.shortTip
     };
   }
-
-  const translatedRec = t?.pdfRecommendations?.[rec.id];
-
-  return {
-    ...rec,
-    // Use translation if available, fall back to original, then to default
-    title: translatedRec?.title || rec.title || 'Security Recommendation',
-    shortTip: translatedRec?.shortTip || rec.shortTip || 'Review this security item.'
-  };
+  return rec;
 };
 
-// Get priority label translated (with defensive fallbacks)
+// Get priority label translated
 const getPriorityLabel = (priority, t) => {
-  if (!priority) return 'MEDIUM';
-  const priorityTranslations = t?.pdfRecommendations?.priority;
-  return priorityTranslations?.[priority] || priority.toUpperCase();
+  return t?.pdfRecommendations?.priority?.[priority] || priority?.toUpperCase() || 'MEDIUM';
 };
 
 export const generatePdfContent = (user, score, answers, lang = 'en') => {
@@ -38,17 +28,11 @@ export const generatePdfContent = (user, score, answers, lang = 'en') => {
   const t = translations[lang] || translations.en;
   const pdf = t.pdf;
 
-  // Defensive: ensure answers is an object
-  const safeAnswers = answers && typeof answers === 'object' ? answers : {};
+  const plan = generateInheritancePlan(answers, score, user.email, lang);
+  const recommendations = generateRecommendations(answers, score);
 
-  const plan = generateInheritancePlan(safeAnswers, score, user.email, lang);
-  const recommendations = generateRecommendations(safeAnswers, score) || [];
-
-  // Translate recommendations and filter out any invalid ones
-  const translatedRecommendations = recommendations
-    .filter(rec => rec && typeof rec === 'object')
-    .map(rec => getTranslatedRecommendation(rec, t))
-    .filter(rec => rec.title && rec.shortTip);
+  // Translate recommendations
+  const translatedRecommendations = recommendations.map(rec => getTranslatedRecommendation(rec, t));
 
   // Date formatting based on language
   const dateLocale = lang === 'es' ? 'es-ES' : 'en-US';
@@ -434,41 +418,26 @@ export const generatePdfContent = (user, score, answers, lang = 'en') => {
 
 // Open PDF in new window for printing/saving
 export const openPdfPreview = (user, score, answers, lang = 'en') => {
-  try {
-    const html = generatePdfContent(user, score, answers, lang);
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
+  const html = generatePdfContent(user, score, answers, lang);
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(html);
+  printWindow.document.close();
 
-      setTimeout(() => {
-        printWindow.print();
-      }, 500);
-    } else {
-      console.error('Failed to open print window - popup may be blocked');
-      alert('Please allow popups to generate PDF');
-    }
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    alert('Error generating PDF. Please try again.');
-  }
+  setTimeout(() => {
+    printWindow.print();
+  }, 500);
 };
 
 // Download as HTML file (can be opened and printed to PDF)
 export const downloadHtmlReport = (user, score, answers, lang = 'en') => {
-  try {
-    const html = generatePdfContent(user, score, answers, lang);
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `kyward-security-plan-${new Date().toISOString().split('T')[0]}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Error downloading HTML report:', error);
-    alert('Error generating report. Please try again.');
-  }
+  const html = generatePdfContent(user, score, answers, lang);
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `kyward-security-plan-${new Date().toISOString().split('T')[0]}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };

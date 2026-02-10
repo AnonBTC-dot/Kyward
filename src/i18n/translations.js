@@ -842,14 +842,14 @@ export const translations = {
         ]
       },
 
-      hotStorage: {
-        title: 'Hot Storage Wallet Options (Bitcoin Mainnet)',
-        description: 'For long-term hot storage (minimal interaction, maximum security), consider these mobile/desktop wallets designed specifically for Bitcoin mainnet use:',
-        blueWallet: 'Mobile-first, supports watch-only mode, Lightning + on-chain, easy to use for hot storage with air-gapped signing via PSBT export/import.',
-        jade: 'Hardware wallet with strong hot storage capabilities (air-gapped via QR codes), fully open-source, integrates well with Green wallet or Sparrow for offline signing.',
-        bullBitcoin: 'Focused on non-KYC Bitcoin privacy, supports hot storage setups with strong emphasis on self-custody and Canadian-friendly features (good for geographic diversification).',
+      coldStorage: {
+        title: 'Recommended Bitcoin Wallet Options',
+        description: 'These wallets are designed for Bitcoin self-custody and can be used alongside hardware wallets for maximum security:',
+        blueWallet: 'Mobile hot wallet with watch-only mode support. Can interface with hardware wallets via PSBT for air-gapped signing. Great for daily use + Lightning.',
+        jade: 'Hardware wallet (cold storage) by Blockstream. Air-gapped via QR codes, fully open-source. Use with Green Wallet or Sparrow for offline signing.',
+        bullBitcoin: 'Mobile hot wallet focused on non-KYC Bitcoin privacy. Strong emphasis on self-custody. Can connect to hardware wallets for cold storage security.',
         bestPractice: 'Best Practice',
-        bestPracticeText: 'Use in watch-only mode on online device, sign offline/air-gapped, never expose private keys online.'
+        bestPracticeText: 'Keep most funds in cold storage (hardware wallet). Use hot wallets only for daily spending amounts.'
       },
 
       paths: {
@@ -2164,13 +2164,13 @@ export const translations = {
       },
 
       coldStorage: {
-        title: 'Opciones de Wallet para Almacenamiento Caliente (Bitcoin Mainnet)',
-        description: 'Para almacenamiento Caliente a largo plazo (mínima interacción, máxima seguridad), considera estas wallets móviles/escritorio diseñadas específicamente para Bitcoin mainnet:',
-        blueWallet: 'Enfocada en móvil, soporta modo watch-only, Lightning + on-chain, fácil de usar para almacenamiento Caliente con firma air-gapped vía exportación/importación de PSBT.',
-        jade: 'Hardware wallet con fuertes capacidades de almacenamiento Caliente (air-gapped vía códigos QR), completamente open-source, se integra bien con Green wallet o Sparrow para firma offline.',
-        bullBitcoin: 'Enfocada en privacidad Bitcoin sin KYC, soporta configuraciones de almacenamiento Caliente con fuerte énfasis en auto-custodia y características amigables para Canadá (bueno para diversificación geográfica).',
+        title: 'Opciones de Wallets Bitcoin Recomendadas',
+        description: 'Estas wallets están diseñadas para auto-custodia de Bitcoin y pueden usarse junto con hardware wallets para máxima seguridad:',
+        blueWallet: 'Hot wallet móvil con soporte de modo watch-only. Puede conectarse con hardware wallets vía PSBT para firma air-gapped. Ideal para uso diario + Lightning.',
+        jade: 'Hardware wallet (cold storage) de Blockstream. Air-gapped vía códigos QR, completamente open-source. Usar con Green Wallet o Sparrow para firma offline.',
+        bullBitcoin: 'Hot wallet móvil enfocada en privacidad Bitcoin sin KYC. Fuerte énfasis en auto-custodia. Puede conectarse a hardware wallets para seguridad de cold storage.',
         bestPractice: 'Mejor Práctica',
-        bestPracticeText: 'Usar en modo watch-only en dispositivo online, firmar offline/air-gapped, nunca exponer llaves privadas online.'
+        bestPracticeText: 'Mantén la mayoría de fondos en cold storage (hardware wallet). Usa hot wallets solo para cantidades de gasto diario.'
       },
 
       paths: {
