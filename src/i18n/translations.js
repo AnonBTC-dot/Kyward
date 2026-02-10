@@ -200,7 +200,7 @@ export const translations = {
       // Footer
       footer: {
         tagline: 'Bitcoin Self-Custody Security by Bitcoiners',
-        copyright: '© 2025 Kyward. Bitcoin Security Assessment Platform.'
+        copyright: '© 2025 Kyward. Bitcoin Security Assessment Platform. All rights reserve'
       }
     },
 
@@ -1522,7 +1522,7 @@ export const translations = {
 
       footer: {
         tagline: 'Seguridad Bitcoin Auto-Custodia por Bitcoiners',
-        copyright: '© 2025 Kyward. Plataforma de Evaluación de Seguridad Bitcoin.'
+        copyright: '© 2025 Kyward. Plataforma de Evaluación de Seguridad Bitcoin. Todos los derechos reservados'
       }
     },
 
