@@ -9,6 +9,7 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import { kywardDB } from './services/Database';
 import { LanguageProvider } from './i18n';
+import { Analytics } from '@vercel/analytics/react';
 
 const KywardApp = () => {
   const [currentPage, setCurrentPage] = useState('landing');
@@ -170,6 +171,7 @@ const KywardApp = () => {
     <LanguageProvider>
       {renderPage()}
       {renderPaymentModal()}
+      <Analytics />
     </LanguageProvider>
   );
 };
