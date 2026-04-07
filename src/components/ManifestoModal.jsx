@@ -23,6 +23,16 @@ const ManifestoModal = () => {
     }
   }, []);
 
+  // Empuja el nav hacia abajo cuando la barra está visible
+  useEffect(() => {
+    if (barVisible && !modalOpen) {
+      document.body.classList.add('has-manifesto-bar');
+    } else {
+      document.body.classList.remove('has-manifesto-bar');
+    }
+    return () => document.body.classList.remove('has-manifesto-bar');
+  }, [barVisible, modalOpen]);
+
   const closeModal = () => {
     localStorage.setItem(STORAGE_KEY, '1');
     setModalOpen(false);
@@ -88,6 +98,10 @@ const ManifestoModal = () => {
           border: none;
           padding: 0;
         }
+        /* Empuja el nav fijo hacia abajo cuando la barra está activa */
+        body.has-manifesto-bar nav {
+          top: 40px !important;
+        }
         @media (max-width: 600px) {
           .manifesto-bar-text {
             font-size: 12px;
@@ -102,9 +116,6 @@ const ManifestoModal = () => {
           }
           .manifesto-modal-subtitle {
             font-size: 14px !important;
-          }
-          .manifesto-modal-form {
-            flex-direction: column !important;
           }
         }
       `}</style>
