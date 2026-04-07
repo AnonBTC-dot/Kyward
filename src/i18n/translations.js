@@ -1321,6 +1321,21 @@ export const translations = {
         contactTitle: 'Questions?',
         contactText: 'For questions about these terms, contact us at:'
       }
+    },
+
+    // Manifesto Modal & Top Bar
+    manifesto: {
+      bar: 'Free guide: Why Bitcoin self-custody is not optional →',
+      badge: 'Free Guide',
+      title: "The last guide you'll need to understand why you need Bitcoin self-custody",
+      subtitle: "Keeping your Bitcoin on an exchange is the #1 mistake most holders make. This free report shows you exactly what's at risk — and how to fix it.",
+      placeholder: 'your@email.com',
+      cta: 'Send me the free guide',
+      loading: 'Sending...',
+      success: "You're in. Check your inbox shortly.",
+      disclaimer: 'No account needed. No spam. Unsubscribe anytime.',
+      error: 'Something went wrong. Please try again.',
+      errorConnection: 'Connection error. Please try again.'
     }
   },
 
@@ -2642,6 +2657,21 @@ export const translations = {
         contactTitle: '¿Preguntas?',
         contactText: 'Para preguntas sobre estos términos, contáctanos en:'
       }
+    },
+
+    // Modal y barra del Manifesto
+    manifesto: {
+      bar: 'Guía gratuita: Por qué el self-custody de tus Bitcoin no es opcional →',
+      badge: 'Guía Gratuita',
+      title: 'La última guía que necesitas para entender por qué necesitas self-custody de tus Bitcoin',
+      subtitle: 'Tener tus Bitcoin en un exchange es el error #1 de la mayoría de holders. Este reporte gratuito te muestra exactamente qué está en riesgo — y cómo solucionarlo.',
+      placeholder: 'tu@email.com',
+      cta: 'Envíame la guía gratis',
+      loading: 'Enviando...',
+      success: 'Ya estás adentro. Revisa tu bandeja de entrada pronto.',
+      disclaimer: 'Sin cuenta. Sin spam. Cancela cuando quieras.',
+      error: 'Algo salió mal. Por favor intenta de nuevo.',
+      errorConnection: 'Error de conexión. Por favor intenta de nuevo.'
     }
   }
 };
