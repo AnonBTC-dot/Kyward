@@ -16,11 +16,9 @@ const ManifestoModal = () => {
   useEffect(() => {
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (!dismissed) {
-      // First visit — show modal after delay
       const timer = setTimeout(() => setModalOpen(true), 1500);
       return () => clearTimeout(timer);
     } else {
-      // Already dismissed — show top bar instead
       setBarVisible(true);
     }
   }, []);
@@ -74,23 +72,60 @@ const ManifestoModal = () => {
 
   return (
     <>
-      {/* TOP BAR */}
+      {/* ── ESTILOS RESPONSIVE ── */}
+      <style>{`
+        .manifesto-bar-text {
+          flex: 1;
+          text-align: center;
+          color: #d1d5db;
+          font-size: 13px;
+          font-weight: 500;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          cursor: pointer;
+          background: none;
+          border: none;
+          padding: 0;
+        }
+        @media (max-width: 600px) {
+          .manifesto-bar-text {
+            font-size: 12px;
+            white-space: normal;
+            line-height: 1.4;
+          }
+          .manifesto-modal-box {
+            padding: 36px 20px 28px !important;
+          }
+          .manifesto-modal-title {
+            font-size: 18px !important;
+          }
+          .manifesto-modal-subtitle {
+            font-size: 14px !important;
+          }
+          .manifesto-modal-form {
+            flex-direction: column !important;
+          }
+        }
+      `}</style>
+
+      {/* ── TOP BAR ── */}
       {barVisible && !modalOpen && (
         <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 999,
-          background: '#1a1a1a',
-          borderBottom: '1px solid rgba(247,147,26,0.25)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '10px 48px', gap: '12px',
-          fontSize: '13px', fontWeight: '500',
+          position: 'fixed',
+          top: 0, left: 0, right: 0,
+          zIndex: 1002, // por encima del nav (zIndex 1000)
+          background: '#111',
+          borderBottom: '1px solid rgba(247,147,26,0.3)',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '10px 44px 10px 16px',
+          gap: '8px',
+          minHeight: '40px',
         }}>
           <button
             onClick={openModal}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: '#d1d5db', fontSize: '13px', fontWeight: '500',
-              padding: 0, textAlign: 'center', flex: 1,
-            }}
+            className="manifesto-bar-text"
           >
             <span style={{ color: '#F7931A', fontWeight: '700', marginRight: '6px' }}>₿</span>
             {m.bar}
@@ -98,10 +133,11 @@ const ManifestoModal = () => {
           <button
             onClick={() => setBarVisible(false)}
             style={{
-              position: 'absolute', right: '12px',
+              position: 'absolute', right: '10px', top: '50%',
+              transform: 'translateY(-50%)',
               background: 'none', border: 'none', cursor: 'pointer',
-              color: '#6b7280', fontSize: '16px', lineHeight: 1,
-              padding: '4px 6px',
+              color: '#6b7280', fontSize: '15px', lineHeight: 1,
+              padding: '6px', flexShrink: 0,
             }}
           >
             ✕
@@ -109,43 +145,46 @@ const ManifestoModal = () => {
         </div>
       )}
 
-      {/* MODAL */}
+      {/* ── MODAL ── */}
       {modalOpen && (
         <>
           {/* Backdrop */}
           <div
             onClick={closeModal}
             style={{
-              position: 'fixed', inset: 0, zIndex: 1000,
+              position: 'fixed', inset: 0, zIndex: 1003,
               background: 'rgba(0,0,0,0.75)',
               backdropFilter: 'blur(4px)',
               WebkitBackdropFilter: 'blur(4px)',
             }}
           />
 
-          {/* Modal box */}
-          <div style={{
-            position: 'fixed', zIndex: 1001,
-            top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 'calc(100% - 32px)', maxWidth: '520px',
-            background: 'linear-gradient(145deg, #111 0%, #1a1a1a 100%)',
-            border: '1px solid rgba(247,147,26,0.3)',
-            borderRadius: '20px',
-            padding: '48px 40px 36px',
-            textAlign: 'center',
-            boxShadow: '0 24px 80px rgba(0,0,0,0.8), 0 0 60px rgba(247,147,26,0.08)',
-            boxSizing: 'border-box',
-          }}>
-            {/* Close button */}
+          {/* Caja del modal */}
+          <div
+            className="manifesto-modal-box"
+            style={{
+              position: 'fixed', zIndex: 1004,
+              top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 'calc(100% - 32px)', maxWidth: '520px',
+              background: 'linear-gradient(145deg, #111 0%, #1a1a1a 100%)',
+              border: '1px solid rgba(247,147,26,0.3)',
+              borderRadius: '20px',
+              padding: '48px 40px 36px',
+              textAlign: 'center',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.8), 0 0 60px rgba(247,147,26,0.08)',
+              boxSizing: 'border-box',
+            }}
+          >
+            {/* Botón cerrar */}
             <button
               onClick={closeModal}
               style={{
-                position: 'absolute', top: '16px', right: '16px',
+                position: 'absolute', top: '14px', right: '14px',
                 background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)',
                 color: '#9ca3af', borderRadius: '8px',
                 width: '32px', height: '32px', cursor: 'pointer',
-                fontSize: '16px', display: 'flex',
+                fontSize: '15px', display: 'flex',
                 alignItems: 'center', justifyContent: 'center',
               }}
             >
@@ -154,7 +193,7 @@ const ManifestoModal = () => {
 
             {/* Badge */}
             <div style={{
-              display: 'inline-block', marginBottom: '20px',
+              display: 'inline-block', marginBottom: '16px',
               padding: '5px 14px', borderRadius: '20px',
               background: 'rgba(247,147,26,0.15)', border: '1px solid rgba(247,147,26,0.35)',
               fontSize: '11px', fontWeight: '700', color: '#F7931A',
@@ -163,23 +202,23 @@ const ManifestoModal = () => {
               {m.badge}
             </div>
 
-            {/* Title */}
-            <h2 style={{
-              fontSize: '22px', fontWeight: '800', color: '#fff',
-              margin: '0 0 14px', lineHeight: 1.35,
-            }}>
+            {/* Título */}
+            <h2
+              className="manifesto-modal-title"
+              style={{ fontSize: '22px', fontWeight: '800', color: '#fff', margin: '0 0 12px', lineHeight: 1.35 }}
+            >
               {m.title}
             </h2>
 
-            {/* Subtitle */}
-            <p style={{
-              fontSize: '15px', color: '#9ca3af',
-              margin: '0 0 28px', lineHeight: 1.65,
-            }}>
+            {/* Subtítulo */}
+            <p
+              className="manifesto-modal-subtitle"
+              style={{ fontSize: '15px', color: '#9ca3af', margin: '0 0 24px', lineHeight: 1.65 }}
+            >
               {m.subtitle}
             </p>
 
-            {/* Form / Success */}
+            {/* Formulario / Éxito */}
             {status === 'success' ? (
               <div style={{
                 padding: '18px 20px',
@@ -191,7 +230,11 @@ const ManifestoModal = () => {
                 {m.success}
               </div>
             ) : (
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <form
+                onSubmit={handleSubmit}
+                className="manifesto-modal-form"
+                style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}
+              >
                 <input
                   type="email"
                   value={email}
