@@ -240,6 +240,40 @@ app.post('/api/auth/reset-password', async (req, res) => {
 });
 
 // ============================================
+// MANIFESTO ENDPOINTS
+// ============================================
+
+app.post('/api/manifesto/subscribe', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || '';
+    const crypto = require('crypto');
+    const ipHash = crypto.createHash('sha256').update(ip).digest('hex');
+
+    const result = await db.saveManifestoLead(email.toLowerCase().trim(), ipHash);
+
+    if (!result.success) {
+      return res.status(500).json({ error: 'Failed to save email. Please try again.' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Manifesto subscribe error:', error);
+    res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
+// ============================================
 // USER ENDPOINTS
 // ============================================
 

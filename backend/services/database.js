@@ -1907,6 +1907,43 @@ const getConsultationPrice = async (email) => {
   }
 };
 
+// ============================================
+// MANIFESTO LEADS
+// ============================================
+
+const saveManifestoLead = async (email, ipHash) => {
+  const db = initSupabase();
+
+  if (db) {
+    try {
+      const { data: existing } = await db
+        .from('manifesto_leads')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+      if (existing) {
+        // Already subscribed — treat as success (idempotent)
+        return { success: true, alreadySubscribed: true };
+      }
+
+      const { error } = await db
+        .from('manifesto_leads')
+        .insert([{ email, ip_hash: ipHash }]);
+
+      if (error) throw error;
+
+      return { success: true, alreadySubscribed: false };
+    } catch (error) {
+      console.error('saveManifestoLead error:', error);
+      return { success: false, message: 'Failed to save email.' };
+    }
+  }
+
+  // Memory fallback (dev without Supabase)
+  return { success: true, alreadySubscribed: false };
+};
+
 module.exports = {
   initSupabase,
   createUser,
@@ -1958,5 +1995,7 @@ module.exports = {
   saveHistoricalBalance,
   getHistoricalBalances,
   // Bot monitoring
-  getActiveBotUsers
+  getActiveBotUsers,
+  // Manifesto leads
+  saveManifestoLead
 };

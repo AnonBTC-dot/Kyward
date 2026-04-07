@@ -325,6 +325,22 @@ INSERT INTO bot_config (key, value) VALUES
   ('last_known_btc_price', '0')
 ON CONFLICT (key) DO NOTHING;
 
+-- ============================================
+-- MANIFESTO LEADS TABLE
+-- Separate from users — email capture only, no account created
+-- ============================================
+CREATE TABLE IF NOT EXISTS manifesto_leads (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  downloaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  ip_hash VARCHAR(64)
+);
+
+CREATE INDEX IF NOT EXISTS idx_manifesto_leads_email ON manifesto_leads(email);
+
+ALTER TABLE manifesto_leads ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Full access for service role" ON manifesto_leads FOR ALL USING (true);
+
 -- RLS for new tables
 ALTER TABLE telegram_links ENABLE ROW LEVEL SECURITY;
 ALTER TABLE monitored_wallets ENABLE ROW LEVEL SECURITY;

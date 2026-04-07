@@ -1,3 +1,6 @@
+# Claude Code temp directories
+tmpclaude-*/
+
 # Logs
 logs
 *.log
