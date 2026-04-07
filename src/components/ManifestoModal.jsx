@@ -102,6 +102,10 @@ const ManifestoModal = () => {
         body.has-manifesto-bar nav {
           top: 40px !important;
         }
+        /* Compensa el espacio extra en el hero para que no quede tapado */
+        body.has-manifesto-bar .hero-section {
+          padding-top: 180px !important;
+        }
         @media (max-width: 600px) {
           .manifesto-bar-text {
             font-size: 12px;
