@@ -224,7 +224,7 @@ const AuthForm = ({ initialMode = 'login', onAuthSuccess, onBack }) => {
   };
 
   return (
-    <div style={styles.authContainer}>
+    <div className="auth-container" style={styles.authContainer}>
       <div className="auth-card" style={styles.authCard}>
         <div style={{ 
           display: 'flex', 

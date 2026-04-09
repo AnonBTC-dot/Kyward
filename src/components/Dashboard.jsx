@@ -301,7 +301,7 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
       </nav>
 
       {/* Main Content */}
-      <div style={styles.dashboardMain}>
+      <div className="dashboard-main" style={styles.dashboardMain}>
         <div style={styles.dashboardGlow1} />
         <div style={styles.dashboardGlow2} />
         <div style={styles.dashboardGlow3} />

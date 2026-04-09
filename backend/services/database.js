@@ -370,10 +370,22 @@ const resetPassword = async (email, newPassword) => {
 // Sanitize user (remove sensitive data)
 const sanitizeUser = (user) => {
   if (!user) return null;
+
+  // Compute effective subscription level — downgrade to 'free' if expired
+  let effectiveLevel = user.subscription_level || 'free';
+  if (
+    (effectiveLevel === 'sentinel' || effectiveLevel === 'consultation') &&
+    user.payment_type === 'subscription' &&
+    user.subscription_end &&
+    new Date(user.subscription_end) < new Date()
+  ) {
+    effectiveLevel = 'free';
+  }
+
   return {
     id: user.id,
     email: user.email,
-    subscriptionLevel: user.subscription_level,
+    subscriptionLevel: effectiveLevel,
     subscriptionDate: user.subscription_start,
     subscriptionEnd: user.subscription_end,
     pdfPassword: user.pdf_password,

@@ -102,9 +102,25 @@ const ManifestoModal = () => {
         body.has-manifesto-bar nav {
           top: 40px !important;
         }
-        /* Compensa el espacio extra en el hero para que no quede tapado */
+        /* Landing page hero */
         body.has-manifesto-bar .hero-section {
           padding-top: 180px !important;
+        }
+        /* Dashboard main content */
+        body.has-manifesto-bar .dashboard-main {
+          padding-top: 140px !important;
+        }
+        /* Report page */
+        body.has-manifesto-bar .report-container {
+          padding-top: 100px !important;
+        }
+        /* Questionnaire page */
+        body.has-manifesto-bar .questionnaire-container {
+          padding-top: 140px !important;
+        }
+        /* Auth pages (login / signup) — shift the centered card down */
+        body.has-manifesto-bar .auth-container {
+          padding-top: 80px !important;
         }
         @media (max-width: 600px) {
           .manifesto-bar-text {
