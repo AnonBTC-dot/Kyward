@@ -297,6 +297,40 @@ const logout = async (token) => {
   }
 };
 
+// Downgrade expired subscriptions to 'free' in the DB
+const downgradeIfExpired = async (db, user) => {
+  const isTimedPlan = user.subscription_level === 'sentinel' || user.subscription_level === 'consultation';
+  if (
+    isTimedPlan &&
+    user.payment_type === 'subscription' &&
+    user.subscription_end &&
+    new Date(user.subscription_end) < new Date()
+  ) {
+    console.log(`Subscription expired for ${user.email} — downgrading to free in DB`);
+    const { error } = await db
+      .from('users')
+      .update({
+        subscription_level: 'free',
+        payment_type: 'none',
+        email_hack_alerts: false,
+        email_daily_tips: false,
+        email_wallet_reviews: false,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', user.id);
+
+    if (!error) {
+      user.subscription_level = 'free';
+      user.payment_type = 'none';
+      user.email_hack_alerts = false;
+      user.email_daily_tips = false;
+      user.email_wallet_reviews = false;
+    } else {
+      console.error('Failed to downgrade subscription:', error);
+    }
+  }
+};
+
 // Get user by email (with actual assessment count from assessments table)
 const getUserByEmail = async (email) => {
   const db = initSupabase();
@@ -310,6 +344,9 @@ const getUserByEmail = async (email) => {
         .single();
 
       if (error) return null;
+
+      // Downgrade to free in DB if subscription has expired
+      await downgradeIfExpired(db, data);
 
       // IMPORTANT: Get actual assessment count from assessments table as fallback
       // This ensures accuracy even if the assessments_taken field wasn't updated
