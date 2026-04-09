@@ -659,7 +659,13 @@ const canTakeNewAssessment = async (email) => {
       if (!user) return false;
 
       const now = new Date();
-      if (user.subscription_level === 'free') return true; // Unlimited for free, but limited features
+      if (user.subscription_level === 'free') {
+        // Free: 1 assessment lifetime
+        const { data: fullUser } = await db.from('users').select('id').eq('email', email).single();
+        if (!fullUser) return false;
+        const { count } = await db.from('assessments').select('*', { count: 'exact', head: true }).eq('user_id', fullUser.id);
+        return count === 0;
+      }
       if (user.subscription_level === 'essential') return !user.essential_assessment_id; // Only if no prior assessment
       if (user.subscription_level === 'sentinel' || user.subscription_level === 'consultation') {
         return user.payment_type === 'subscription' && new Date(user.subscription_end) > now; // Unlimited while active
@@ -674,7 +680,7 @@ const canTakeNewAssessment = async (email) => {
     if (!user) return false;
 
     const now = new Date();
-    if (user.subscriptionLevel === 'free') return true;
+    if (user.subscriptionLevel === 'free') return (user.assessments?.length ?? 0) === 0;
     if (user.subscriptionLevel === 'essential') return !user.essential_assessment_id;
     if (user.subscriptionLevel === 'sentinel' || user.subscriptionLevel === 'consultation') {
       return user.payment_type === 'subscription' && new Date(user.subscriptionEnd) > now;
@@ -711,26 +717,22 @@ const canTakeAssessment = async (email) => {
     };
   }
 
-  // Free users: 1 per 30 days
+  // Free users: 1 assessment ever (lifetime)
   if (db) {
     try {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
       const { count, error } = await db
         .from('assessments')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', thirtyDaysAgo.toISOString());
+        .eq('user_id', user.id);
 
       if (!error) {
         const canTake = count === 0;
-        console.log(`Free user ${email} - assessments in last 30 days: ${count}, canTake: ${canTake}`);
+        console.log(`Free user ${email} - total assessments: ${count}, canTake: ${canTake}`);
         return {
           canTake,
           remaining: canTake ? 1 : 0,
           isPremium: false,
-          reason: !canTake ? 'Free users can take 1 assessment per month. Upgrade for more.' : null
+          reason: !canTake ? 'Free users can take 1 assessment. Upgrade to take more.' : null
         };
       }
     } catch (error) {
@@ -738,7 +740,7 @@ const canTakeAssessment = async (email) => {
     }
   }
 
-  // Fallback: allow
+  // Fallback: allow if no DB
   return { canTake: true, remaining: 1, isPremium: false };
 };
 

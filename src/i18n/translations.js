@@ -490,7 +490,7 @@ export const translations = {
       },
 
       errors: {
-        limitReached: 'Monthly limit reached. Upgrade to premium.',
+        limitReached: 'Free accounts include 1 assessment. Upgrade to take more.',
         savingError: 'Error saving assessment'
       }
     },
@@ -1831,7 +1831,7 @@ export const translations = {
       },
 
       errors: {
-        limitReached: 'Límite mensual alcanzado. Mejora a premium.',
+        limitReached: 'Las cuentas gratuitas incluyen 1 evaluación. Actualiza para hacer más.',
         savingError: 'Error al guardar la evaluación'
       }
     },
