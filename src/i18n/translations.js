@@ -375,6 +375,7 @@ export const translations = {
       cancel: 'Cancel Assessment',
 
       questions: {
+        q0: 'Which best describes your current situation?',
         q1: 'Do you use a hardware wallet to store your Bitcoin?',
         q2: 'How often do you back up your wallet seed phrase?',
         q3: 'Where do you store your seed phrase backup?',
@@ -394,6 +395,11 @@ export const translations = {
 
       // Answer options for each question
       answers: {
+        q0: {
+          beginner: "I'm moving Bitcoin off an exchange for the first time",
+          intermediate: 'I have self-custody and want to verify my setup',
+          advanced: "I'm securing significant holdings and want maximum protection"
+        },
         q1: {
           yes: 'Yes, I use a hardware wallet',
           sometimes: 'Sometimes, for larger amounts',
@@ -1711,6 +1717,7 @@ export const translations = {
       cancel: 'Cancelar Evaluación',
 
       questions: {
+        q0: '¿Cuál describe mejor tu situación actual?',
         q1: '¿Usas una hardware wallet para almacenar tu Bitcoin?',
         q2: '¿Con qué frecuencia haces respaldo de tu frase semilla?',
         q3: '¿Dónde guardas el respaldo de tu frase semilla?',
@@ -1729,6 +1736,11 @@ export const translations = {
       },
 
       answers: {
+        q0: {
+          beginner: 'Estoy sacando Bitcoin de un exchange por primera vez',
+          intermediate: 'Ya tengo auto-custodia y quiero verificar mi setup',
+          advanced: 'Tengo holdings significativos y quiero protección máxima'
+        },
         q1: {
           yes: 'Sí, uso una hardware wallet',
           sometimes: 'A veces, para cantidades grandes',

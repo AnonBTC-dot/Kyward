@@ -30,6 +30,11 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
 
   // Question structure with points
   const questionData = [
+    { id: 'q0', type: 'path', options: [
+      { value: 'beginner', points: 0, icon: '🟡' },
+      { value: 'intermediate', points: 0, icon: '🟠' },
+      { value: 'advanced', points: 0, icon: '🔴' }
+    ]},
     { id: 'q1', type: 'radio', options: [
       { value: 'yes', points: 15 },
       { value: 'sometimes', points: 8 },
@@ -129,6 +134,20 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
     }))
   }));
 
+  // Path descriptions shown under each q0 option
+  const pathDescriptions = {
+    en: {
+      beginner: 'Simple setup: 1 hardware wallet + secure backup. ~$80–130 total.',
+      intermediate: 'Fill the gaps in your existing setup. Cost depends on what you have.',
+      advanced: 'Multisig 2-of-3 + inheritance plan. Built for serious long-term security.'
+    },
+    es: {
+      beginner: 'Setup simple: 1 hardware wallet + respaldo seguro. ~$80–130 en total.',
+      intermediate: 'Cubre los huecos de tu setup actual. Costo depende de lo que ya tienes.',
+      advanced: 'Multisig 2-de-3 + plan de herencia. Para seguridad máxima a largo plazo.'
+    }
+  };
+
   const handleAnswerChange = (questionId, value, isCheckbox = false) => {
     if (isCheckbox) {
       const current = answers[questionId] || [];
@@ -209,11 +228,13 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
   };
 
   const currentQ = questions[currentQuestion];
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
+  // q0 is the path selector — don't count it in visible progress
+  const technicalQuestionIndex = currentQuestion === 0 ? 0 : currentQuestion;
+  const progress = currentQuestion === 0 ? 0 : (currentQuestion / (questions.length - 1)) * 100;
   const progressPercent = Math.round(progress);
-  const isAnswered = currentQ.type === 'checkbox' ?
-    (answers[currentQ.id]?.length > 0) :
-    !!answers[currentQ.id];
+  const isAnswered = currentQ.type === 'checkbox'
+    ? (answers[currentQ.id]?.length > 0)
+    : !!answers[currentQ.id];
 
   return (
     <div style={styles.dashContainer}>
@@ -255,75 +276,128 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
           <div style={styles.questionCardGlow} />
 
           <div style={styles.questionNumber}>
-            {currentQ.type === 'checkbox' ? `☑ ${t.questionnaire.selectAll}` : `${t.questionnaire.progress} ${currentQuestion + 1}`}
+            {currentQ.type === 'path'
+              ? '📍 Setup Profile'
+              : currentQ.type === 'checkbox'
+                ? `☑ ${t.questionnaire.selectAll}`
+                : `${t.questionnaire.progress} ${currentQuestion}`}
           </div>
 
           <h2 className="question-title" style={styles.questionTitle}>{currentQ.question}</h2>
 
           <div style={styles.optionsContainer}>
-            {currentQ.options.map(option => {
-              const selected = currentQ.type === 'checkbox' 
-                ? (answers[currentQ.id] || []).includes(option.value)
-                : answers[currentQ.id] === option.value;
-
-              return (
-                <div
-                  key={option.value}
-                  className={`option-item ${selected ? 'selected' : ''}`}
-                  style={{
-                    ...styles.optionItem,
-                    ...(selected ? styles.optionItemSelected : {})
-                  }}
-                  onClick={() => handleAnswerChange(currentQ.id, option.value, currentQ.type === 'checkbox')}
-                >
-                  <div style={{
-                    ...styles.optionGlow,
-                    ...(selected ? styles.optionGlowActive : {}),
-                    pointerEvents: 'none'
-                  }} />
-
-                  <label style={{...styles.optionLabel, pointerEvents: 'none'}}>
-                    <input
-                      type={currentQ.type}
-                      name={currentQ.id}
-                      value={option.value}
-                      checked={selected}
-                      onChange={() => handleAnswerChange(currentQ.id, option.value, currentQ.type === 'checkbox')}
-                      style={{...styles.optionInput, pointerEvents: 'none'}}
-                    />
-
-                    {currentQ.type === 'radio' ? (
-                      <div style={{
-                        ...styles.optionRadio,
-                        ...(selected ? styles.optionRadioSelected : {})
-                      }}>
-                        <div style={{
-                          ...styles.optionRadioInner,
-                          ...(selected ? styles.optionRadioInnerSelected : {})
-                        }} />
-                      </div>
-                    ) : (
-                      <div style={{
-                        ...styles.optionCheckbox,
-                        ...(selected ? styles.optionCheckboxSelected : {})
-                      }}>
+            {currentQ.type === 'path' ? (
+              // Special path selector — larger cards with description
+              currentQ.options.map(option => {
+                const selected = answers[currentQ.id] === option.value;
+                const lang = typeof window !== 'undefined' && document.documentElement.lang === 'es' ? 'es' : 'en';
+                const desc = pathDescriptions[lang]?.[option.value] || pathDescriptions.en[option.value];
+                return (
+                  <div
+                    key={option.value}
+                    onClick={() => handleAnswerChange(currentQ.id, option.value)}
+                    style={{
+                      ...styles.optionItem,
+                      ...(selected ? styles.optionItemSelected : {}),
+                      padding: '20px 24px',
+                      cursor: 'pointer',
+                      marginBottom: '12px'
+                    }}
+                  >
+                    <div style={{
+                      ...styles.optionGlow,
+                      ...(selected ? styles.optionGlowActive : {}),
+                      pointerEvents: 'none'
+                    }} />
+                    <div style={{ pointerEvents: 'none' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '20px' }}>{option.icon}</span>
                         <span style={{
-                          ...styles.optionCheckmark,
-                          ...(selected ? styles.optionCheckmarkSelected : {})
-                        }}>✓</span>
+                          ...styles.optionText,
+                          ...(selected ? styles.optionTextSelected : {}),
+                          fontWeight: 600,
+                          fontSize: '15px'
+                        }}>
+                          {option.label}
+                        </span>
                       </div>
-                    )}
+                      <p style={{
+                        margin: 0,
+                        fontSize: '13px',
+                        color: selected ? 'rgba(247,147,26,0.8)' : '#6b7280',
+                        paddingLeft: '30px'
+                      }}>
+                        {desc}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              currentQ.options.map(option => {
+                const selected = currentQ.type === 'checkbox'
+                  ? (answers[currentQ.id] || []).includes(option.value)
+                  : answers[currentQ.id] === option.value;
 
-                    <span style={{
-                      ...styles.optionText,
-                      ...(selected ? styles.optionTextSelected : {})
-                    }}>
-                      {option.label}
-                    </span>
-                  </label>
-                </div>
-              );
-            })}
+                return (
+                  <div
+                    key={option.value}
+                    className={`option-item ${selected ? 'selected' : ''}`}
+                    style={{
+                      ...styles.optionItem,
+                      ...(selected ? styles.optionItemSelected : {})
+                    }}
+                    onClick={() => handleAnswerChange(currentQ.id, option.value, currentQ.type === 'checkbox')}
+                  >
+                    <div style={{
+                      ...styles.optionGlow,
+                      ...(selected ? styles.optionGlowActive : {}),
+                      pointerEvents: 'none'
+                    }} />
+
+                    <label style={{...styles.optionLabel, pointerEvents: 'none'}}>
+                      <input
+                        type={currentQ.type}
+                        name={currentQ.id}
+                        value={option.value}
+                        checked={selected}
+                        onChange={() => handleAnswerChange(currentQ.id, option.value, currentQ.type === 'checkbox')}
+                        style={{...styles.optionInput, pointerEvents: 'none'}}
+                      />
+
+                      {currentQ.type === 'radio' ? (
+                        <div style={{
+                          ...styles.optionRadio,
+                          ...(selected ? styles.optionRadioSelected : {})
+                        }}>
+                          <div style={{
+                            ...styles.optionRadioInner,
+                            ...(selected ? styles.optionRadioInnerSelected : {})
+                          }} />
+                        </div>
+                      ) : (
+                        <div style={{
+                          ...styles.optionCheckbox,
+                          ...(selected ? styles.optionCheckboxSelected : {})
+                        }}>
+                          <span style={{
+                            ...styles.optionCheckmark,
+                            ...(selected ? styles.optionCheckmarkSelected : {})
+                          }}>✓</span>
+                        </div>
+                      )}
+
+                      <span style={{
+                        ...styles.optionText,
+                        ...(selected ? styles.optionTextSelected : {})
+                      }}>
+                        {option.label}
+                      </span>
+                    </label>
+                  </div>
+                );
+              })
+            )}
           </div>
 
           <div className="question-buttons" style={styles.questionButtons}>

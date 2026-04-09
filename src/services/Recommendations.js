@@ -374,11 +374,16 @@ export const allRecommendations = {
   }
 };
 
+// Recommendations to skip for beginners (too advanced, not actionable yet)
+const BEGINNER_SKIP = ['multisig_setup', 'utxo_management', 'dedicated_device', 'verify_updates'];
+
 // Generate recommendations based on answers
 export const generateRecommendations = (answers, score) => {
+  const path = answers.q0 || 'intermediate';
   const recommendations = [];
 
   Object.values(allRecommendations).forEach(rec => {
+    if (path === 'beginner' && BEGINNER_SKIP.includes(rec.id)) return;
     if (rec.trigger(answers)) {
       recommendations.push({
         id: rec.id,
@@ -420,14 +425,82 @@ export const getLockedTipsPreview = (recommendations) => {
   }));
 };
 
+// Build path-specific action plans
+const buildActionPlan = (path, setup, t) => {
+  const ap = t.actionPlan;
+
+  if (path === 'beginner') {
+    // Path A: Simple singlesig setup — one wallet, one backup, tested
+    const steps = [];
+    if (!setup.hasHardwareWallet) {
+      steps.push({ priority: 1, action: 'Buy a Blockstream Jade or BitBox02 — purchase directly from manufacturer', timeframe: '1 week', cost: '$65–120' });
+    }
+    steps.push({ priority: steps.length + 1, action: 'Set up your hardware wallet using the official guide (no YouTube, no third parties)', timeframe: '2 hours', cost: '$0' });
+    steps.push({ priority: steps.length + 1, action: 'Write down your 12 or 24-word seed phrase on paper — store in a secure drawer at home', timeframe: '30 min', cost: '$0' });
+    if (!setup.hasMetalBackup) {
+      steps.push({ priority: steps.length + 1, action: 'Transfer paper backup to metal (Seedplate or steel washers) for fire/water protection', timeframe: '1 hour', cost: '$20–50' });
+    }
+    steps.push({ priority: steps.length + 1, action: 'Test your recovery: restore wallet on a second device or Sparrow Wallet using your seed phrase', timeframe: '1 hour', cost: '$0' });
+    steps.push({ priority: steps.length + 1, action: 'Transfer Bitcoin from exchange in small batches — verify first receiving address on wallet screen before sending', timeframe: 'Same day', cost: '$0' });
+    return { sparrow: steps, liana: steps };
+  }
+
+  if (path === 'intermediate') {
+    // Path B: Fill the gaps — based on what they already have
+    const steps = [];
+    if (!setup.hasHardwareWallet) {
+      steps.push({ priority: 1, action: ap.purchaseHardware.action, timeframe: ap.purchaseHardware.timeframe, cost: ap.purchaseHardware.cost });
+    }
+    if (!setup.hasMetalBackup) {
+      steps.push({ priority: steps.length + 1, action: ap.createMetalBackup.action, timeframe: ap.createMetalBackup.timeframe, cost: ap.createMetalBackup.cost });
+    }
+    if (!setup.hasPassphrase) {
+      steps.push({ priority: steps.length + 1, action: 'Add a BIP39 passphrase (25th word) — generates a completely separate wallet, stored apart from seed', timeframe: '1 hour', cost: '$0' });
+    }
+    steps.push({ priority: steps.length + 1, action: 'Test full recovery: restore seed + passphrase on secondary device, confirm addresses match', timeframe: '1 hour', cost: '$0' });
+    if (!setup.hasInheritancePlan) {
+      steps.push({ priority: steps.length + 1, action: 'Write a sealed letter of instruction: what Bitcoin is, where the hardware wallet is, how to find the seed', timeframe: '2 hours', cost: '$0' });
+    }
+    steps.push({ priority: steps.length + 1, action: ap.documentEverything.action, timeframe: ap.documentEverything.timeframe, cost: ap.documentEverything.cost });
+    return { sparrow: steps, liana: steps };
+  }
+
+  // Path C: Advanced — full multisig with inheritance
+  const sparrowSteps = [];
+  const lianaSteps = [];
+
+  if (!setup.hasHardwareWallet) {
+    sparrowSteps.push({ priority: 1, action: ap.purchaseHardware.action, timeframe: ap.purchaseHardware.timeframe, cost: ap.purchaseHardware.cost });
+    lianaSteps.push({ priority: 1, action: ap.purchaseHardware.action, timeframe: ap.purchaseHardware.timeframe, cost: ap.purchaseHardware.cost });
+  }
+  if (!setup.hasMetalBackup) {
+    sparrowSteps.push({ priority: sparrowSteps.length + 1, action: ap.createMetalBackup.action, timeframe: ap.createMetalBackup.timeframe, cost: ap.createMetalBackup.cost });
+    lianaSteps.push({ priority: lianaSteps.length + 1, action: ap.createMetalBackup.action, timeframe: ap.createMetalBackup.timeframe, cost: ap.createMetalBackup.cost });
+  }
+  if (!setup.hasMultisig) {
+    sparrowSteps.push({ priority: sparrowSteps.length + 1, action: ap.setupMultisig.action, timeframe: ap.setupMultisig.timeframe, cost: ap.setupMultisig.cost });
+    lianaSteps.push({ priority: lianaSteps.length + 1, action: ap.lianaMultisig.action, timeframe: ap.lianaMultisig.timeframe || ap.setupMultisig.timeframe, cost: ap.lianaMultisig.cost });
+  }
+  if (!setup.hasInheritancePlan) {
+    sparrowSteps.push({ priority: sparrowSteps.length + 1, action: ap.implementLiana.action, timeframe: ap.implementLiana.timeframe, cost: ap.implementLiana.cost });
+    lianaSteps.push({ priority: lianaSteps.length + 1, action: ap.lianaTimelock.action, timeframe: ap.implementLiana.timeframe, cost: ap.implementLiana.cost });
+  }
+  sparrowSteps.push({ priority: sparrowSteps.length + 1, action: ap.documentEverything.action, timeframe: ap.documentEverything.timeframe, cost: ap.documentEverything.cost });
+  lianaSteps.push({ priority: lianaSteps.length + 1, action: ap.documentEverything.action, timeframe: ap.documentEverything.timeframe, cost: ap.documentEverything.cost });
+
+  return { sparrow: sparrowSteps, liana: lianaSteps };
+};
+
 // Generate full inheritance plan based on answers (with i18n support)
 export const generateInheritancePlan = (answers, score, userEmail, lang = 'en') => {
   const t = translations[lang]?.inheritancePlanGen || translations.en.inheritancePlanGen;
+  const path = answers.q0 || 'intermediate';
 
   const plan = {
     generatedAt: new Date().toISOString(),
     userEmail,
     score,
+    path,
     executiveSummary: '',
     currentSetup: {},
     recommendedSetup: {},
@@ -458,8 +531,8 @@ export const generateInheritancePlan = (answers, score, userEmail, lang = 'en') 
     plan.executiveSummary = t.executiveSummary.needsWork.replace('{score}', score);
   }
 
-  // Wallet Recommendation (translated)
-  if (!plan.currentSetup.hasMultisig && score < 80) {
+  // Wallet Recommendation (only for non-beginners upgrading)
+  if (path !== 'beginner' && !plan.currentSetup.hasMultisig && score < 80) {
     plan.walletRecommendation = {
       primary: t.walletRecommendation.primary,
       description: t.walletRecommendation.description,
@@ -468,8 +541,8 @@ export const generateInheritancePlan = (answers, score, userEmail, lang = 'en') 
     };
   }
 
-  // Multisig Plan (translated)
-  if (!plan.currentSetup.hasMultisig) {
+  // Multisig Plan — only for advanced path
+  if (path === 'advanced' && !plan.currentSetup.hasMultisig) {
     plan.multisigPlan = {
       recommended: true,
       type: t.multisigPlan.type,
@@ -486,14 +559,16 @@ export const generateInheritancePlan = (answers, score, userEmail, lang = 'en') 
     };
   }
 
-  // Liana recommendation (translated)
-  plan.inheritanceStrategy = {
-    recommended: t.inheritanceStrategy.recommended,
-    description: t.inheritanceStrategy.description,
-    howItWorks: t.inheritanceStrategy.howItWorks,
-    setupUrl: t.inheritanceStrategy.setupUrl,
-    considerations: t.inheritanceStrategy.considerations
-  };
+  // Liana recommendation (only for advanced path)
+  if (path === 'advanced') {
+    plan.inheritanceStrategy = {
+      recommended: t.inheritanceStrategy.recommended,
+      description: t.inheritanceStrategy.description,
+      howItWorks: t.inheritanceStrategy.howItWorks,
+      setupUrl: t.inheritanceStrategy.setupUrl,
+      considerations: t.inheritanceStrategy.considerations
+    };
+  }
 
   // Backup Strategy (translated)
   plan.backupStrategy = {
@@ -516,77 +591,10 @@ export const generateInheritancePlan = (answers, score, userEmail, lang = 'en') 
     }
   };
 
-  // Action Plan (translated)
-  let tempActionPlan = [];
-
-  if (!plan.currentSetup.hasHardwareWallet) {
-    tempActionPlan.push({
-      priority: 1,
-      action: t.actionPlan.purchaseHardware.action,
-      timeframe: t.actionPlan.purchaseHardware.timeframe,
-      cost: t.actionPlan.purchaseHardware.cost
-    });
-  }
-
-  if (!plan.currentSetup.hasMetalBackup) {
-    tempActionPlan.push({
-      priority: 2,
-      action: t.actionPlan.createMetalBackup.action,
-      timeframe: t.actionPlan.createMetalBackup.timeframe,
-      cost: t.actionPlan.createMetalBackup.cost
-    });
-  }
-
-  if (!plan.currentSetup.hasPassphrase) {
-    tempActionPlan.push({
-      priority: 3,
-      action: t.actionPlan.generatePassphrase.action,
-      timeframe: t.actionPlan.generatePassphrase.timeframe,
-      cost: t.actionPlan.generatePassphrase.cost
-    });
-  }
-
-  if (!plan.currentSetup.hasMultisig) {
-    tempActionPlan.push({
-      priority: 4,
-      action: t.actionPlan.setupMultisig.action,
-      timeframe: t.actionPlan.setupMultisig.timeframe,
-      cost: t.actionPlan.setupMultisig.cost
-    });
-  }
-
-  if (!plan.currentSetup.hasInheritancePlan) {
-    tempActionPlan.push({
-      priority: 5,
-      action: t.actionPlan.implementLiana.action,
-      timeframe: t.actionPlan.implementLiana.timeframe,
-      cost: t.actionPlan.implementLiana.cost
-    });
-  }
-
-  tempActionPlan.push({
-    priority: tempActionPlan.length + 1,
-    action: t.actionPlan.documentEverything.action,
-    timeframe: t.actionPlan.documentEverything.timeframe,
-    cost: t.actionPlan.documentEverything.cost
-  });
-
-  // Create both paths
-  plan.actionPlanSparrow = tempActionPlan.map(item => ({ ...item }));
-
-  plan.actionPlanLiana = tempActionPlan.map(item => {
-    let newItem = { ...item };
-    // Replace multisig step with Liana multisig
-    if (newItem.action === t.actionPlan.setupMultisig.action) {
-      newItem.action = t.actionPlan.lianaMultisig.action;
-      newItem.cost = t.actionPlan.lianaMultisig.cost;
-    }
-    // Replace Liana inheritance step
-    if (newItem.action === t.actionPlan.implementLiana.action) {
-      newItem.action = t.actionPlan.lianaTimelock.action;
-    }
-    return newItem;
-  });
+  // Build path-specific action plans
+  const actionPlans = buildActionPlan(path, plan.currentSetup, t);
+  plan.actionPlanSparrow = actionPlans.sparrow;
+  plan.actionPlanLiana = actionPlans.liana;
 
   return plan;
 };

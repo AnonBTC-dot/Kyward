@@ -201,6 +201,28 @@ export const generatePdfContent = (user, score, answers, lang = 'en') => {
       </div>
       <div class="score-label">${scoreLabel}</div>
       <p class="score-desc">${plan.executiveSummary}</p>
+      ${plan.path ? (() => {
+        const pathLabels = {
+          en: { beginner: '🟡 Path A — First-Time Self-Custody', intermediate: '🟠 Path B — Verifying Existing Setup', advanced: '🔴 Path C — Maximum Protection' },
+          es: { beginner: '🟡 Perfil A — Primera Auto-Custodia', intermediate: '🟠 Perfil B — Verificando Setup Existente', advanced: '🔴 Perfil C — Protección Máxima' }
+        };
+        const pathDescs = {
+          en: {
+            beginner: 'Your plan focuses on the essentials: one hardware wallet, a secure backup, and a tested recovery. No unnecessary complexity.',
+            intermediate: 'Your plan targets the specific gaps found in your current setup. You already have the basics — this fills what\'s missing.',
+            advanced: 'Your plan includes multisig and inheritance. This is the highest level of self-custody security available.'
+          },
+          es: {
+            beginner: 'Tu plan se enfoca en lo esencial: una hardware wallet, un respaldo seguro, y una recuperación probada. Sin complejidad innecesaria.',
+            intermediate: 'Tu plan apunta a los huecos específicos de tu setup actual. Ya tienes lo básico — esto cubre lo que falta.',
+            advanced: 'Tu plan incluye multisig y herencia. Este es el nivel más alto de seguridad en auto-custodia disponible.'
+          }
+        };
+        const labels = pathLabels[lang] || pathLabels.en;
+        const descs = pathDescs[lang] || pathDescs.en;
+        return `<p style="margin-top:12px; padding: 8px 16px; background: rgba(247,147,26,0.1); border-radius: 6px; font-size: 13px; color: #F7931A; font-weight: 600;">${labels[plan.path] || plan.path}</p>
+        <p style="font-size: 13px; color: #9ca3af; margin-top: 6px;">${descs[plan.path] || ''}</p>`;
+      })() : ''}
     </div>
 
     <div class="section">
@@ -232,6 +254,32 @@ export const generatePdfContent = (user, score, answers, lang = 'en') => {
     <div class="section">
       <h2>${pdf.sections.walletSetup}</h2>
 
+      ${plan.path === 'beginner' ? `
+      <div class="wallet-box">
+        <h3>Recommended Hardware Wallet</h3>
+        <p>For a first-time setup, you don't need a $200 device. These two options give you excellent security at a reasonable cost:</p>
+        <ul>
+          <li><strong>Blockstream Jade</strong> — Open-source, ~$65. Buy at blockstream.com/jade</li>
+          <li><strong>BitBox02 (Bitcoin-only edition)</strong> — Swiss-made, ~$120. Buy at shiftcrypto.ch</li>
+        </ul>
+        <p><strong>Important:</strong> Buy directly from the manufacturer. Never from Amazon or eBay.</p>
+        <h4>Managing your wallet with Sparrow:</h4>
+        <p>Download Sparrow Wallet (sparrowwallet.com) — it's the best free software to manage your Bitcoin with a hardware wallet.</p>
+        <ol>
+          ${pdf.sparrow.steps.map(step => `<li>${step}</li>`).join('')}
+        </ol>
+      </div>
+      ` : plan.path === 'intermediate' ? `
+      <div class="wallet-box">
+        <h3>${pdf.sparrow.title}</h3>
+        <p>${pdf.sparrow.description}</p>
+        <p><strong>${pdf.sparrow.download}:</strong> https://sparrowwallet.com</p>
+        <h4>${pdf.sparrow.setupSteps}:</h4>
+        <ol>
+          ${pdf.sparrow.steps.map(step => `<li>${step}</li>`).join('')}
+        </ol>
+      </div>
+      ` : `
       <div class="wallet-box">
         <h3>${pdf.sparrow.title}</h3>
         <p>${pdf.sparrow.description}</p>
@@ -297,19 +345,31 @@ export const generatePdfContent = (user, score, answers, lang = 'en') => {
         </div>
       </div>
       ` : ''}
+      `}
     </div>
 
     <!-- Inheritance Strategy -->
     <div class="section">
       <h2>${pdf.sections.inheritanceStrategy}</h2>
 
+      ${plan.path === 'beginner' ? `
+      <p>For your current setup, the most important inheritance step is simple: write a sealed letter explaining that you have Bitcoin, where the hardware wallet is, and where the seed phrase is stored. Leave it with a trusted person.</p>
+      <p>You don't need multisig or Liana yet. A clear letter of instruction is 10x better than nothing.</p>
+      ` : plan.path === 'intermediate' ? `
       <p>${pdf.inheritance.bothPathsValid}</p>
-
       <h3>${pdf.inheritance.documentation}</h3>
       <p>${pdf.inheritance.documentationDesc}</p>
       <ol>
-        ${pdf.inheritance.documents.map((doc, i) => `<li><strong>${doc.split(':')[0]}:</strong>${doc.split(':')[1] || ''}</li>`).join('')}
+        ${pdf.inheritance.documents.map(doc => `<li><strong>${doc.split(':')[0]}:</strong>${doc.split(':')[1] || ''}</li>`).join('')}
       </ol>
+      ` : `
+      <p>${pdf.inheritance.bothPathsValid}</p>
+      <h3>${pdf.inheritance.documentation}</h3>
+      <p>${pdf.inheritance.documentationDesc}</p>
+      <ol>
+        ${pdf.inheritance.documents.map(doc => `<li><strong>${doc.split(':')[0]}:</strong>${doc.split(':')[1] || ''}</li>`).join('')}
+      </ol>
+      `}
     </div>
 
     <!-- Backup Strategy -->
@@ -366,27 +426,31 @@ export const generatePdfContent = (user, score, answers, lang = 'en') => {
       <h2>${pdf.sections.actionPlan}</h2>
       <p>${pdf.actionPlan.description}</p>
 
-      <!-- Sparrow Path -->
+      ${plan.path === 'advanced' ? `
+      <!-- Advanced: show both Sparrow and Liana paths -->
       <div class="wallet-box">
         <h3>${pdf.actionPlan.sparrowTitle}</h3>
         <p>${pdf.actionPlan.sparrowDesc}</p>
         <ol>
-          ${plan.actionPlanSparrow.map(item => `
-            <li>${item.action} (${item.timeframe}, ${item.cost})</li>
-          `).join('')}
+          ${plan.actionPlanSparrow.map(item => `<li>${item.action} <span style="color:#6b7280">(${item.timeframe}, ${item.cost})</span></li>`).join('')}
         </ol>
       </div>
-
-      <!-- Liana Path -->
       <div class="wallet-box">
         <h3>${pdf.actionPlan.lianaTitle}</h3>
         <p>${pdf.actionPlan.lianaDesc}</p>
         <ol>
-          ${plan.actionPlanLiana.map(item => `
-            <li>${item.action} (${item.timeframe}, ${item.cost})</li>
-          `).join('')}
+          ${plan.actionPlanLiana.map(item => `<li>${item.action} <span style="color:#6b7280">(${item.timeframe}, ${item.cost})</span></li>`).join('')}
         </ol>
       </div>
+      ` : `
+      <!-- Beginner / Intermediate: single clear action plan -->
+      <div class="wallet-box">
+        <h3>Your Step-by-Step Plan</h3>
+        <ol>
+          ${plan.actionPlanSparrow.map(item => `<li>${item.action} <span style="color:#6b7280">(${item.timeframe}${item.cost !== '$0' ? ', ' + item.cost : ''})</span></li>`).join('')}
+        </ol>
+      </div>
+      `}
     </div>
 
     <!-- Security Checklist -->
