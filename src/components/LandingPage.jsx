@@ -50,6 +50,11 @@ const LandingPage = ({ onLogin, onSignup, onPrivacyPolicy, onTermsOfService }) =
               {t.landing.heroSecondaryCta}
             </button>
           </div>
+          {t.landing.heroTrustText && (
+            <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '16px', letterSpacing: '0.02em' }}>
+              {t.landing.heroTrustText}
+            </div>
+          )}
           <div className="hero-stats" style={styles.heroStats}>
             <div style={styles.heroStat}>
               <div style={styles.heroStatNumber}>{t.landing.heroStats.nonCustodialValue}</div>
@@ -385,6 +390,9 @@ const LandingPage = ({ onLogin, onSignup, onPrivacyPolicy, onTermsOfService }) =
           <div className="glow-element" style={{...styles.pricingCardGlow, ...styles.pricingCardGlowFree, top: '-10%'}} />
           <div style={styles.pricingBadge}>{t.landing.plans.free.badge}</div>
           <h3 style={styles.pricingTitle}>{t.landing.plans.free.name}</h3>
+          {t.landing.plans.free.for && (
+            <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '8px', fontStyle: 'italic' }}>{t.landing.plans.free.for}</div>
+          )}
           <div style={{...styles.pricingPrice, fontSize: '44px'}}>
             {t.landing.plans.free.price}
             <span style={{...styles.pricingPeriod, fontSize: '15px'}}>{t.landing.plans.free.period}</span>
@@ -431,6 +439,9 @@ const LandingPage = ({ onLogin, onSignup, onPrivacyPolicy, onTermsOfService }) =
           }} />
           <div style={styles.pricingBadge}>{t.landing.plans.essential.badge}</div>
           <h3 style={styles.pricingTitle}>{t.landing.plans.essential.name}</h3>
+          {t.landing.plans.essential.for && (
+            <div style={{ fontSize: '12px', color: '#fcd34d', marginBottom: '8px', fontStyle: 'italic' }}>{t.landing.plans.essential.for}</div>
+          )}
           <div style={{...styles.pricingPrice, ...styles.pricingPriceFeatured, fontSize: '52px'}}>
             {t.landing.plans.essential.price}
             <span style={{...styles.pricingPeriod, fontSize: '16px'}}>{t.landing.plans.essential.period}</span>
@@ -469,6 +480,9 @@ const LandingPage = ({ onLogin, onSignup, onPrivacyPolicy, onTermsOfService }) =
           <h3 style={{ ...styles.pricingTitle, color: '#22c55e' }}>
             {t.landing.plans.sentinel.name}
           </h3>
+          {t.landing.plans.sentinel.for && (
+            <div style={{ fontSize: '12px', color: '#86efac', marginBottom: '8px', fontStyle: 'italic' }}>{t.landing.plans.sentinel.for}</div>
+          )}
           <div style={{ ...styles.pricingPrice, color: '#a5f3fc', fontSize: '44px' }}>
             {t.landing.plans.sentinel.price}
             <span style={{...styles.pricingPeriod, fontSize: '15px'}}>{t.landing.plans.sentinel.period}</span>
@@ -509,6 +523,9 @@ const LandingPage = ({ onLogin, onSignup, onPrivacyPolicy, onTermsOfService }) =
             {t.landing.plans.consultation.badge}
           </div>
           <h3 style={styles.pricingTitle}>{t.landing.plans.consultation.name}</h3>
+          {t.landing.plans.consultation.for && (
+            <div style={{ fontSize: '12px', color: '#c4b5fd', marginBottom: '8px', fontStyle: 'italic' }}>{t.landing.plans.consultation.for}</div>
+          )}
           <div style={{...styles.pricingPrice, ...styles.pricingPricePro, fontSize: '44px'}}>
             {t.landing.plans.consultation.price}
             <span style={{...styles.pricingPeriod, fontSize: '15px'}}>{t.landing.plans.consultation.period}</span>

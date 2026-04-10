@@ -20,9 +20,10 @@ export const translations = {
       heroLine1: 'Not Your Keys,',
       heroLine2: 'Not Your Bitcoin.',
       heroLine3: 'Secure Them Now.',
-      heroSubtitle: 'The #1 Bitcoin self-custody security assessment. Protect your private keys, seed phrase, and cold storage setup with personalized recommendations from security experts. No wallet sales. No KYC. Just honest Bitcoin security guidance.',
+      heroSubtitle: 'Most Bitcoin holders think they\'re protected. They\'re not. Take a free 5-minute assessment and find out exactly what\'s at risk in your setup — before it\'s too late.',
+      heroTrustText: 'Takes 5 min · No credit card · Free forever',
       heroCta: 'Get Your Free Security Score',
-      heroSecondaryCta: 'How Self-Custody Works',
+      heroSecondaryCta: 'How It Works',
       heroStats: {
         nonCustodial: 'Self-Custody',
         nonCustodialValue: '100%',
@@ -41,24 +42,24 @@ export const translations = {
       },
 
       // Why Kyward Section (PVU)
-      whyTitle: 'Why Choose Kyward for Bitcoin Self-Custody?',
-      whySubtitle: "We don't sell hardware wallets or custody services. We teach you how to truly own your Bitcoin with proper self-custody security practices.",
+      whyTitle: 'One Mistake Can Wipe Out Everything You\'ve Built',
+      whySubtitle: 'Kyward scans your self-custody setup for the gaps that hackers, house fires, and bad luck exploit — then gives you a step-by-step plan to close them.',
       whyCards: {
         personalized: {
-          title: 'Bitcoin Security Assessment',
-          description: 'Answer 15 questions about your hardware wallet, seed phrase backup, and cold storage setup. Get a personalized security score with actionable self-custody recommendations.'
+          title: 'See every gap in your setup',
+          description: 'Answer 15 questions and get a precise security score showing exactly where you\'re exposed — your hardware wallet, seed phrase backup, and cold storage practices, all reviewed.'
         },
         zeroData: {
-          title: 'Zero Data Storage',
-          description: 'True self-custody means privacy. Your answers never leave your device. We don\'t store, track, or sell your data. Ever. No KYC required.'
+          title: 'Your data never leaves your device',
+          description: 'Your answers are processed locally and never stored on our servers. No KYC. No account data sold. Only you see your results.'
         },
         education: {
-          title: 'Self-Custody Education',
-          description: 'Learn WHY each Bitcoin security recommendation matters. Understand hardware wallets, multi-signature setups, and inheritance planning.'
+          title: 'Understand what actually protects you',
+          description: 'Every recommendation comes with a clear explanation of why it matters. No jargon, no assumptions — just what you need to do and why.'
         },
         noWallet: {
-          title: 'No Wallet Sales',
-          description: 'We\'re not affiliated with any hardware wallet provider. Our Bitcoin security recommendations are based purely on best practices.'
+          title: 'Honest advice, zero conflicts of interest',
+          description: 'We don\'t sell hardware wallets or earn affiliate commissions. Every recommendation is based on Bitcoin security best practices, nothing else.'
         }
       },
 
@@ -84,14 +85,15 @@ export const translations = {
       },
 
       // Pricing Section
-      pricingTitle: 'Bitcoin Security Plans',
-      pricingSubtitle: 'Protect your self-custody setup. No hidden fees. Pay with Bitcoin.',
+      pricingTitle: 'Choose Your Protection Level',
+      pricingSubtitle: 'Start free. Upgrade when you\'re ready. No hidden fees. Pay with Bitcoin.',
       plans: {
         subtitle: 'Choose the self-custody security plan that fits your needs',
 
         free: {
           badge: 'FREE',
           name: 'Free',
+          for: 'For your first look at your setup',
           price: '$0',
           period: '/forever',
           features: [
@@ -105,6 +107,7 @@ export const translations = {
         essential: {
           badge: 'MOST POPULAR',
           name: 'Essential',
+          for: 'For serious Bitcoin holders',
           price: '$9.99',
           period: '/one-time',
           features: [
@@ -120,6 +123,7 @@ export const translations = {
         sentinel: {
           badge: 'ADVANCED',
           name: 'Sentinel',
+          for: 'For active on-chain users',
           price: '$14.99',
           period: '/month',
           features: [
@@ -137,6 +141,7 @@ export const translations = {
         consultation: {
           badge: 'EXPERT',
           name: 'Consultation',
+          for: 'Complex setups & inheritance planning',
           price: '$99',
           period: '+ $49/hr add',
           features: [
@@ -1364,9 +1369,10 @@ export const translations = {
       heroLine1: 'No Son Tus Llaves,',
       heroLine2: 'No Es Tu Bitcoin.',
       heroLine3: 'Asegúralas Ahora.',
-      heroSubtitle: 'La evaluación #1 de seguridad Bitcoin auto-custodia. Protege tus llaves privadas, frase semilla y almacenamiento frío con recomendaciones personalizadas de expertos en seguridad. Sin venta de wallets. Sin KYC. Solo guía honesta de seguridad Bitcoin.',
+      heroSubtitle: 'La mayoría de los holders de Bitcoin creen que están protegidos. No lo están. Haz una evaluación gratis de 5 minutos y descubre exactamente qué está en riesgo en tu setup — antes de que sea tarde.',
+      heroTrustText: '5 min · Sin tarjeta de crédito · Gratis para siempre',
       heroCta: 'Obtén Tu Puntuación Gratis',
-      heroSecondaryCta: 'Cómo Funciona la Auto-Custodia',
+      heroSecondaryCta: 'Cómo Funciona',
       heroStats: {
         nonCustodial: 'Auto-Custodia',
         nonCustodialValue: '100%',
@@ -1385,24 +1391,24 @@ export const translations = {
       },
 
       // Why Kyward Section (PVU)
-      whyTitle: '¿Por Qué Elegir Kyward para Auto-Custodia Bitcoin?',
-      whySubtitle: 'No vendemos hardware wallets ni servicios de custodia. Te enseñamos a ser verdadero dueño de tu Bitcoin con prácticas de seguridad auto-custodia.',
+      whyTitle: 'Un Error Puede Borrar Todo lo Que Construiste',
+      whySubtitle: 'Kyward escanea tu setup de auto-custodia para encontrar los puntos débiles que explotan los hackers, los incendios y la mala suerte — y te da un plan paso a paso para cerrarlos.',
       whyCards: {
         personalized: {
-          title: 'Evaluación de Seguridad Bitcoin',
-          description: 'Responde 15 preguntas sobre tu hardware wallet, respaldo de frase semilla y configuración de almacenamiento frío. Obtén una puntuación de seguridad personalizada con recomendaciones de auto-custodia.'
+          title: 'Ve cada vulnerabilidad en tu setup',
+          description: 'Responde 15 preguntas y obtén una puntuación precisa que muestra exactamente dónde estás expuesto — tu hardware wallet, respaldo de semilla y cold storage, todo revisado.'
         },
         zeroData: {
-          title: 'Cero Almacenamiento de Datos',
-          description: 'Auto-custodia real significa privacidad. Tus respuestas nunca salen de tu dispositivo. No almacenamos ni vendemos tus datos. Sin KYC requerido.'
+          title: 'Tus datos nunca salen de tu dispositivo',
+          description: 'Tus respuestas se procesan localmente y nunca se almacenan en nuestros servidores. Sin KYC. Sin datos vendidos. Solo tú ves tus resultados.'
         },
         education: {
-          title: 'Educación Auto-Custodia',
-          description: 'Aprende POR QUÉ cada recomendación de seguridad Bitcoin importa. Entiende hardware wallets, configuraciones multi-firma y planificación de herencia.'
+          title: 'Entiende qué te protege de verdad',
+          description: 'Cada recomendación viene con una explicación clara de por qué importa. Sin jerga, sin suposiciones — solo lo que necesitas hacer y por qué.'
         },
         noWallet: {
-          title: 'Sin Venta de Wallets',
-          description: 'No estamos afiliados a ningún proveedor de hardware wallets. Nuestras recomendaciones de seguridad Bitcoin se basan únicamente en mejores prácticas.'
+          title: 'Consejos honestos, sin conflictos de interés',
+          description: 'No vendemos hardware wallets ni ganamos comisiones de afiliados. Cada recomendación se basa en mejores prácticas de seguridad Bitcoin, nada más.'
         }
       },
 
@@ -1428,14 +1434,15 @@ export const translations = {
       },
 
       // Pricing Section
-      pricingTitle: 'Planes de Seguridad Bitcoin',
-      pricingSubtitle: 'Protege tu configuración auto-custodia. Sin cargos ocultos. Paga con Bitcoin.',
+      pricingTitle: 'Elige Tu Nivel de Protección',
+      pricingSubtitle: 'Empieza gratis. Mejora cuando estés listo. Sin cargos ocultos. Paga con Bitcoin.',
       plans: {
         subtitle: 'Elige el plan de seguridad auto-custodia que mejor se adapte a ti',
 
         free: {
           badge: 'GRATIS',
           name: 'Gratis',
+          for: 'Para ver tu setup por primera vez',
           price: '$0',
           period: '/siempre',
           features: [
@@ -1449,6 +1456,7 @@ export const translations = {
         essential: {
           badge: 'MÁS POPULAR',
           name: 'Essential',
+          for: 'Para holders serios de Bitcoin',
           price: '$9.99',
           period: '/pago único',
           features: [
@@ -1464,6 +1472,7 @@ export const translations = {
         sentinel: {
           badge: 'AVANZADO',
           name: 'Sentinel',
+          for: 'Para usuarios activos on-chain',
           price: '$14.99',
           period: '/mes',
           features: [
@@ -1481,6 +1490,7 @@ export const translations = {
         consultation: {
           badge: 'EXPERTO',
           name: 'Consulta',
+          for: 'Setups complejos y planificación de herencia',
           price: '$99',
           period: '+ $49/hora add',
           features: [

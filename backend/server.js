@@ -16,6 +16,34 @@ const paymentRouter = require('./services/paymentRouter');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Simple in-memory rate limiter (per IP, resets on server restart)
+const rateLimitStore = new Map(); // ipHash -> { count, resetAt }
+const RATE_LIMIT_MAX = 3;         // max requests per window
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+function checkRateLimit(ipHash) {
+  const now = Date.now();
+  const entry = rateLimitStore.get(ipHash);
+  if (!entry || now > entry.resetAt) {
+    rateLimitStore.set(ipHash, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true };
+  }
+  if (entry.count >= RATE_LIMIT_MAX) {
+    const retryAfterSec = Math.ceil((entry.resetAt - now) / 1000);
+    return { allowed: false, retryAfterSec };
+  }
+  entry.count += 1;
+  return { allowed: true };
+}
+
+// Clean up expired rate limit entries every 30 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitStore.entries()) {
+    if (now > entry.resetAt) rateLimitStore.delete(key);
+  }
+}, 30 * 60 * 1000);
+
 // 1. TRADUCTOR JSON (DEBE IR ANTES QUE LAS RUTAS)
 // Increased limit to 10MB for PDF uploads via email
 app.use(express.json({ limit: '10mb' }));
@@ -259,6 +287,14 @@ app.post('/api/manifesto/subscribe', async (req, res) => {
     const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || '';
     const crypto = require('crypto');
     const ipHash = crypto.createHash('sha256').update(ip).digest('hex');
+
+    const rateCheck = checkRateLimit(ipHash);
+    if (!rateCheck.allowed) {
+      return res.status(429).json({
+        error: 'Too many requests. Please try again later.',
+        retryAfter: rateCheck.retryAfterSec
+      });
+    }
 
     const result = await db.saveManifestoLead(email.toLowerCase().trim(), ipHash);
 

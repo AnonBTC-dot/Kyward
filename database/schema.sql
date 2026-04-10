@@ -171,7 +171,10 @@ BEFORE UPDATE ON users
 FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ============================================
--- ROW LEVEL SECURITY (RLS) - Permisivo para Backend (Service Role)
+-- ROW LEVEL SECURITY (RLS)
+-- NOTE: The service_role key used by the backend bypasses RLS entirely (BYPASSRLS privilege).
+-- No policies needed for service_role. Having RLS enabled with NO policies = zero access
+-- for anon/authenticated roles, which is correct — all access goes through the backend API.
 -- ============================================
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE assessments ENABLE ROW LEVEL SECURITY;
@@ -180,14 +183,9 @@ ALTER TABLE consultations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE session_tokens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE community_stats ENABLE ROW LEVEL SECURITY;
 
--- Políticas: Service Role tiene acceso total (tu backend usa la service key)
-CREATE POLICY "Full access for service role" ON users FOR ALL USING (true);
-CREATE POLICY "Full access for service role" ON assessments FOR ALL USING (true);
-CREATE POLICY "Full access for service role" ON payments FOR ALL USING (true);
-CREATE POLICY "Full access for service role" ON consultations FOR ALL USING (true);
-CREATE POLICY "Full access for service role" ON session_tokens FOR ALL USING (true);
-CREATE POLICY "Read access for all" ON community_stats FOR SELECT USING (true);
-CREATE POLICY "Full access for service role" ON community_stats FOR ALL USING (true);
+-- community_stats: allow public read (anonymous score display on landing page if needed)
+-- Remove this policy if community stats are only read server-side
+CREATE POLICY "Public read community_stats" ON community_stats FOR SELECT USING (true);
 
 -- ============================================
 -- TELEGRAM BOT INTEGRATION TABLES
@@ -339,9 +337,9 @@ CREATE TABLE IF NOT EXISTS manifesto_leads (
 CREATE INDEX IF NOT EXISTS idx_manifesto_leads_email ON manifesto_leads(email);
 
 ALTER TABLE manifesto_leads ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Full access for service role" ON manifesto_leads FOR ALL USING (true);
+-- No policies: service_role bypasses RLS, anon gets no access (correct)
 
--- RLS for new tables
+-- RLS for bot/telegram tables — no policies needed, backend uses service_role
 ALTER TABLE telegram_links ENABLE ROW LEVEL SECURITY;
 ALTER TABLE monitored_wallets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions_seen ENABLE ROW LEVEL SECURITY;
@@ -350,13 +348,3 @@ ALTER TABLE bot_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE xpub_cache ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bot_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE custom_price_alerts ENABLE ROW LEVEL SECURITY;
-
--- Policies for new tables (service role full access)
-CREATE POLICY "Full access for service role" ON telegram_links FOR ALL USING (true);
-CREATE POLICY "Full access for service role" ON monitored_wallets FOR ALL USING (true);
-CREATE POLICY "Full access for service role" ON transactions_seen FOR ALL USING (true);
-CREATE POLICY "Full access for service role" ON historical_balances FOR ALL USING (true);
-CREATE POLICY "Full access for service role" ON bot_preferences FOR ALL USING (true);
-CREATE POLICY "Full access for service role" ON xpub_cache FOR ALL USING (true);
-CREATE POLICY "Full access for service role" ON bot_config FOR ALL USING (true);
-CREATE POLICY "Full access for service role" ON custom_price_alerts FOR ALL USING (true);
