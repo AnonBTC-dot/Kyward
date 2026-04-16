@@ -355,7 +355,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
       case 'payment':
         const methodColor = paymentData?.method === 'usdt' ? '#26A17B' :
                            paymentData?.method === 'liquid' ? '#00AAFF' :
-                           paymentData?.method === 'lemonsqueezy' ? '#7c3aed' : '#F7931A';
+                           paymentData?.method === 'lemonsqueezy' ? '#F7931A' : '#F7931A';
         const isLightning = paymentData?.method === 'lightning';
         const isRedirectPayment = paymentData?.useRedirect;
         const displayAddress = isLightning ? paymentData?.invoice : paymentData?.address;
@@ -381,8 +381,8 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                 </svg>
               ) : paymentData?.method === 'lemonsqueezy' ? (
                 <svg width="48" height="48" viewBox="0 0 48 48" style={{ margin: '0 auto' }}>
-                  <rect x="4" y="10" width="40" height="28" rx="4" fill="#7c3aed"/>
-                  <rect x="4" y="16" width="40" height="6" fill="#5b21b6"/>
+                  <rect x="4" y="10" width="40" height="28" rx="4" fill="#F7931A"/>
+                  <rect x="4" y="16" width="40" height="6" fill="#e07010"/>
                   <rect x="10" y="28" width="12" height="4" rx="2" fill="#fff" opacity="0.8"/>
                   <circle cx="34" cy="30" r="4" fill="#fff" opacity="0.6"/>
                   <circle cx="38" cy="30" r="4" fill="#fff" opacity="0.4"/>
@@ -443,7 +443,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                     marginBottom: '16px'
                   }}>
                     <span style={{ fontSize: '13px', color: '#6b7280' }}>Total</span>
-                    <p style={{ fontSize: '24px', fontWeight: '700', color: '#7c3aed', margin: '4px 0' }}>
+                    <p style={{ fontSize: '24px', fontWeight: '700', color: '#F7931A', margin: '4px 0' }}>
                       ${paymentData.amount} USD
                     </p>
                   </div>
@@ -453,7 +453,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                     style={{
                       width: '100%',
                       padding: '16px 24px',
-                      background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+                      background: 'linear-gradient(135deg, #F7931A 0%, #e07010 100%)',
                       border: 'none',
                       borderRadius: '12px',
                       color: '#fff',
@@ -710,7 +710,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                   style={{
                     width: '100%',
                     padding: '16px 24px',
-                    background: 'linear-gradient(135deg, #a855f7 0%, #7c3aed 100%)',
+                    background: 'linear-gradient(135deg, #e07010 0%, #F7931A 100%)',
                     border: 'none',
                     borderRadius: '12px',
                     color: '#fff',
