@@ -59,8 +59,8 @@ const PAYMENT_METHODS = [
     badge: 'Secure',
     description: 'Visa, Mastercard, PayPal & more',
     time: '< 1 minute',
-    color: '#7c3aed',
-    comingSoon: true  // Waiting for Lemon Squeezy account setup
+    color: '#F7931A',
+    comingSoon: false
   }
 ];
 
@@ -114,8 +114,8 @@ const PaymentIcon = ({ type, size = 32 }) => {
       return (
         <div style={iconStyle}>
           <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-            <rect x="2" y="4" width="20" height="16" rx="2" fill="#7c3aed"/>
-            <rect x="2" y="8" width="20" height="3" fill="#5b21b6"/>
+            <rect x="2" y="4" width="20" height="16" rx="2" fill="#F7931A"/>
+            <rect x="2" y="8" width="20" height="3" fill="#e07010"/>
             <rect x="5" y="14" width="6" height="2" rx="1" fill="#fff" opacity="0.8"/>
             <circle cx="17" cy="15" r="2" fill="#fff" opacity="0.6"/>
             <circle cx="19" cy="15" r="2" fill="#fff" opacity="0.4"/>
