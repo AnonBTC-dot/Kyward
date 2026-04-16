@@ -632,7 +632,10 @@ app.post('/api/payments/create', async (req, res) => {
       networkFee: result.networkFee,
       // Links
       checkoutLink: result.checkoutLink,
+      checkoutUrl: result.checkoutUrl,
       paymentLink: result.paymentLink,
+      // Lemon Squeezy redirect
+      useRedirect: result.useRedirect || false,
       // Timing
       expiresAt: result.expiresAt,
       reused: result.reused
