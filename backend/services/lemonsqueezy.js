@@ -88,11 +88,11 @@ async function createPayment(amount, metadata) {
             logo: true,
             desc: true,
             discount: true,
-            button_color: '#7c3aed' // Purple to match Kyward theme
+            button_color: '#F7931A' // Kyward orange
           },
           product_options: {
             enabled_variants: [parseInt(variantId)],
-            redirect_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment/success?payment_id=${paymentId}`,
+            redirect_url: `${process.env.FRONTEND_URL || 'https://kyward.com'}/payment/success?payment_id=${paymentId}`,
             receipt_button_text: 'Return to Kyward',
             receipt_thank_you_note: 'Thank you for your purchase! Your report is now available.'
           },
@@ -211,17 +211,29 @@ function handleWebhook(event, payload) {
     if (eventName === 'order_created') {
       const customData = payload.meta?.custom_data || {};
       const paymentId = customData.payment_id;
+      const orderId = payload.data?.id;
 
-      if (paymentId && paymentSessions.has(paymentId)) {
-        const session = paymentSessions.get(paymentId);
-        session.status = 'confirmed';
-        session.orderId = payload.data?.id;
-        session.confirmedAt = new Date().toISOString();
+      if (paymentId) {
+        // Update in-memory session if it still exists (server may have restarted)
+        if (paymentSessions.has(paymentId)) {
+          const session = paymentSessions.get(paymentId);
+          session.status = 'confirmed';
+          session.orderId = orderId;
+          session.confirmedAt = new Date().toISOString();
+        }
 
-        console.log(`[LemonSqueezy] Payment confirmed: ${paymentId}, Order: ${session.orderId}`);
-
-        return { success: true, paymentId, status: 'confirmed' };
+        console.log(`[LemonSqueezy] order_created confirmed: paymentId=${paymentId}, orderId=${orderId}`);
+        return { success: true, paymentId, orderId, status: 'confirmed' };
       }
+    }
+
+    if (eventName === 'subscription_cancelled') {
+      const customData = payload.meta?.custom_data || {};
+      const paymentId = customData.payment_id;
+      const email = payload.data?.attributes?.user_email;
+
+      console.log(`[LemonSqueezy] subscription_cancelled: email=${email}`);
+      return { success: true, paymentId, email, status: 'cancelled' };
     }
 
     return { success: true, handled: false };
@@ -241,10 +253,19 @@ function verifyWebhookSignature(payload, signature) {
     return true;
   }
 
+  if (!signature) {
+    console.warn('[LemonSqueezy] Missing x-signature header');
+    return false;
+  }
+
   const hmac = crypto.createHmac('sha256', process.env.LEMONSQUEEZY_WEBHOOK_SECRET);
   const digest = hmac.update(payload).digest('hex');
 
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+  try {
+    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+  } catch {
+    return false;
+  }
 }
 
 /**

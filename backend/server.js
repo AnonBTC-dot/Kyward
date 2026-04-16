@@ -921,7 +921,7 @@ app.post('/api/webhooks/lemonsqueezy', express.raw({ type: '*/*' }), async (req,
 
       if (payment) {
         // Mark payment as confirmed
-        paymentStore.updatePaymentStatus(result.paymentId, 'confirmed', {
+        paymentStore.updateStatus(result.paymentId, 'confirmed', {
           orderId: result.orderId
         });
 
@@ -933,7 +933,7 @@ app.post('/api/webhooks/lemonsqueezy', express.raw({ type: '*/*' }), async (req,
 
           // Get user's language preference for email
           const user = await db.getUserByEmail(payment.email);
-          const userLanguage = user?.preferences?.language || 'en';
+          const userLanguage = user?.language_preference || user?.preferred_language || 'en';
 
           // Send confirmation email
           await emailService.sendPaymentConfirmation(payment.email, payment.plan, userLanguage);
@@ -942,6 +942,15 @@ app.post('/api/webhooks/lemonsqueezy', express.raw({ type: '*/*' }), async (req,
         }
       } else {
         console.warn(`Lemon Squeezy webhook: No payment found for ID ${result.paymentId}`);
+      }
+    }
+
+    if (result.success && result.status === 'cancelled' && result.email) {
+      const downgradeResult = await db.upgradeSubscription(result.email, 'free');
+      if (downgradeResult.success) {
+        console.log(`Lemon Squeezy webhook: Sentinel cancelled, downgraded ${result.email} to free`);
+      } else {
+        console.error('Lemon Squeezy webhook: Downgrade failed:', downgradeResult);
       }
     }
 
