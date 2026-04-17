@@ -402,7 +402,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                 margin: '0 0 8px 0',
                 fontWeight: '700'
               }}>
-                {t.payment.title} — {planName}
+                {paymentData?.method === 'lemonsqueezy' ? 'Pay with Card' : t.payment.title} — {planName}
               </h2>
 
               <div style={{
@@ -425,8 +425,8 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
             {isRedirectPayment ? (
               <>
                 <div style={{
-                  background: 'rgba(124,58,237,0.1)',
-                  border: '1px solid rgba(124,58,237,0.3)',
+                  background: 'rgba(247,147,26,0.08)',
+                  border: '1px solid rgba(247,147,26,0.3)',
                   borderRadius: '16px',
                   padding: '24px',
                   marginBottom: '24px',
@@ -444,7 +444,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                   }}>
                     <span style={{ fontSize: '13px', color: '#6b7280' }}>Total</span>
                     <p style={{ fontSize: '24px', fontWeight: '700', color: '#F7931A', margin: '4px 0' }}>
-                      ${paymentData.amount} USD
+                      ${paymentData.usdAmount ?? priceInfo.amount.replace('$', '')} USD
                     </p>
                   </div>
 
