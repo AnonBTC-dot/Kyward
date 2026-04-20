@@ -6,7 +6,7 @@ const btcpay = require('./btcpay');
 const bitcoin = require('./bitcoin');
 const tron = require('./tron');
 const ethereum = require('./ethereum');
-const lemonsqueezy = require('./lemonsqueezy');
+const stripeService = require('./stripe');
 
 // Payment providers
 const PROVIDERS = {
@@ -16,7 +16,7 @@ const PROVIDERS = {
   ONCHAIN: 'direct_btc',
   USDT_TRC20: 'direct_tron',
   USDT_ERC20: 'direct_ethereum',
-  LEMONSQUEEZY: 'lemonsqueezy_fiat'
+  STRIPE: 'stripe_fiat'
 };
 
 // Payment methods shown to users
@@ -63,14 +63,14 @@ const PAYMENT_METHODS = {
       { id: 'usdterc20', name: 'Ethereum (ERC20)', fee: '~$5-20', provider: PROVIDERS.USDT_ERC20 }
     ]
   },
-  lemonsqueezy: {
-    id: 'lemonsqueezy',
+  stripe: {
+    id: 'stripe',
     name: 'Credit/Debit Card',
     icon: '💳',
     badge: 'Secure',
-    description: 'Visa, Mastercard, PayPal & more',
+    description: 'Visa, Mastercard & more',
     time: '< 1 minute',
-    provider: PROVIDERS.LEMONSQUEEZY
+    provider: PROVIDERS.STRIPE
   }
 };
 
@@ -117,9 +117,9 @@ function getAvailablePaymentMethods() {
     }
   }
 
-  // Lemon Squeezy (FIAT) - requires API key and store ID
-  if (lemonsqueezy.isConfigured()) {
-    methods.push(PAYMENT_METHODS.lemonsqueezy);
+  // Stripe (FIAT) - requires secret key
+  if (stripeService.isConfigured()) {
+    methods.push(PAYMENT_METHODS.stripe);
   }
 
   return methods;
@@ -162,8 +162,8 @@ async function createPayment({ method, network, plan, email, paymentId, amount: 
       case 'usdt':
         return await createUsdtPayment(amount, network || 'usdttrc20', metadata);
 
-      case 'lemonsqueezy':
-        return await createLemonsqueezyPayment(amount, metadata);
+      case 'stripe':
+        return await createStripePayment(amount, metadata);
 
       default:
         return {
@@ -359,14 +359,14 @@ async function createUsdtPayment(amount, network, metadata) {
 }
 
 /**
- * Create Lemon Squeezy (FIAT) payment
+ * Create Stripe (FIAT) payment
  */
-async function createLemonsqueezyPayment(amount, metadata) {
-  if (!lemonsqueezy.isConfigured()) {
-    return { success: false, error: 'Lemon Squeezy payments not configured' };
+async function createStripePayment(amount, metadata) {
+  if (!stripeService.isConfigured()) {
+    return { success: false, error: 'Stripe payments not configured' };
   }
 
-  const result = await lemonsqueezy.createPayment(amount, metadata);
+  const result = await stripeService.createPayment(amount, metadata);
 
   if (!result.success) {
     return result;
@@ -374,16 +374,14 @@ async function createLemonsqueezyPayment(amount, metadata) {
 
   return {
     success: true,
-    provider: PROVIDERS.LEMONSQUEEZY,
-    method: 'lemonsqueezy',
+    provider: PROVIDERS.STRIPE,
+    method: 'stripe',
     paymentId: metadata.paymentId,
-    // Payment data - redirect to Lemon Squeezy checkout
     checkoutUrl: result.checkoutUrl,
-    checkoutId: result.checkoutId,
+    sessionId: result.sessionId,
     amount: amount,
     currency: 'USD',
     expiresAt: result.expiresAt,
-    // For FIAT, we use redirect instead of QR
     useRedirect: true
   };
 }
@@ -457,15 +455,12 @@ async function checkPaymentStatus(paymentId, provider, paymentData) {
           confirmations: ethStatus.confirmations
         };
 
-      case PROVIDERS.LEMONSQUEEZY:
-        // Lemon Squeezy FIAT - status updated via webhook
-        const lsStatus = await lemonsqueezy.checkPayment(paymentId);
+      case PROVIDERS.STRIPE:
+        // Stripe FIAT - status updated via webhook, polling just reads cached state
         return {
           success: true,
           provider,
-          status: lsStatus.status,
-          orderId: lsStatus.orderId,
-          amount: lsStatus.amount
+          status: 'pending'  // real confirmation comes through the webhook
         };
 
       default:
@@ -511,10 +506,8 @@ function markPaymentUsed(provider, paymentData, email) {
       }
       break;
 
-    case PROVIDERS.LEMONSQUEEZY:
-      if (paymentData.paymentId) {
-        lemonsqueezy.markPaymentUsed(paymentData.paymentId, paymentData.orderId);
-      }
+    case PROVIDERS.STRIPE:
+      // Stripe payments are confirmed by webhook — nothing extra to mark
       break;
   }
 }
@@ -572,10 +565,10 @@ async function healthCheck() {
     ...ethereum.getStats()
   };
 
-  // Lemon Squeezy (FIAT)
-  results.lemonsqueezy = {
-    status: lemonsqueezy.isConfigured() ? 'ok' : 'not_configured',
-    ...lemonsqueezy.getStats()
+  // Stripe (FIAT)
+  results.stripe = {
+    status: stripeService.isConfigured() ? 'ok' : 'not_configured',
+    ...stripeService.getStats()
   };
 
   return results;

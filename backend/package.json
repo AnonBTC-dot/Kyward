@@ -9,14 +9,15 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
-    "express": "^4.18.2",
+    "bip32": "^4.0.0",
+    "bitcoinjs-lib": "^6.1.5",
+    "bs58check": "^3.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "bitcoinjs-lib": "^6.1.5",
-    "bip32": "^4.0.0",
-    "tiny-secp256k1": "^2.2.3",
-    "bs58check": "^3.0.1",
+    "express": "^4.18.2",
     "nodemailer": "^6.9.7",
+    "stripe": "^14.25.0",
+    "tiny-secp256k1": "^2.2.3",
     "uuid": "^9.0.0"
   }
 }

@@ -202,7 +202,7 @@ export const createPayment = async (plan, userEmail, paymentMethod = 'onchain', 
       checkoutLink: data.checkoutLink,
       checkoutUrl: data.checkoutUrl,
       paymentLink: data.paymentLink,
-      // Lemon Squeezy redirect flag
+      // Stripe redirect flag
       useRedirect: data.useRedirect || false,
       // Timing
       expiresAt: data.expiresAt,

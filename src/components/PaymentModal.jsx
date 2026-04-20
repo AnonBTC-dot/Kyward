@@ -267,7 +267,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
       onchain: 'Bitcoin',
       liquid: selectedNetwork === 'lusdt' ? 'Liquid USDT' : 'Liquid BTC',
       usdt: paymentData.networkName || 'USDT',
-      lemonsqueezy: 'Credit/Debit Card'
+      stripe: 'Credit/Debit Card (Stripe)'
     };
     return methodNames[paymentData.method] || paymentData.method;
   };
@@ -355,7 +355,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
       case 'payment':
         const methodColor = paymentData?.method === 'usdt' ? '#26A17B' :
                            paymentData?.method === 'liquid' ? '#00AAFF' :
-                           paymentData?.method === 'lemonsqueezy' ? '#F7931A' : '#F7931A';
+                           paymentData?.method === 'stripe' ? '#F7931A' : '#F7931A';
         const isLightning = paymentData?.method === 'lightning';
         const isRedirectPayment = paymentData?.useRedirect;
         const displayAddress = isLightning ? paymentData?.invoice : paymentData?.address;
@@ -379,7 +379,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                   <circle cx="24" cy="24" r="22" fill="#26A17B"/>
                   <text x="24" y="32" textAnchor="middle" fill="#fff" fontSize="20" fontWeight="bold">$</text>
                 </svg>
-              ) : paymentData?.method === 'lemonsqueezy' ? (
+              ) : paymentData?.method === 'stripe' ? (
                 <svg width="48" height="48" viewBox="0 0 48 48" style={{ margin: '0 auto' }}>
                   <rect x="4" y="10" width="40" height="28" rx="4" fill="#F7931A"/>
                   <rect x="4" y="16" width="40" height="6" fill="#e07010"/>
@@ -402,7 +402,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                 margin: '0 0 8px 0',
                 fontWeight: '700'
               }}>
-                {paymentData?.method === 'lemonsqueezy' ? 'Pay with Card' : t.payment.title} — {planName}
+                {paymentData?.method === 'stripe' ? 'Pay with Card — Stripe' : t.payment.title} — {planName}
               </h2>
 
               <div style={{
@@ -474,7 +474,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                   </button>
 
                   <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '12px' }}>
-                    {t.payment?.securePayment || 'Secured by Lemon Squeezy. We accept Visa, Mastercard, PayPal & more.'}
+                    {t.payment?.securePayment || 'Secured by Stripe. We accept Visa and Mastercard.'}
                   </p>
                 </div>
 
