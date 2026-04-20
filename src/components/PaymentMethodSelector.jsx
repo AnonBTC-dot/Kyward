@@ -53,11 +53,11 @@ const PAYMENT_METHODS = [
     ]
   },
   {
-    id: 'lemonsqueezy',
+    id: 'stripe',
     name: 'Credit/Debit Card',
     icon: 'card',
     badge: 'Secure',
-    description: 'Visa, Mastercard, PayPal & more',
+    description: 'Visa, Mastercard & more',
     time: '< 1 minute',
     color: '#F7931A',
     comingSoon: false
