@@ -3,6 +3,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
+const path = require('path');
 
 const bitcoinService = require('./services/bitcoin');
 const emailService = require('./services/email');
@@ -301,6 +303,66 @@ app.post('/api/manifesto/subscribe', async (req, res) => {
     if (!result.success) {
       return res.status(500).json({ error: 'Failed to save email. Please try again.' });
     }
+
+    // Send PDF email (fire-and-forget — don't block the response)
+    const pdfPath = path.join(__dirname, 'assets', 'The State of Bitcoin-KYWARD.pdf');
+    setImmediate(async () => {
+      try {
+        const pdfBuffer = fs.readFileSync(pdfPath);
+        const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; margin: 0; padding: 40px; }
+    .container { max-width: 600px; margin: 0 auto; background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%); border-radius: 16px; overflow: hidden; border: 1px solid #2a2a2a; }
+    .header { background: linear-gradient(135deg, #F7931A 0%, #f5a623 100%); padding: 40px; text-align: center; }
+    .header h1 { color: #000; margin: 0; font-size: 32px; font-weight: 800; letter-spacing: 2px; }
+    .body { padding: 40px; }
+    .body h2 { color: #fff; margin-top: 0; font-size: 24px; }
+    .body p { color: #9ca3af; line-height: 1.7; font-size: 15px; }
+    .highlight { color: #F7931A; font-weight: 600; }
+    .footer { background: #0a0a0a; padding: 24px; text-align: center; border-top: 1px solid #2a2a2a; }
+    .footer p { color: #6b7280; font-size: 12px; margin: 4px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>KYWARD</h1>
+    </div>
+    <div class="body">
+      <h2>The State of Bitcoin — Your Copy</h2>
+      <p>You just made the right call.</p>
+      <p>Most people holding Bitcoin still don't fully understand what they own, how to protect it, or how to pass it on. This report changes that.</p>
+      <p><span class="highlight">The State of Bitcoin</span> covers the shift happening right now — from speculation to generational wealth — and what it means for how you secure your stack.</p>
+      <p>The PDF is attached. No password needed. Read it, save it, share it.</p>
+      <p style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #2a2a2a; font-size: 13px; color: #6b7280;">
+        Questions? <a href="mailto:contact@kyward.com" style="color: #F7931A;">contact@kyward.com</a>
+      </p>
+    </div>
+    <div class="footer">
+      <p style="color: #F7931A; font-weight: 600;">KYWARD — Bitcoin Legacy Security</p>
+      <p>This email was sent to ${email}</p>
+    </div>
+  </div>
+</body>
+</html>`;
+        await emailService.sendEmailWithAttachment(
+          email.toLowerCase().trim(),
+          'The State of Bitcoin — Your Copy',
+          html,
+          {
+            filename: 'The State of Bitcoin-KYWARD.pdf',
+            content: pdfBuffer,
+            contentType: 'application/pdf'
+          }
+        );
+        console.log('✅ Manifesto PDF sent to:', email);
+      } catch (emailErr) {
+        console.error('❌ Failed to send manifesto PDF to', email, ':', emailErr.message);
+      }
+    });
 
     res.json({ success: true });
   } catch (error) {

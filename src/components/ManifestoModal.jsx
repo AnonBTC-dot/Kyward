@@ -3,8 +3,7 @@ import { useLanguage } from '../i18n';
 
 const STORAGE_KEY = 'kyward_manifesto_dismissed';
 
-// ⚡ ACTIVAR MANIFESTO: cambiar a true cuando el PDF esté listo
-const MANIFESTO_ENABLED = false;
+const MANIFESTO_ENABLED = true;
 
 const ManifestoModal = () => {
   if (!MANIFESTO_ENABLED) return null;
