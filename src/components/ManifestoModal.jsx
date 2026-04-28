@@ -58,7 +58,7 @@ const ManifestoModal = () => {
 
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL || 'https://api.kyward.com'}/api/manifesto/subscribe`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/manifesto/subscribe`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
