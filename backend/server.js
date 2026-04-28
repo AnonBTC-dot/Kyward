@@ -320,8 +320,8 @@ app.post('/api/manifesto/subscribe', async (req, res) => {
     .header h1 { color: #000; margin: 0; font-size: 32px; font-weight: 800; letter-spacing: 2px; }
     .body { padding: 40px; }
     .body h2 { color: #fff; margin-top: 0; font-size: 24px; }
-    .body p { color: #9ca3af; line-height: 1.7; font-size: 15px; }
-    .highlight { color: #F7931A; font-weight: 600; }
+    .body p { color: #fff; line-height: 1.7; font-size: 15px; }
+    .cta-btn { display: inline-block; background: #F7931A; color: #000; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px; margin-top: 8px; }
     .footer { background: #0a0a0a; padding: 24px; text-align: center; border-top: 1px solid #2a2a2a; }
     .footer p { color: #6b7280; font-size: 12px; margin: 4px 0; }
   </style>
@@ -332,13 +332,15 @@ app.post('/api/manifesto/subscribe', async (req, res) => {
       <h1>KYWARD</h1>
     </div>
     <div class="body">
-      <h2>The State of Bitcoin — Your Copy</h2>
-      <p>You just made the right call.</p>
-      <p>Most people holding Bitcoin still don't fully understand what they own, how to protect it, or how to pass it on. This report changes that.</p>
-      <p><span class="highlight">The State of Bitcoin</span> covers the shift happening right now — from speculation to generational wealth — and what it means for how you secure your stack.</p>
-      <p>The PDF is attached. No password needed. Read it, save it, share it.</p>
-      <p style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #2a2a2a; font-size: 13px; color: #6b7280;">
-        Questions? <a href="mailto:contact@kyward.com" style="color: #F7931A;">contact@kyward.com</a>
+      <h2>The State of Bitcoin</h2>
+      <p>Your copy is attached.</p>
+      <p>Most people holding Bitcoin don't fully understand what they own, how to protect it, or how to pass it on. This report covers exactly that.</p>
+      <p>Read it. If you have questions or want to secure your stack the right way, book a consultation.</p>
+      <p style="margin-top: 28px;">
+        <a href="https://kyward.com" class="cta-btn">Visit Kyward</a>
+      </p>
+      <p style="margin-top: 28px; font-size: 14px;">
+        Want a personal consultation? Write to <a href="mailto:contact@kyward.com" style="color: #F7931A;">contact@kyward.com</a>
       </p>
     </div>
     <div class="footer">
@@ -350,7 +352,7 @@ app.post('/api/manifesto/subscribe', async (req, res) => {
 </html>`;
         await emailService.sendEmailWithAttachment(
           email.toLowerCase().trim(),
-          'The State of Bitcoin — Your Copy',
+          'Are you paying attention?',
           html,
           {
             filename: 'The State of Bitcoin-KYWARD.pdf',
