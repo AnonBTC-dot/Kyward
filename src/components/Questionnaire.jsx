@@ -436,42 +436,88 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
         </div>
 
         {showEmailStep && (
-          <div className="question-card" style={{ ...styles.questionCard, marginTop: '16px' }}>
-            <div style={styles.questionNumber}>✉ Final Step</div>
-            <h2 className="question-title" style={styles.questionTitle}>
-              Get your results by email
-            </h2>
-            <p style={{ color: '#9ca3af', marginBottom: '24px', lineHeight: '1.6' }}>
-              We'll send your score and top recommendations. Optional — skip to view results now.
-            </p>
-            <input
-              type="email"
-              value={capturedEmail}
-              onChange={(e) => setCapturedEmail(e.target.value)}
-              placeholder="your@email.com"
-              style={{
-                width: '100%',
-                padding: '14px 16px',
-                background: '#1a1a1a',
-                border: '1px solid #3a3a3a',
-                borderRadius: '12px',
-                color: '#fff',
-                fontSize: '16px',
-                outline: 'none',
-                boxSizing: 'border-box',
-                marginBottom: '16px'
-              }}
-            />
-            <div className="question-buttons" style={styles.questionButtons}>
+          <div style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.88)',
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}>
+            <div style={{
+              background: '#111',
+              border: '1px solid #2a2a2a',
+              borderRadius: '20px',
+              padding: '40px 32px',
+              maxWidth: '440px',
+              width: '100%',
+              textAlign: 'center',
+              boxShadow: '0 24px 80px rgba(0,0,0,0.8)'
+            }}>
+              <div style={{ fontSize: '36px', marginBottom: '12px' }}>📥</div>
+              <h2 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', margin: '0 0 8px 0' }}>
+                Get your results by email
+              </h2>
+              <p style={{ color: '#9ca3af', fontSize: '14px', margin: '0 0 24px 0', lineHeight: '1.6' }}>
+                We'll send your score and top recommendations — no password, no KYC.
+              </p>
+              <input
+                type="email"
+                value={capturedEmail}
+                onChange={(e) => setCapturedEmail(e.target.value)}
+                placeholder="satoshi@blockmail.com"
+                autoFocus
+                onKeyDown={(e) => e.key === 'Enter' && capturedEmail.trim() && !loading && handleSubmit()}
+                style={{
+                  width: '100%',
+                  padding: '14px 16px',
+                  background: '#1a1a1a',
+                  border: '1px solid #3a3a3a',
+                  borderRadius: '12px',
+                  color: '#fff',
+                  fontSize: '16px',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  marginBottom: '12px'
+                }}
+              />
               <button
                 onClick={handleSubmit}
+                disabled={loading || !capturedEmail.trim()}
                 style={{
-                  ...styles.submitButton,
-                  ...(loading || !capturedEmail ? { opacity: 0.6, cursor: 'not-allowed' } : {})
+                  width: '100%',
+                  padding: '14px',
+                  background: capturedEmail.trim() && !loading ? '#22c55e' : '#1e1e1e',
+                  border: 'none',
+                  borderRadius: '12px',
+                  color: capturedEmail.trim() && !loading ? '#000' : '#4b5563',
+                  fontSize: '15px',
+                  fontWeight: '700',
+                  cursor: capturedEmail.trim() && !loading ? 'pointer' : 'not-allowed',
+                  marginBottom: '14px',
+                  transition: 'background 0.2s, color 0.2s'
                 }}
-                disabled={loading || !capturedEmail}
               >
                 {loading ? t.questionnaire.calculating : `${t.questionnaire.getScore} ✓`}
+              </button>
+              <button
+                onClick={() => { const score = calculateScore(); onComplete({ score, answers }); }}
+                disabled={loading}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#6b7280',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  textUnderlineOffset: '3px'
+                }}
+              >
+                Skip — view results now
               </button>
             </div>
           </div>
