@@ -191,7 +191,8 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
           setError(result.message || 'Failed to save assessment');
         }
       } else {
-        const response = await fetch('/api/assessments/anonymous', {
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const response = await fetch(`${apiBase}/assessments/anonymous`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ score, responses: answers, email: capturedEmail })
