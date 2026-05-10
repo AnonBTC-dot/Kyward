@@ -14,6 +14,10 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
   const [expandedTip, setExpandedTip] = useState(null);
   const [comparison, setComparison] = useState(null);
   const [canTakeNew, setCanTakeNew] = useState(false);
+  const [captureEmail, setCaptureEmail] = useState('');
+  const [captureLoading, setCaptureLoading] = useState(false);
+  const [captureSuccess, setCaptureSuccess] = useState(false);
+  const [captureError, setCaptureError] = useState('');
 
   // Plan detection - más preciso para los 4 tiers
   const subscriptionLevel = user?.subscriptionLevel || user?.subscription || 'free';
@@ -140,6 +144,27 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
 
   // Calculate critical/high priority count for urgency
   const criticalCount = recommendations.filter(r => r.priority === 'critical' || r.priority === 'high').length;
+
+  const handleEmailCapture = async (e) => {
+    e.preventDefault();
+    const trimmed = captureEmail.trim();
+    if (!trimmed) return;
+    setCaptureLoading(true);
+    setCaptureError('');
+    try {
+      const result = await kywardDB.login(trimmed);
+      if (result.success) {
+        setUser(result.user);
+        setCaptureSuccess(true);
+      } else {
+        setCaptureError(result.message || 'Could not save. Try again.');
+      }
+    } catch {
+      setCaptureError('Network error. Please try again.');
+    } finally {
+      setCaptureLoading(false);
+    }
+  };
 
   return (
     <div className="report-container" style={styles.reportContainer2}>
@@ -598,6 +623,88 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
           ))}
         </div>
 
+        {/* ===== EMAIL CAPTURE (anonymous users only) ===== */}
+        {!user && !isPremium && (
+          <div style={{
+            maxWidth: '600px',
+            margin: '40px auto 0',
+            padding: '0 20px'
+          }}>
+            {!captureSuccess ? (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(247,147,26,0.08) 0%, rgba(247,147,26,0.03) 100%)',
+                border: '1px solid rgba(247,147,26,0.3)',
+                borderRadius: '16px',
+                padding: '28px 24px',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '24px', marginBottom: '8px' }}>📥</div>
+                <h3 style={{ color: '#fff', fontSize: '17px', fontWeight: '700', margin: '0 0 6px 0' }}>
+                  Save your results + get the full breakdown
+                </h3>
+                <p style={{ color: '#9ca3af', fontSize: '13px', margin: '0 0 20px 0' }}>
+                  Enter your email to save your score and receive the complete security breakdown — no password, no KYC.
+                </p>
+                {captureError && (
+                  <p style={{ color: '#ef4444', fontSize: '13px', marginBottom: '12px' }}>{captureError}</p>
+                )}
+                <form onSubmit={handleEmailCapture} style={{ display: 'flex', gap: '8px', maxWidth: '400px', margin: '0 auto' }}>
+                  <input
+                    type="email"
+                    value={captureEmail}
+                    onChange={(e) => setCaptureEmail(e.target.value)}
+                    placeholder="satoshi@blockmail.com"
+                    required
+                    style={{
+                      flex: 1,
+                      padding: '12px 16px',
+                      background: 'rgba(0,0,0,0.4)',
+                      border: '1px solid #374151',
+                      borderRadius: '10px',
+                      color: '#fff',
+                      fontSize: '14px',
+                      outline: 'none'
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={captureLoading || !captureEmail.trim()}
+                    style={{
+                      padding: '12px 20px',
+                      background: '#F7931A',
+                      border: 'none',
+                      borderRadius: '10px',
+                      color: '#000',
+                      fontSize: '14px',
+                      fontWeight: '700',
+                      cursor: captureLoading ? 'not-allowed' : 'pointer',
+                      opacity: captureLoading ? 0.7 : 1,
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {captureLoading ? '...' : 'Save →'}
+                  </button>
+                </form>
+                <p style={{ color: '#6b7280', fontSize: '11px', marginTop: '12px' }}>
+                  No spam. Unsubscribe anytime.
+                </p>
+              </div>
+            ) : (
+              <div style={{
+                background: 'rgba(34,197,94,0.08)',
+                border: '1px solid rgba(34,197,94,0.3)',
+                borderRadius: '16px',
+                padding: '24px',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '28px', marginBottom: '8px' }}>✓</div>
+                <p style={{ color: '#22c55e', fontWeight: '700', margin: 0 }}>Results saved to your account.</p>
+                <p style={{ color: '#9ca3af', fontSize: '13px', marginTop: '6px' }}>Access your dashboard anytime with your email.</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ===== FREE USER UPGRADE SECTION ===== */}
         {!isPremium && (
           <div style={{ marginTop: '48px' }}>
@@ -675,12 +782,43 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
               padding: '32px',
               textAlign: 'center'
             }}>
+              {/* Expert intro */}
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '12px',
+                background: 'rgba(0,0,0,0.3)',
+                border: '1px solid #2a2a2a',
+                borderRadius: '50px',
+                padding: '8px 16px 8px 8px',
+                marginBottom: '20px'
+              }}>
+                <div style={{
+                  width: '36px', height: '36px',
+                  background: 'linear-gradient(135deg, #F7931A, #22c55e)',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '16px',
+                  fontWeight: '800',
+                  color: '#000'
+                }}>L</div>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ color: '#fff', fontSize: '13px', fontWeight: '700' }}>Leonardo Molina</div>
+                  <div style={{ color: '#9ca3af', fontSize: '11px' }}>Bitcoin Security Consultant · Kyward Founder</div>
+                </div>
+              </div>
+
               <h3 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', margin: '0 0 8px 0' }}>
-                Book a 1:1 Bitcoin Security Consultation
+                1:1 Bitcoin Security Consultation
               </h3>
+              <p style={{ color: '#9ca3af', fontSize: '14px', margin: '0 0 16px 0', maxWidth: '360px', marginLeft: 'auto', marginRight: 'auto' }}>
+                60-minute session reviewing your exact setup — wallet, seed backup, inheritance plan. Walk away with a specific action list, not generic advice.
+              </p>
               <div style={{ margin: '16px 0' }}>
                 <span style={{ fontSize: '42px', fontWeight: '800', color: '#22c55e' }}>$99</span>
-                <span style={{ color: '#6b7280', fontSize: '14px' }}> one-time</span>
+                <span style={{ color: '#6b7280', fontSize: '14px' }}> one-time · 60 min</span>
               </div>
               <ul style={{
                 listStyle: 'none',
@@ -694,9 +832,9 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                 marginRight: 'auto'
               }}>
                 <li style={{ marginBottom: '8px' }}>✓ All {recommendations.length} recommendations unlocked</li>
-                <li style={{ marginBottom: '8px' }}>✓ 1:1 expert security review of your setup</li>
-                <li style={{ marginBottom: '8px' }}>✓ Actionable checklist tailored to your score</li>
-                <li style={{ marginBottom: '8px' }}>✓ No KYC — pay with Bitcoin</li>
+                <li style={{ marginBottom: '8px' }}>✓ Live review of your wallet, backup, and inheritance plan</li>
+                <li style={{ marginBottom: '8px' }}>✓ Specific action list for your exact score of {score}/100</li>
+                <li style={{ marginBottom: '8px' }}>✓ No KYC — pay with Bitcoin, Lightning, or card</li>
               </ul>
               <button
                 onClick={() => onUpgrade && onUpgrade('consultation')}
@@ -715,7 +853,7 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
                   cursor: 'pointer'
                 }}
               >
-                Book Consultation
+                Book Consultation — $99
               </button>
               <div style={{
                 display: 'flex',

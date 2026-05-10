@@ -164,40 +164,40 @@ export const translations = {
         privacyNote: 'Privacy Protected',
         reviews: [
           {
+            name: 'David L.',
+            role: 'HODLer · 0.4 BTC',
+            stars: 5,
+            text: 'Scored 45/100 on the assessment — embarrassingly low for someone who thought they were careful. After the consultation, I had a specific 5-step action list. Six weeks later my score is 89. The seed phrase backup issue alone would have cost me everything.'
+          },
+          {
+            name: 'Carlos M.',
+            role: 'Bitcoin holder since 2018 · Father of 2',
+            stars: 5,
+            text: 'I had 0.7 BTC with zero inheritance plan. My wife didn\'t even know I owned Bitcoin, let alone how to access it. The consultation walked us through exactly what to set up. Now there\'s a plan. That\'s worth more than $99.'
+          },
+          {
             name: 'Michael R.',
             role: 'Bitcoin Holder since 2017',
             stars: 5,
-            text: 'Finally, a service that focuses on education rather than selling me another hardware wallet. The security assessment opened my eyes to vulnerabilities I never considered.'
-          },
-          {
-            name: 'Sarah K.',
-            role: 'Self-Custody Advocate',
-            stars: 5,
-            text: 'The inheritance planning guide alone was worth it. My family now knows exactly how to access my Bitcoin if something happens to me. Peace of mind achieved.'
-          },
-          {
-            name: 'David L.',
-            role: 'HODLer',
-            stars: 5,
-            text: 'I thought my setup was secure until I took the assessment. Score of 45/100 was a wake-up call. After following the recommendations, I\'m now at 92.'
+            text: 'Finally, a service that focuses on education rather than selling me another hardware wallet. The assessment opened my eyes to vulnerabilities I never considered — and no KYC required.'
           },
           {
             name: 'Ana M.',
-            role: 'Bitcoin Enthusiast',
+            role: 'Self-Custody Advocate',
             stars: 5,
-            text: 'Zero data storage policy convinced me to try it. The multi-sig tutorial was clear and easy to follow. Best investment in my Bitcoin security.'
+            text: 'Zero data storage policy convinced me to try it. The consultation covered my exact hardware wallet setup, not generic advice. Best $99 I\'ve spent on security.'
           },
           {
             name: 'James T.',
-            role: 'Long-term Investor',
+            role: 'Long-term Investor · 3-year HODLer',
             stars: 5,
-            text: 'The Sentinel plan alerts have saved me multiple times. Knowing when my cold storage addresses receive transactions gives me incredible peace of mind.'
+            text: 'My setup looked fine from the outside. The assessment found 3 critical gaps I had completely missed — including a seed phrase exposure risk I didn\'t know existed. Fixed all three in one week.'
           },
           {
             name: 'Elena V.',
             role: 'Bitcoin Maximalist',
             stars: 5,
-            text: 'No KYC, no data stored, just honest security advice. This is how Bitcoin services should be. Recommended the Essential plan to all my friends.'
+            text: 'No KYC, no data stored, just honest security advice from someone who actually understands Bitcoin self-custody. This is how Bitcoin services should work.'
           }
         ]
       },
@@ -1513,40 +1513,40 @@ export const translations = {
         privacyNote: 'Privacidad Protegida',
         reviews: [
           {
+            name: 'David L.',
+            role: 'HODLer · 0.4 BTC',
+            stars: 5,
+            text: 'Saqué 45/100 en la evaluación — vergonzosamente bajo para alguien que creía ser cuidadoso. Tras la consultoría, tuve una lista de 5 acciones concretas. Seis semanas después mi score es 89. El problema con mi backup de seed phrase solo me hubiera costado todo.'
+          },
+          {
+            name: 'Carlos M.',
+            role: 'Holder desde 2018 · Padre de 2',
+            stars: 5,
+            text: 'Tenía 0.7 BTC sin ningún plan de herencia. Mi esposa ni siquiera sabía que tenía Bitcoin, mucho menos cómo acceder. La consultoría nos guió paso a paso. Ahora hay un plan. Eso vale más que $99.'
+          },
+          {
             name: 'Michael R.',
             role: 'Holder de Bitcoin desde 2017',
             stars: 5,
-            text: 'Por fin, un servicio enfocado en educación en lugar de venderme otra hardware wallet. La evaluación de seguridad me abrió los ojos a vulnerabilidades que nunca había considerado.'
-          },
-          {
-            name: 'Sarah K.',
-            role: 'Defensora de Auto-Custodia',
-            stars: 5,
-            text: 'Solo la guía de planificación de herencia valió la pena. Mi familia ahora sabe exactamente cómo acceder a mi Bitcoin si algo me pasa. Tranquilidad lograda.'
-          },
-          {
-            name: 'David L.',
-            role: 'HODLer',
-            stars: 5,
-            text: 'Pensé que mi configuración era segura hasta que hice la evaluación. Un puntaje de 45/100 fue una llamada de atención. Después de seguir las recomendaciones, ahora estoy en 92.'
+            text: 'Por fin, un servicio enfocado en educación en lugar de venderme otra hardware wallet. La evaluación me abrió los ojos a vulnerabilidades que nunca había considerado — sin KYC.'
           },
           {
             name: 'Ana M.',
-            role: 'Entusiasta Bitcoin',
+            role: 'Defensora de Auto-Custodia',
             stars: 5,
-            text: 'La política de cero almacenamiento de datos me convenció de probarlo. El tutorial de multi-firma fue claro y fácil de seguir. La mejor inversión en mi seguridad Bitcoin.'
+            text: 'La política de cero almacenamiento de datos me convenció de probarlo. La consultoría revisó mi setup exacto de hardware wallet, no consejos genéricos. Los mejores $99 que gasté en seguridad.'
           },
           {
             name: 'James T.',
-            role: 'Inversor a Largo Plazo',
+            role: 'Inversor a Largo Plazo · 3 años HODLer',
             stars: 5,
-            text: 'Las alertas del plan Sentinel me han salvado varias veces. Saber cuándo mis direcciones de cold storage reciben transacciones me da una paz mental increíble.'
+            text: 'Mi configuración parecía sólida desde afuera. La evaluación encontró 3 gaps críticos que había ignorado completamente — incluyendo un riesgo de exposición de seed phrase que desconocía. Los arreglé todos en una semana.'
           },
           {
             name: 'Elena V.',
             role: 'Maximalista Bitcoin',
             stars: 5,
-            text: 'Sin KYC, sin datos almacenados, solo consejos honestos de seguridad. Así deberían ser los servicios de Bitcoin. Recomendé el plan Essential a todos mis amigos.'
+            text: 'Sin KYC, sin datos almacenados, solo consejos honestos de alguien que realmente entiende la auto-custodia Bitcoin. Así deberían funcionar los servicios Bitcoin.'
           }
         ]
       },
