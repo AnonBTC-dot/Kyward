@@ -19,19 +19,19 @@ const KywardApp = () => {
   const [paymentModal, setPaymentModal] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Clear any existing session on app load - always start fresh on landing page
+  // Restore existing session on load (email = identity, no forced logout)
   useEffect(() => {
-    const clearSessionOnLoad = async () => {
+    const restoreSession = async () => {
       try {
-        // Always logout and clear session - users should start fresh
-        await kywardDB.logout();
-        setUser(null);
+        const user = await kywardDB.validateSession();
+        if (user) {
+          setUser(user);
+        }
       } catch (error) {
-        console.error('Failed to clear session:', error);
+        console.error('Failed to restore session:', error);
       }
     };
-
-    clearSessionOnLoad();
+    restoreSession();
   }, []);
 
   const handleAssessmentComplete = (results) => {
@@ -41,7 +41,8 @@ const KywardApp = () => {
 
   const handleUpgrade = (level) => {
     if (!user) {
-      setCurrentPage('signup');
+      // No session — send to questionnaire to create one first
+      setCurrentPage('questionnaire');
       return;
     }
     setPaymentModal({ plan: level });
@@ -144,7 +145,7 @@ const KywardApp = () => {
             answers={lastResults?.answers || lastResults?.responses}
             user={user}
             setUser={setUser}
-            onBackToDashboard={() => user ? setCurrentPage('dashboard') : setCurrentPage('landing')}
+            onBackToDashboard={() => setCurrentPage(user ? 'dashboard' : 'landing')}
             onUpgrade={handleUpgrade}
             onStartAssessment={() => setCurrentPage('questionnaire')}
           />
@@ -176,7 +177,7 @@ const KywardApp = () => {
     <LanguageProvider>
       {renderPage()}
       {renderPaymentModal()}
-      <ManifestoModal />
+      <ManifestoModal onLogin={(u) => setUser(u)} />
       <Analytics />
     </LanguageProvider>
   );

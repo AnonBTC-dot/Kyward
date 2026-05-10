@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../i18n';
+import { kywardDB } from '../services/Database';
 
 const STORAGE_KEY = 'kyward_manifesto_dismissed';
 
 const MANIFESTO_ENABLED = true;
 
-const ManifestoModal = () => {
+const ManifestoModal = ({ onLogin }) => {
   if (!MANIFESTO_ENABLED) return null;
   const { t } = useLanguage();
   const m = t.manifesto;
@@ -67,6 +68,12 @@ const ManifestoModal = () => {
       );
       const data = await res.json();
       if (res.ok && data.success) {
+        if (data.token && data.user) {
+          kywardDB.setToken(data.token);
+          const normalizedUser = kywardDB.normalizeUser(data.user);
+          kywardDB.setCachedUser(normalizedUser);
+          if (onLogin) onLogin(normalizedUser);
+        }
         setStatus('success');
         setTimeout(() => {
           localStorage.setItem(STORAGE_KEY, '1');

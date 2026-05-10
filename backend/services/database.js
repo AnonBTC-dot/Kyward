@@ -1962,6 +1962,77 @@ const getConsultationPrice = async (email) => {
 // MANIFESTO LEADS
 // ============================================
 
+const findOrCreateUserByEmail = async (email) => {
+  const db = initSupabase();
+  const cleanEmail = email.toLowerCase().trim();
+
+  if (db) {
+    try {
+      let { data: user } = await db
+        .from('users')
+        .select('*')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+
+      if (!user) {
+        const pdfPassword = generatePdfPassword();
+        const { data: newUser, error } = await db
+          .from('users')
+          .insert([{
+            email: cleanEmail,
+            password_hash: null,
+            subscription_level: 'free',
+            pdf_password: pdfPassword,
+            payment_type: 'none',
+            email_hack_alerts: false,
+            email_daily_tips: false,
+            email_wallet_reviews: false,
+            consultation_count: 0
+          }])
+          .select()
+          .single();
+
+        if (error) throw error;
+        user = newUser;
+      }
+
+      const token = generateSessionToken();
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      const { error: sessionError } = await db.from('session_tokens').insert([{
+        user_id: user.id,
+        token,
+        expires_at: expiresAt.toISOString()
+      }]);
+
+      if (sessionError) throw sessionError;
+
+      return { success: true, user: sanitizeUser(user), token };
+    } catch (error) {
+      console.error('findOrCreateUserByEmail error:', error);
+      return { success: false, message: 'Failed to create session.' };
+    }
+  }
+
+  // Memory fallback
+  const pdfPassword = generatePdfPassword();
+  let user = Object.values(memoryDB.users).find(u => u.email === cleanEmail);
+  if (!user) {
+    user = {
+      id: crypto.randomUUID(),
+      email: cleanEmail,
+      subscription_level: 'free',
+      pdf_password: pdfPassword,
+      payment_type: 'none',
+      consultation_count: 0,
+      assessments_taken: 0
+    };
+    memoryDB.users[cleanEmail] = user;
+  }
+  const token = generateSessionToken();
+  memoryDB.sessions[token] = { email: cleanEmail, expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() };
+  return { success: true, user: sanitizeUser(user), token };
+};
+
 const saveAssessmentLead = async (score, responses, email, ipHash) => {
   const db = initSupabase();
 
@@ -2070,5 +2141,7 @@ module.exports = {
   // Manifesto leads
   saveManifestoLead,
   // Anonymous assessment leads
-  saveAssessmentLead
+  saveAssessmentLead,
+  // Email-only auth
+  findOrCreateUserByEmail
 };

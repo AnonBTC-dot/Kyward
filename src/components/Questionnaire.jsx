@@ -191,16 +191,23 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
           setError(result.message || 'Failed to save assessment');
         }
       } else {
-        if (capturedEmail) {
-          try {
-            await fetch('/api/assessments/anonymous', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ score, responses: answers, email: capturedEmail })
-            });
-          } catch (e) {
-            console.error('Failed to save anonymous assessment:', e);
-          }
+        const response = await fetch('/api/assessments/anonymous', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ score, responses: answers, email: capturedEmail })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          setError(data.error || 'Failed to save assessment');
+          return;
+        }
+        if (data.token) {
+          kywardDB.setToken(data.token);
+        }
+        if (data.user) {
+          const normalizedUser = kywardDB.normalizeUser(data.user);
+          kywardDB.setCachedUser(normalizedUser);
+          setUser(normalizedUser);
         }
         onComplete({ score, answers });
       }

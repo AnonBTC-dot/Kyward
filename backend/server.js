@@ -298,11 +298,13 @@ app.post('/api/manifesto/subscribe', async (req, res) => {
       });
     }
 
-    const result = await db.saveManifestoLead(email.toLowerCase().trim(), ipHash);
-
-    if (!result.success) {
+    // Create or find user by email — same identity system as assessment
+    const authResult = await db.findOrCreateUserByEmail(email);
+    if (!authResult.success) {
       return res.status(500).json({ error: 'Failed to save email. Please try again.' });
     }
+
+    const { user, token } = authResult;
 
     // Send PDF email (fire-and-forget — don't block the response)
     const pdfPath = path.join(__dirname, 'assets', 'The State of Bitcoin-KYWARD.pdf');
@@ -366,7 +368,7 @@ app.post('/api/manifesto/subscribe', async (req, res) => {
       }
     });
 
-    res.json({ success: true });
+    res.json({ success: true, user, token });
   } catch (error) {
     console.error('Manifesto subscribe error:', error);
     res.status(500).json({ error: 'Server error. Please try again.' });
@@ -381,32 +383,42 @@ app.post('/api/assessments/anonymous', async (req, res) => {
   try {
     const { score, responses, email } = req.body;
 
-    if (score === undefined || !responses) {
-      return res.status(400).json({ error: 'score and responses are required' });
+    if (score === undefined || !responses || !email) {
+      return res.status(400).json({ error: 'score, responses, and email are required' });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
     }
 
     const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || '';
     const crypto = require('crypto');
     const ipHash = crypto.createHash('sha256').update(ip).digest('hex');
 
-    if (email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({ error: 'Invalid email format' });
-      }
+    const rateCheck = checkRateLimit(ipHash);
+    if (!rateCheck.allowed) {
+      return res.status(429).json({ error: 'Too many requests.', retryAfter: rateCheck.retryAfterSec });
+    }
 
-      const rateCheck = checkRateLimit(ipHash);
-      if (!rateCheck.allowed) {
-        return res.status(429).json({ error: 'Too many requests.', retryAfter: rateCheck.retryAfterSec });
-      }
+    // Create or find user by email (no password needed)
+    const authResult = await db.findOrCreateUserByEmail(email);
+    if (!authResult.success) {
+      return res.status(500).json({ error: 'Failed to create session. Please try again.' });
+    }
 
-      await db.saveAssessmentLead(score, responses, email, ipHash);
+    const { user, token } = authResult;
 
-      // Send results email (fire-and-forget)
-      setImmediate(async () => {
-        try {
-          const scoreLabel = score >= 80 ? 'Strong' : score >= 60 ? 'Moderate' : score >= 40 ? 'At Risk' : 'Critical';
-          const html = `
+    // Save assessment linked to the user account
+    await db.saveAssessment(user.id, score, responses);
+
+    // Send score + free guide email (fire-and-forget)
+    setImmediate(async () => {
+      try {
+        const scoreLabel = score >= 80 ? 'Strong' : score >= 60 ? 'Moderate' : score >= 40 ? 'At Risk' : 'Critical';
+        const pdfPath = path.join(__dirname, 'assets', 'The State of Bitcoin-KYWARD.pdf');
+        const pdfBuffer = fs.readFileSync(pdfPath);
+        const html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -435,7 +447,8 @@ app.post('/api/assessments/anonymous', async (req, res) => {
         <div class="score-number">${score}</div>
         <div class="score-label">${scoreLabel} — Bitcoin Security Assessment</div>
       </div>
-      <p>Your score reveals gaps in your self-custody setup. A 1:1 consultation unlocks your full personalized action plan.</p>
+      <p>Your score reveals the gaps in your self-custody setup. A 1:1 consultation unlocks your full personalized action plan.</p>
+      <p>Also attached: <strong>The State of Bitcoin</strong> — our free report on how to protect and pass on your BTC.</p>
       <p style="margin-top: 28px; text-align: center;">
         <a href="https://kyward.com" class="cta-btn">Book Consultation — $99</a>
       </p>
@@ -447,15 +460,19 @@ app.post('/api/assessments/anonymous', async (req, res) => {
   </div>
 </body>
 </html>`;
-          await emailService.sendEmail(email.toLowerCase().trim(), 'Your Bitcoin Security Score — Kyward', html);
-          console.log('✅ Assessment results sent to:', email);
-        } catch (emailErr) {
-          console.error('❌ Failed to send assessment results to', email, ':', emailErr.message);
-        }
-      });
-    }
+        await emailService.sendEmailWithAttachment(
+          email.toLowerCase().trim(),
+          'Your Bitcoin Security Score — Kyward',
+          html,
+          { filename: 'The State of Bitcoin-KYWARD.pdf', content: pdfBuffer, contentType: 'application/pdf' }
+        );
+        console.log('✅ Score + guide sent to:', email);
+      } catch (emailErr) {
+        console.error('❌ Failed to send email to', email, ':', emailErr.message);
+      }
+    });
 
-    res.json({ success: true });
+    res.json({ success: true, user, token });
   } catch (error) {
     console.error('Anonymous assessment error:', error);
     res.status(500).json({ error: 'Server error. Please try again.' });
