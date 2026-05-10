@@ -9,24 +9,8 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
   const [answers, setAnswers] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [canStart, setCanStart] = useState(null); // null = cargando, true/false = resultado
-
-  // Verificar si el usuario puede empezar el cuestionario
-  useState(() => {
-    const checkPermission = async () => {
-      try {
-        const can = await kywardDB.canTakeNewAssessment(user?.email);
-        setCanStart(can);
-        if (!can) {
-          setError(t.questionnaire.errors.limitReached);
-        }
-      } catch (err) {
-        setError('Error al verificar permisos');
-        setCanStart(false);
-      }
-    };
-    checkPermission();
-  }, [user]);
+  const [showEmailStep, setShowEmailStep] = useState(false);
+  const [capturedEmail, setCapturedEmail] = useState('');
 
   // Question structure with points
   const questionData = [
@@ -187,40 +171,40 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
     setError('');
 
     try {
-      // Verificar permiso (ya lo tienes)
-      const can = await kywardDB.canTakeNewAssessment();
-      if (!can) {
-        setError(t.questionnaire.errors.limitReached);
-        return;
-      }
-
       const score = calculateScore();
 
-      const assessment = {
-        score,
-        responses: answers,
-        // NO envíes userId ni timestamp (el backend los maneja)
-      };
-
-      console.log('Enviando assessment:', assessment);
-
-      const result = await kywardDB.saveAssessment(assessment);
-
-      if (result.success) {
-        console.log('Guardado OK');
-        const updatedUser = await kywardDB.getUser(true); // Refresca usuario completo
-        setUser(updatedUser);
-        localStorage.removeItem('kyward_user_cache'); // Limpia cache manualmente
-        const freshUser = await kywardDB.getUser(true); // Fuerza otro fetch para estar seguros
-        setUser(freshUser);
-        console.log('Usuario final después de save (doble check):', freshUser);
-        onComplete({ score, answers });
+      if (user) {
+        const can = await kywardDB.canTakeNewAssessment(user.email);
+        if (!can) {
+          setError(t.questionnaire.errors.limitReached);
+          return;
+        }
+        const result = await kywardDB.saveAssessment({ score, responses: answers });
+        if (result.success) {
+          const updatedUser = await kywardDB.getUser(true);
+          setUser(updatedUser);
+          localStorage.removeItem('kyward_user_cache');
+          const freshUser = await kywardDB.getUser(true);
+          setUser(freshUser);
+          onComplete({ score, answers });
+        } else {
+          setError(result.message || 'Failed to save assessment');
+        }
       } else {
-        console.error('Save failed:', result.message);
-        setError(result.message || 'Failed to save assessment');
+        if (capturedEmail) {
+          try {
+            await fetch('/api/assessments/anonymous', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ score, responses: answers, email: capturedEmail })
+            });
+          } catch (e) {
+            console.error('Failed to save anonymous assessment:', e);
+          }
+        }
+        onComplete({ score, answers });
       }
     } catch (err) {
-      console.error('Error completo:', err);
       setError(err.message || 'Error al guardar la evaluación');
     } finally {
       setLoading(false);
@@ -423,31 +407,67 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
               </button>
             ) : (
               <button
-                onClick={handleSubmit}
+                onClick={() => {
+                  if (!isAnswered) return;
+                  if (user) {
+                    handleSubmit();
+                  } else {
+                    setShowEmailStep(true);
+                  }
+                }}
                 style={{
                   ...styles.submitButton,
-                  ...(loading || !isAnswered || !canStart ? { opacity: 0.6, cursor: 'not-allowed' } : {}),
-                  backgroundColor: !canStart ? '#ef4444' : '#22c55e'
+                  ...(!isAnswered || loading ? { opacity: 0.6, cursor: 'not-allowed' } : {})
                 }}
-                disabled={loading || !isAnswered || !canStart}
+                disabled={!isAnswered || loading}
               >
                 {loading ? t.questionnaire.calculating : `${t.questionnaire.getScore} ✓`}
               </button>
             )}
           </div>
-
-          {/* Mensaje si no puede empezar (Essential ya usado) */}
-          {!canStart && !loading && (
-            <p style={{
-              color: '#ef4444',
-              fontSize: '14px',
-              textAlign: 'center',
-              marginTop: '16px'
-            }}>
-              {t.questionnaire.errors.limitReached}
-            </p>
-          )}
         </div>
+
+        {showEmailStep && (
+          <div className="question-card" style={{ ...styles.questionCard, marginTop: '16px' }}>
+            <div style={styles.questionNumber}>✉ Final Step</div>
+            <h2 className="question-title" style={styles.questionTitle}>
+              Get your results by email
+            </h2>
+            <p style={{ color: '#9ca3af', marginBottom: '24px', lineHeight: '1.6' }}>
+              We'll send your score and top recommendations. Optional — skip to view results now.
+            </p>
+            <input
+              type="email"
+              value={capturedEmail}
+              onChange={(e) => setCapturedEmail(e.target.value)}
+              placeholder="your@email.com"
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                background: '#1a1a1a',
+                border: '1px solid #3a3a3a',
+                borderRadius: '12px',
+                color: '#fff',
+                fontSize: '16px',
+                outline: 'none',
+                boxSizing: 'border-box',
+                marginBottom: '16px'
+              }}
+            />
+            <div className="question-buttons" style={styles.questionButtons}>
+              <button
+                onClick={handleSubmit}
+                style={{
+                  ...styles.submitButton,
+                  ...(loading || !capturedEmail ? { opacity: 0.6, cursor: 'not-allowed' } : {})
+                }}
+                disabled={loading || !capturedEmail}
+              >
+                {loading ? t.questionnaire.calculating : `${t.questionnaire.getScore} ✓`}
+              </button>
+            </div>
+          </div>
+        )}
 
         <button
           className="cancel-button"

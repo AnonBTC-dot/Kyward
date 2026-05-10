@@ -3,7 +3,6 @@ import { styles } from '../styles/Theme';
 import { kywardDB } from '../services/Database';
 import { generateRecommendations, getFreeTips, getLockedTipsPreview, generateInheritancePlan } from '../services/Recommendations';
 import { openPdfPreview, downloadHtmlReport } from '../services/PdfGenerator';
-import TelegramBlur from './TelegramBlur';
 import Footer from './Footer';
 import { useLanguage, LanguageToggle } from '../i18n';
 
@@ -525,61 +524,6 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
         </div>
       )}
 
-      {/* Free User: Quick Summary Box */}
-      {!isPremium && (
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(247,147,26,0.1) 0%, rgba(239,68,68,0.1) 100%)',
-          border: '1px solid rgba(247,147,26,0.3)',
-          borderRadius: '16px',
-          padding: '32px',
-          margin: '48px auto',
-          maxWidth: '800px',
-          textAlign: 'center'
-        }}>
-          <h3 style={{ color: '#F7931A', fontSize: '24px', marginBottom: '16px' }}>
-            {t.report.upgrade.unlockFullReport}
-          </h3>
-
-          <p style={{ color: '#9ca3af', marginBottom: '24px' }}>
-            {t.report.upgrade.freeLimitedDesc || 'You have limited access to recommendations'}
-          </p>
-
-          {/* Acquire full plan with these buttons */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '400px', margin: '0 auto' }}>
-            <button
-              onClick={() => onUpgrade('essential')}
-              style={{
-                padding: '16px',
-                background: '#F7931A',
-                color: '#000',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '16px',
-                fontWeight: '700',
-                cursor: 'pointer'
-              }}
-            >
-              {t.common.getEssential || 'Get Essential - $9.99 one-time'}
-            </button>
-
-            <button
-              onClick={() => onUpgrade('sentinel')}
-              style={{
-                padding: '16px',
-                background: 'transparent',
-                border: '2px solid #22c55e',
-                color: '#22c55e',
-                borderRadius: '12px',
-                fontSize: '16px',
-                fontWeight: '700',
-                cursor: 'pointer'
-              }}
-            >
-              {t.common.subscribeSentinel || 'Subscribe Sentinel - Unlimited'}
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Recommendations Section */}
       <div style={styles.reportRecsSection}>
@@ -658,452 +602,133 @@ const Report = ({ score, answers, user, setUser, onBackToDashboard, onUpgrade, o
         {!isPremium && (
           <div style={{ marginTop: '48px' }}>
 
-            {/* Locked Tips Preview with Telegram Blur Effect */}
+            {/* Locked Recommendations Preview */}
             <div style={{
-              background: 'linear-gradient(180deg, rgba(26,26,26,0.9) 0%, rgba(15,15,15,0.95) 100%)',
+              background: 'rgba(26,26,26,0.9)',
               border: '1px solid #2a2a2a',
-              borderRadius: '20px',
-              padding: '32px',
-              marginBottom: '32px',
-              position: 'relative',
-              overflow: 'hidden'
+              borderRadius: '16px',
+              padding: '20px',
+              marginBottom: '20px'
             }}>
-              {/* Header without lock emoji */}
-              <div style={{
-                textAlign: 'center',
-                marginBottom: '24px'
-              }}>
-                <h3 style={{ color: '#fff', fontSize: '24px', fontWeight: '700', margin: '0 0 8px 0' }}>
-                  {lockedTips.length > 0 ? `+${lockedTips.length} ` : ''}{t.report.recommendations.locked}
-                </h3>
-                <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0 }}>
-                  {t.report.recommendations.lockedDesc}
-                </p>
-              </div>
-
-              {/* Premium Locked Tips with LARGER Telegram Blur */}
-              <TelegramBlur
-                isRevealed={false}
-                showLockIcon={true}
-                showStars={true}
-                accentColor="#F7931A"
-                revealText={`${t.report.recommendations.unlock} ${lockedTips.length} ${t.report.recommendations.recommendations}`}
-                height="450px"
-              >
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                  padding: '16px',
-                  minHeight: '420px'
-                }}>
-                  {lockedTips.slice(0, 6).map((tip, index) => (
-                    <div key={tip.id} style={{
-                      background: '#1a1a1a',
-                      border: '1px solid #2a2a2a',
-                      borderRadius: '12px',
-                      padding: '20px'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
-                        <span style={{
-                          padding: '5px 12px',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: '700',
-                          backgroundColor: `${getPriorityColor(tip.priority)}20`,
-                          color: getPriorityColor(tip.priority)
-                        }}>
-                          {getPriorityLabel(tip.priority)}
-                        </span>
-                        <span style={{ color: '#6b7280', fontSize: '13px' }}>{tip.category}</span>
-                      </div>
-                      <span style={{ color: '#fff', fontWeight: '600', fontSize: '16px' }}>{tip.title}</span>
-                      <p style={{ color: '#9ca3af', fontSize: '14px', margin: '10px 0 0 0', lineHeight: '1.5' }}>
-                        {tip.shortTip}
-                      </p>
-                    </div>
-                  ))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+                <span style={{ fontSize: '18px' }}>🔒</span>
+                <div>
+                  <h3 style={{ color: '#fff', fontSize: '15px', fontWeight: '700', margin: 0 }}>
+                    +{lockedTips.length} {t.report.recommendations.locked}
+                  </h3>
+                  <p style={{ color: '#6b7280', fontSize: '12px', margin: '2px 0 0 0' }}>
+                    {t.report.recommendations.lockedDesc}
+                  </p>
                 </div>
-              </TelegramBlur>
-
-              {lockedTips.length > 5 && (
-                <p style={{
-                  textAlign: 'center',
-                  color: '#6b7280',
-                  fontSize: '13px',
-                  marginTop: '16px',
-                  marginBottom: 0
-                }}>
-                  + {lockedTips.length - 5} {t.report.recommendations.moreRecommendations}
-                </p>
-              )}
-
-              {/* Upgrade Button - Essential plan ($9.99 one-time) */}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
+                {lockedTips.slice(0, 3).map((tip) => (
+                  <div key={tip.id} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '8px 12px',
+                    background: 'rgba(0,0,0,0.3)',
+                    borderRadius: '8px',
+                    filter: 'blur(3px)',
+                    userSelect: 'none',
+                    pointerEvents: 'none'
+                  }}>
+                    <span style={{
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontSize: '11px',
+                      fontWeight: '700',
+                      backgroundColor: `${getPriorityColor(tip.priority)}20`,
+                      color: getPriorityColor(tip.priority),
+                      flexShrink: 0
+                    }}>
+                      {getPriorityLabel(tip.priority)}
+                    </span>
+                    <span style={{ color: '#fff', fontSize: '13px', fontWeight: '600' }}>{tip.title}</span>
+                  </div>
+                ))}
+              </div>
               <button
-                onClick={() => onUpgrade && onUpgrade('essential')}
+                onClick={() => onUpgrade && onUpgrade('consultation')}
                 style={{
                   width: '100%',
-                  marginTop: '20px',
-                  padding: '14px',
-                  background: 'linear-gradient(135deg, #F7931A 0%, #f5a623 100%)',
+                  padding: '12px',
+                  background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
                   border: 'none',
-                  borderRadius: '12px',
+                  borderRadius: '10px',
                   color: '#000',
-                  fontSize: '15px',
+                  fontSize: '14px',
                   fontWeight: '700',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
+                  cursor: 'pointer'
                 }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
-                </svg>
-                {t.report.recommendations.unlock} {t.report.recommendations.recommendations} - $9.99
+                Book Consultation to Unlock — $99
               </button>
             </div>
 
-            {/* What You'll Get Section */}
+            {/* Consultation CTA */}
             <div style={{
-              background: 'linear-gradient(135deg, rgba(247,147,26,0.05) 0%, rgba(34,197,94,0.05) 100%)',
-              border: '2px solid #F7931A',
-              borderRadius: '24px',
-              padding: '40px',
-              marginBottom: '32px'
+              background: 'linear-gradient(135deg, rgba(34,197,94,0.08) 0%, rgba(247,147,26,0.05) 100%)',
+              border: '2px solid #22c55e',
+              borderRadius: '20px',
+              padding: '32px',
+              textAlign: 'center'
             }}>
-              <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                <h2 style={{
-                  fontSize: '28px',
-                  fontWeight: '800',
-                  color: '#fff',
-                  marginBottom: '12px'
-                }}>
-                  {t.report.upgrade.title}
-                </h2>
-                <p style={{ color: '#9ca3af', fontSize: '16px', maxWidth: '600px', margin: '0 auto' }}>
-                  {t.report.upgrade.subtitle}
-                </p>
+              <h3 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', margin: '0 0 8px 0' }}>
+                Book a 1:1 Bitcoin Security Consultation
+              </h3>
+              <div style={{ margin: '16px 0' }}>
+                <span style={{ fontSize: '42px', fontWeight: '800', color: '#22c55e' }}>$99</span>
+                <span style={{ color: '#6b7280', fontSize: '14px' }}> one-time</span>
               </div>
-
-              {/* Benefits Grid */}
-              <div className="benefits-grid" style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '20px',
-                marginBottom: '32px'
+              <ul style={{
+                listStyle: 'none',
+                padding: 0,
+                margin: '0 0 24px 0',
+                color: '#9ca3af',
+                fontSize: '14px',
+                textAlign: 'left',
+                maxWidth: '360px',
+                marginLeft: 'auto',
+                marginRight: 'auto'
               }}>
-                {/* Benefit 1 */}
-                <div style={{
-                  background: 'rgba(0,0,0,0.3)',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  border: '1px solid #2a2a2a'
-                }}>
-                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>📋</div>
-                  <h4 style={{ color: '#fff', fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>
-                    {t.report.upgrade.benefits.recommendations.title.replace('All', `${recommendations.length}`)}
-                  </h4>
-                  <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
-                    {t.report.upgrade.benefits.recommendations.description}
-                  </p>
-                </div>
-
-                {/* Benefit 2 */}
-                <div style={{
-                  background: 'rgba(0,0,0,0.3)',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  border: '1px solid #2a2a2a'
-                }}>
-                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>📄</div>
-                  <h4 style={{ color: '#fff', fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>
-                    {t.report.upgrade.benefits.pdf.title}
-                  </h4>
-                  <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
-                    {t.report.upgrade.benefits.pdf.description}
-                  </p>
-                </div>
-
-                {/* Benefit 3 */}
-                <div style={{
-                  background: 'rgba(0,0,0,0.3)',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  border: '1px solid #2a2a2a'
-                }}>
-                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>🏦</div>
-                  <h4 style={{ color: '#fff', fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>
-                    {t.report.upgrade.benefits.inheritance.title}
-                  </h4>
-                  <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
-                    {t.report.upgrade.benefits.inheritance.description}
-                  </p>
-                </div>
-
-                {/* Benefit 4 */}
-                <div style={{
-                  background: 'rgba(0,0,0,0.3)',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  border: '1px solid #2a2a2a'
-                }}>
-                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔐</div>
-                  <h4 style={{ color: '#fff', fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>
-                    {t.report.upgrade.benefits.multisig.title}
-                  </h4>
-                  <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
-                    {t.report.upgrade.benefits.multisig.description}
-                  </p>
-                </div>
-
-                {/* Benefit 5 */}
-                <div style={{
-                  background: 'rgba(0,0,0,0.3)',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  border: '1px solid #2a2a2a'
-                }}>
-                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>💼</div>
-                  <h4 style={{ color: '#fff', fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>
-                    {t.report.upgrade.benefits.sparrow.title}
-                  </h4>
-                  <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
-                    {t.report.upgrade.benefits.sparrow.description}
-                  </p>
-                </div>
-
-                {/* Benefit 6 */}
-                <div style={{
-                  background: 'rgba(0,0,0,0.3)',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  border: '1px solid #2a2a2a'
-                }}>
-                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>♾️</div>
-                  <h4 style={{ color: '#fff', fontSize: '16px', fontWeight: '700', marginBottom: '8px' }}>
-                    {t.report.upgrade.benefits.unlimited.title}
-                  </h4>
-                  <p style={{ color: '#9ca3af', fontSize: '14px', margin: 0, lineHeight: '1.5' }}>
-                    {t.report.upgrade.benefits.unlimited.description}
-                  </p>
-                </div>
-              </div>
-
-              {/* PDF Preview */}
-              <div style={{
-                background: '#fff',
-                borderRadius: '12px',
-                padding: '24px',
-                marginBottom: '32px'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
-                  <div style={{
-                    width: '48px',
-                    height: '48px',
-                    background: '#ef4444',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#fff',
-                    fontWeight: '800',
-                    fontSize: '12px'
-                  }}>
-                    PDF
-                  </div>
-                  <div>
-                    <div style={{ color: '#333', fontWeight: '700', fontSize: '16px' }}>
-                      {t.report.upgrade.pdfPreview.title}
-                    </div>
-                    <div style={{ color: '#666', fontSize: '13px' }}>
-                      {t.report.upgrade.pdfPreview.subtitle}
-                    </div>
-                  </div>
-                </div>
-                <div style={{
-                  background: '#f5f5f5',
-                  borderRadius: '8px',
+                <li style={{ marginBottom: '8px' }}>✓ All {recommendations.length} recommendations unlocked</li>
+                <li style={{ marginBottom: '8px' }}>✓ 1:1 expert security review of your setup</li>
+                <li style={{ marginBottom: '8px' }}>✓ Actionable checklist tailored to your score</li>
+                <li style={{ marginBottom: '8px' }}>✓ No KYC — pay with Bitcoin</li>
+              </ul>
+              <button
+                onClick={() => onUpgrade && onUpgrade('consultation')}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  maxWidth: '360px',
+                  margin: '0 auto',
                   padding: '16px',
-                  fontSize: '13px',
-                  color: '#666'
-                }}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-                    {t.report.upgrade.pdfPreview.contents.map((item, i) => (
-                      <span key={i}>✓ {item}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Pricing Options */}
-              <div className="upgrade-pricing-grid" style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-                gap: '20px'
-              }}>
-                {/* Complete Plan */}
-                <div className="upgrade-pricing-card" style={{
-                  background: 'linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%)',
-                  border: '2px solid #F7931A',
-                  borderRadius: '20px',
-                  padding: '32px',
-                  textAlign: 'center',
-                  position: 'relative'
-                }}>
-                  <div style={{
-                    position: 'absolute',
-                    top: '-12px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    background: '#F7931A',
-                    color: '#000',
-                    padding: '4px 16px',
-                    borderRadius: '20px',
-                    fontSize: '12px',
-                    fontWeight: '700'
-                  }}>
-                    {t.report?.upgrade?.plan?.gridtitle}
-                  </div>
-                  <h3 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>
-                    {t.report?.upgrade?.plan?.title1}
-                  </h3>
-                  <div style={{ marginBottom: '8px' }}>
-                    <span style={{ fontSize: '48px', fontWeight: '800', color: '#F7931A' }}>{t.report?.upgrade?.plan?.price1}</span>
-                    <span style={{ color: '#6b7280', fontSize: '14px' }}>{t.report?.upgrade?.plan?.renew1}</span>
-                  </div>
-                  <p style={{ color: '#6b7280', fontSize: '12px', marginBottom: '16px' }}>
-                    {t.report?.upgrade?.plan?.explanation1}
-                  </p>
-                  <ul style={{
-                    listStyle: 'none',
-                    padding: 0,
-                    margin: '0 0 24px 0',
-                    textAlign: 'left',
-                    color: '#9ca3af',
-                    fontSize: '14px'
-                  }}>
-                    <li style={{ marginBottom: '8px' }}>✓ {recommendations.length} {t.report?.upgrade?.plan?.benefit1} </li>
-                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit2}</li>
-                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit3}</li>
-                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit4}</li>
-                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit5}</li>
-                  </ul>
-                  <button
-                    onClick={() => onUpgrade && onUpgrade('sentinel')}
-                    style={{
-                      width: '100%',
-                      padding: '16px',
-                      background: '#F7931A',
-                      border: 'none',
-                      borderRadius: '12px',
-                      color: '#000',
-                      fontSize: '16px',
-                      fontWeight: '700',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {t.report?.upgrade?.plan?.payment1}
-                  </button>
-                </div>
-
-                {/* Consultation */}
-                <div className="upgrade-pricing-card" style={{
-                  background: 'linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%)',
-                  border: '1px solid #3a3a3a',
-                  borderRadius: '20px',
-                  padding: '32px',
-                  textAlign: 'center'
-                }}>
-                  <h3 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', marginBottom: '8px' }}>
-                    {t.report?.upgrade?.plan?.title2}
-                  </h3>
-                  <div style={{ marginBottom: '8px' }}>
-                    <span style={{ fontSize: '48px', fontWeight: '800', color: '#22c55e' }}>{t.report?.upgrade?.plan?.price2}</span>
-                    <span style={{ color: '#6b7280', fontSize: '14px' }}>{t.report?.upgrade?.plan?.renew2}</span>
-                  </div>
-                  <p style={{ color: '#6b7280', fontSize: '12px', marginBottom: '16px' }}>
-                    {t.report?.upgrade?.plan?.explanation2}
-                  </p>
-                  <ul style={{
-                    listStyle: 'none',
-                    padding: 0,
-                    margin: '0 0 24px 0',
-                    textAlign: 'left',
-                    color: '#9ca3af',
-                    fontSize: '14px'
-                  }}>
-                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit11}</li>
-                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit21}</li>
-                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit31} </li>
-                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit41}</li>
-                    <li style={{ marginBottom: '8px' }}>✓ {t.report?.upgrade?.plan?.benefit51}</li>
-                  </ul>
-                  <button
-                    onClick={() => onUpgrade && onUpgrade('consultation')}
-                    style={{
-                      width: '100%',
-                      padding: '16px',
-                      background: 'transparent',
-                      border: '2px solid #22c55e',
-                      borderRadius: '12px',
-                      color: '#22c55e',
-                      fontSize: '16px',
-                      fontWeight: '700',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {t.report?.upgrade?.plan?.payment2}
-                  </button>
-                </div>
-              </div>
-
-              {/* Trust Badges */}
-              <div className="trust-badges" style={{
+                  background: '#22c55e',
+                  border: 'none',
+                  borderRadius: '12px',
+                  color: '#000',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  cursor: 'pointer'
+                }}
+              >
+                Book Consultation
+              </button>
+              <div style={{
                 display: 'flex',
                 justifyContent: 'center',
-                gap: '32px',
-                marginTop: '32px',
+                gap: '24px',
+                marginTop: '20px',
                 flexWrap: 'wrap'
               }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>🔒</div>
-                  <div style={{ color: '#6b7280', fontSize: '12px' }}>{t.report.upgrade.trustBadges.bitcoin}</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>🚫</div>
-                  <div style={{ color: '#6b7280', fontSize: '12px' }}>{t.report.upgrade.trustBadges.noKyc}</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>⚡</div>
-                  <div style={{ color: '#6b7280', fontSize: '12px' }}>{t.report.upgrade.trustBadges.instant}</div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>🛡️</div>
-                  <div style={{ color: '#6b7280', fontSize: '12px' }}>{t.report.upgrade.trustBadges.private}</div>
-                </div>
+                <span style={{ color: '#6b7280', fontSize: '12px' }}>🔒 Bitcoin payments</span>
+                <span style={{ color: '#6b7280', fontSize: '12px' }}>🚫 No KYC</span>
+                <span style={{ color: '#6b7280', fontSize: '12px' }}>🛡️ Private</span>
               </div>
             </div>
-
-            {/* Urgency Message */}
-            {criticalCount > 0 && (
-              <div style={{
-                background: 'rgba(239,68,68,0.1)',
-                border: '1px solid rgba(239,68,68,0.3)',
-                borderRadius: '12px',
-                padding: '20px',
-                textAlign: 'center'
-              }}>
-                <p style={{ color: '#ef4444', margin: 0, fontSize: '15px' }}>
-                  <strong>⚠️ {t.report.upgrade.urgency.message} {criticalCount} {t.report.upgrade.urgency.issues}</strong>
-                  <br />
-                  <span style={{ color: '#9ca3af' }}>
-                    {t.report.upgrade.urgency.cta}
-                  </span>
-                </p>
-              </div>
-            )}
           </div>
         )}
 

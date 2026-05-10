@@ -3,7 +3,7 @@ import { styles } from '../styles/Theme';
 import { useLanguage, LanguageToggle } from '../i18n';
 import Footer from './Footer';
 
-const LandingPage = ({ onLogin, onSignup, onPrivacyPolicy, onTermsOfService }) => {
+const LandingPage = ({ onLogin, onSignup, onStartAssessment, onPrivacyPolicy, onTermsOfService }) => {
   const { t } = useLanguage();
   return (
     <div style={styles.landingContainer}>
@@ -40,7 +40,7 @@ const LandingPage = ({ onLogin, onSignup, onPrivacyPolicy, onTermsOfService }) =
             {t.landing.heroSubtitle}
           </p>
           <div className="hero-buttons" style={styles.heroButtons}>
-            <button onClick={onSignup} style={styles.heroCTA}>
+            <button onClick={onStartAssessment || onSignup} style={styles.heroCTA}>
               {t.landing.heroCta}
               <span style={styles.heroCtaArrow}>→</span>
             </button>

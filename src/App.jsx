@@ -40,7 +40,10 @@ const KywardApp = () => {
   };
 
   const handleUpgrade = (level) => {
-    // Show payment modal
+    if (!user) {
+      setCurrentPage('signup');
+      return;
+    }
     setPaymentModal({ plan: level });
   };
 
@@ -87,6 +90,7 @@ const KywardApp = () => {
           <LandingPage
             onLogin={() => setCurrentPage('login')}
             onSignup={() => setCurrentPage('signup')}
+            onStartAssessment={() => setCurrentPage('questionnaire')}
             onPrivacyPolicy={() => setCurrentPage('privacy')}
             onTermsOfService={() => setCurrentPage('terms')}
           />
@@ -129,7 +133,7 @@ const KywardApp = () => {
             user={user}
             setUser={setUser}
             onComplete={handleAssessmentComplete}
-            onCancel={() => setCurrentPage('dashboard')}
+            onCancel={() => user ? setCurrentPage('dashboard') : setCurrentPage('landing')}
           />
         );
 
@@ -140,7 +144,7 @@ const KywardApp = () => {
             answers={lastResults?.answers || lastResults?.responses}
             user={user}
             setUser={setUser}
-            onBackToDashboard={() => setCurrentPage('dashboard')}
+            onBackToDashboard={() => user ? setCurrentPage('dashboard') : setCurrentPage('landing')}
             onUpgrade={handleUpgrade}
             onStartAssessment={() => setCurrentPage('questionnaire')}
           />

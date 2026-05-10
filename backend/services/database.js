@@ -1962,6 +1962,26 @@ const getConsultationPrice = async (email) => {
 // MANIFESTO LEADS
 // ============================================
 
+const saveAssessmentLead = async (score, responses, email, ipHash) => {
+  const db = initSupabase();
+
+  if (db) {
+    try {
+      const { error } = await db
+        .from('assessment_leads')
+        .insert([{ email: email.toLowerCase().trim(), score, responses, ip_hash: ipHash }]);
+
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      console.error('saveAssessmentLead error:', error);
+      return { success: false, message: 'Failed to save assessment lead.' };
+    }
+  }
+
+  return { success: true };
+};
+
 const saveManifestoLead = async (email, ipHash) => {
   const db = initSupabase();
 
@@ -2048,5 +2068,7 @@ module.exports = {
   // Bot monitoring
   getActiveBotUsers,
   // Manifesto leads
-  saveManifestoLead
+  saveManifestoLead,
+  // Anonymous assessment leads
+  saveAssessmentLead
 };

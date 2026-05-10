@@ -374,6 +374,95 @@ app.post('/api/manifesto/subscribe', async (req, res) => {
 });
 
 // ============================================
+// ANONYMOUS ASSESSMENT ENDPOINT
+// ============================================
+
+app.post('/api/assessments/anonymous', async (req, res) => {
+  try {
+    const { score, responses, email } = req.body;
+
+    if (score === undefined || !responses) {
+      return res.status(400).json({ error: 'score and responses are required' });
+    }
+
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || '';
+    const crypto = require('crypto');
+    const ipHash = crypto.createHash('sha256').update(ip).digest('hex');
+
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+      }
+
+      const rateCheck = checkRateLimit(ipHash);
+      if (!rateCheck.allowed) {
+        return res.status(429).json({ error: 'Too many requests.', retryAfter: rateCheck.retryAfterSec });
+      }
+
+      await db.saveAssessmentLead(score, responses, email, ipHash);
+
+      // Send results email (fire-and-forget)
+      setImmediate(async () => {
+        try {
+          const scoreLabel = score >= 80 ? 'Strong' : score >= 60 ? 'Moderate' : score >= 40 ? 'At Risk' : 'Critical';
+          const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; margin: 0; padding: 40px; }
+    .container { max-width: 600px; margin: 0 auto; background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%); border-radius: 16px; overflow: hidden; border: 1px solid #2a2a2a; }
+    .header { background: linear-gradient(135deg, #F7931A 0%, #f5a623 100%); padding: 40px; text-align: center; }
+    .header h1 { color: #000; margin: 0; font-size: 32px; font-weight: 800; letter-spacing: 2px; }
+    .body { padding: 40px; }
+    .score-box { background: #0a0a0a; border: 2px solid #F7931A; border-radius: 12px; padding: 24px; text-align: center; margin: 24px 0; }
+    .score-number { font-size: 64px; font-weight: 800; color: #F7931A; margin: 0; }
+    .score-label { color: #9ca3af; font-size: 14px; margin-top: 4px; }
+    .body h2 { color: #fff; margin-top: 0; font-size: 22px; }
+    .body p { color: #9ca3af; line-height: 1.7; font-size: 15px; }
+    .cta-btn { display: inline-block; background: #22c55e; color: #000; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px; margin-top: 8px; }
+    .footer { background: #0a0a0a; padding: 24px; text-align: center; border-top: 1px solid #2a2a2a; }
+    .footer p { color: #6b7280; font-size: 12px; margin: 4px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header"><h1>KYWARD</h1></div>
+    <div class="body">
+      <h2>Your Bitcoin Security Score</h2>
+      <div class="score-box">
+        <div class="score-number">${score}</div>
+        <div class="score-label">${scoreLabel} — Bitcoin Security Assessment</div>
+      </div>
+      <p>Your score reveals gaps in your self-custody setup. A 1:1 consultation unlocks your full personalized action plan.</p>
+      <p style="margin-top: 28px; text-align: center;">
+        <a href="https://kyward.com" class="cta-btn">Book Consultation — $99</a>
+      </p>
+    </div>
+    <div class="footer">
+      <p style="color: #F7931A; font-weight: 600;">KYWARD — Bitcoin Legacy Security</p>
+      <p>This email was sent to ${email}</p>
+    </div>
+  </div>
+</body>
+</html>`;
+          await emailService.sendEmail(email.toLowerCase().trim(), 'Your Bitcoin Security Score — Kyward', html);
+          console.log('✅ Assessment results sent to:', email);
+        } catch (emailErr) {
+          console.error('❌ Failed to send assessment results to', email, ':', emailErr.message);
+        }
+      });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Anonymous assessment error:', error);
+    res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
+// ============================================
 // USER ENDPOINTS
 // ============================================
 
