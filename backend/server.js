@@ -150,67 +150,27 @@ app.get('/api/health', async (req, res) => {
 // AUTH ENDPOINTS
 // ============================================
 
-// Sign up
-app.post('/api/auth/signup', async (req, res) => {
+// Login — email only, no password
+app.post('/api/auth/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ error: 'Invalid email format' });
     }
 
-    // Validate password strength
-    if (password.length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters' });
-    }
-
-    const result = await db.createUser(email.toLowerCase(), password);
+    const result = await db.findOrCreateUserByEmail(email.toLowerCase());
 
     if (!result.success) {
-      return res.status(400).json({ error: result.message });
+      return res.status(500).json({ error: result.message });
     }
 
-    // Auto-login after signup
-    const loginResult = await db.loginUser(email.toLowerCase(), password);
-
-    res.json({
-      success: true,
-      user: loginResult.user,
-      token: loginResult.token
-    });
-
-  } catch (error) {
-    console.error('Signup error:', error);
-    res.status(500).json({ error: 'Failed to create account' });
-  }
-});
-
-// Login
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
-
-    const result = await db.loginUser(email.toLowerCase(), password);
-
-    if (!result.success) {
-      return res.status(401).json({ error: result.message });
-    }
-
-    res.json({
-      success: true,
-      user: result.user,
-      token: result.token
-    });
+    res.json({ success: true, user: result.user, token: result.token });
 
   } catch (error) {
     console.error('Login error:', error);
@@ -236,38 +196,6 @@ app.get('/api/auth/validate', authMiddleware, (req, res) => {
   });
 });
 
-// Check if email exists
-app.post('/api/auth/check-email', async (req, res) => {
-  try {
-    const { email } = req.body;
-    const exists = await db.userExists(email.toLowerCase());
-    res.json({ exists });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to check email' });
-  }
-});
-
-// Reset password
-app.post('/api/auth/reset-password', async (req, res) => {
-  try {
-    const { email, newPassword } = req.body;
-
-    if (!email || !newPassword) {
-      return res.status(400).json({ error: 'Email and new password are required' });
-    }
-
-    const exists = await db.userExists(email.toLowerCase());
-    if (!exists) {
-      return res.status(404).json({ error: 'No account found with this email' });
-    }
-
-    const result = await db.resetPassword(email.toLowerCase(), newPassword);
-    res.json(result);
-
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to reset password' });
-  }
-});
 
 // ============================================
 // MANIFESTO ENDPOINTS

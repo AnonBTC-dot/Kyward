@@ -33,11 +33,6 @@ const memoryDB = {
   }
 };
 
-// Hash password
-const hashPassword = (password) => {
-  return crypto.createHash('sha256').update(password + process.env.PASSWORD_SALT || 'kyward_secure_salt_2024').digest('hex');
-};
-
 // Generate session token
 const generateSessionToken = () => {
   return crypto.randomBytes(32).toString('hex');
@@ -56,163 +51,6 @@ const generatePdfPassword = () => {
 // ============================================
 // USER OPERATIONS
 // ============================================
-
-// Create new user
-const createUser = async (email, password) => {
-  const db = initSupabase();
-  const passwordHash = hashPassword(password);
-  const pdfPassword = generatePdfPassword();
-
-  if (db) {
-    try {
-      // Check if user exists
-      const { data: existing } = await db
-        .from('users')
-        .select('id')
-        .eq('email', email)
-        .single();
-
-      if (existing) {
-        return { success: false, message: 'An account with this email already exists.' };
-      }
-
-      // Create user
-      const { data, error } = await db
-        .from('users')
-        .insert([{
-          email,
-          password_hash: passwordHash,
-          subscription_level: 'free',
-          pdf_password: pdfPassword,
-          payment_type: 'none',
-          essential_assessment_id: null,
-          // ¡Valores explícitos para alertas!
-          email_hack_alerts: false,
-          email_daily_tips: false,
-          email_wallet_reviews: false,
-          consultation_count: 0
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      return {
-        success: true,
-        user: sanitizeUser(data)
-      };
-    } catch (error) {
-      console.error('Create user error:', error);
-      return { success: false, message: 'Failed to create account.' };
-    }
-  } else {
-    // Memory fallback
-    if (memoryDB.users[email]) {
-      return { success: false, message: 'An account with this email already exists.' };
-    }
-
-    const user = {
-      id: crypto.randomUUID(),
-      email,
-      password_hash: passwordHash,
-      subscription_level: 'free',
-      pdf_password: pdfPassword,
-      payment_type: 'none', // New
-      essential_assessment_id: null, // New
-      created_at: new Date().toISOString(),
-      monthly_assessment_count: 0,
-      last_reset_date: new Date().toISOString()
-    };
-
-    memoryDB.users[email] = user;
-    return { success: true, user: sanitizeUser(user) };
-  }
-};
-
-// Login user
-const loginUser = async (email, password) => {
-  const db = initSupabase();
-  const passwordHash = hashPassword(password);
-
-  if (db) {
-    try {
-      const { data: user, error } = await db
-        .from('users')
-        .select('*')
-        .eq('email', email)
-        .single();
-
-      if (error || !user) {
-        return { success: false, message: 'User not found. Please sign up first.' };
-      }
-
-      if (user.password_hash !== passwordHash) {
-        return { success: false, message: 'Incorrect password. Please try again.' };
-      }
-
-      // Get actual assessment count from assessments table
-      const { count: actualCount, error: countError } = await db
-        .from('assessments')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-
-      if (!countError && actualCount !== null) {
-        user.assessments_taken = actualCount;
-        console.log(`Login - User ${email} has ${actualCount} assessments`);
-      }
-
-      // Create session
-      const token = generateSessionToken();
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
-
-      const { error: sessionError } = await db.from('session_tokens').insert([{
-        user_id: user.id,
-        token,
-        expires_at: expiresAt.toISOString()
-      }]);
-
-      if (sessionError) {
-        console.error('Failed to create session:', sessionError);
-        return { success: false, message: 'Failed to create session. Please try again.' };
-      }
-
-      console.log('Session created successfully for user:', email);
-
-      // Update last login
-      await db
-        .from('users')
-        .update({ last_login: new Date().toISOString() })
-        .eq('id', user.id);
-
-      return {
-        success: true,
-        user: sanitizeUser(user),
-        token
-      };
-    } catch (error) {
-      console.error('Login error:', error);
-      return { success: false, message: 'Login failed. Please try again.' };
-    }
-  } else {
-    // Memory fallback
-    const user = memoryDB.users[email];
-    if (!user) {
-      return { success: false, message: 'User not found. Please sign up first.' };
-    }
-
-    if (user.password_hash !== passwordHash) {
-      return { success: false, message: 'Incorrect password. Please try again.' };
-    }
-
-    const token = generateSessionToken();
-    memoryDB.sessions[token] = {
-      email,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-    };
-
-    return { success: true, user: sanitizeUser(user), token };
-  }
-};
 
 // Validate session
 const validateSession = async (token) => {
@@ -372,37 +210,6 @@ const getUserByEmail = async (email) => {
   }
 };
 
-// Check if user exists
-const userExists = async (email) => {
-  const user = await getUserByEmail(email);
-  return !!user;
-};
-
-// Reset password
-const resetPassword = async (email, newPassword) => {
-  const db = initSupabase();
-  const passwordHash = hashPassword(newPassword);
-
-  if (db) {
-    try {
-      const { error } = await db
-        .from('users')
-        .update({ password_hash: passwordHash, updated_at: new Date().toISOString() })
-        .eq('email', email);
-
-      if (error) throw error;
-      return { success: true, message: 'Password reset successfully.' };
-    } catch (error) {
-      return { success: false, message: 'Failed to reset password.' };
-    }
-  } else {
-    if (!memoryDB.users[email]) {
-      return { success: false, message: 'User not found.' };
-    }
-    memoryDB.users[email].password_hash = passwordHash;
-    return { success: true, message: 'Password reset successfully.' };
-  }
-};
 
 // Sanitize user (remove sensitive data)
 const sanitizeUser = (user) => {
@@ -1987,7 +1794,6 @@ const findOrCreateUserByEmail = async (email) => {
           .from('users')
           .insert([{
             email: cleanEmail,
-            password_hash: null,
             subscription_level: 'free',
             pdf_password: pdfPassword,
             payment_type: 'none',
@@ -2095,13 +1901,9 @@ const saveManifestoLead = async (email, ipHash) => {
 
 module.exports = {
   initSupabase,
-  createUser,
-  loginUser,
   validateSession,
   logout,
   getUserByEmail,
-  userExists,
-  resetPassword,
   upgradeSubscription,
   updateEmailPreferences,
   hasPremiumAccess,

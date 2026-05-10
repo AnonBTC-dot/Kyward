@@ -68,29 +68,10 @@ class KywardDatabase {
   // AUTHENTICATION
   // ============================================
 
-  async createUser(userData) {
-    const result = await this.apiRequest('/auth/signup', {
-      method: 'POST',
-      body: JSON.stringify({
-        email: userData.email,
-        password: userData.password,
-      }),
-    });
-
-    if (result.success && result.token) {
-      this.setToken(result.token);
-      const normalizedUser = this.normalizeUser(result.user);
-      this.setCachedUser(normalizedUser);
-      result.user = normalizedUser;
-    }
-
-    return result;
-  }
-
-  async login(email, password) {
+  async login(email) {
     const result = await this.apiRequest('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email }),
     });
 
     if (result.success && result.token) {
@@ -344,21 +325,6 @@ class KywardDatabase {
       comparison: difference > 10 ? 'well above' : difference > 0 ? 'above' : difference === 0 ? 'at' : difference > -10 ? 'below' : 'well below',
       distribution: { excellent: 33, moderate: 34, needsWork: 33 }
     };
-  }
-
-  async userExists(email) {
-    const result = await this.apiRequest('/auth/check-email', {
-      method: 'POST',
-      body: JSON.stringify({ email }),
-    });
-    return result.success ? (result.exists ?? false) : false;
-  }
-
-  async resetPassword(email, newPassword) {
-    return this.apiRequest('/auth/reset-password', {
-      method: 'POST',
-      body: JSON.stringify({ email, newPassword }),
-    });
   }
 
   // ============================================

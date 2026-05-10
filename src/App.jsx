@@ -107,7 +107,6 @@ const KywardApp = () => {
       case 'signup':
         return (
           <AuthForm
-            initialMode={currentPage}
             onAuthSuccess={(u) => { setUser(u); setCurrentPage('dashboard'); }}
             onBack={() => setCurrentPage('landing')}
           />
