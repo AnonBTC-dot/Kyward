@@ -193,12 +193,8 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
   };
 
   const handlePaymentSuccess = async (password) => {
-  try {
-    // Llamada real al backend (debería ser async)
-    const upgradeResult = await kywardDB.upgradeSubscription(user.email, plan);
-    
-    if (upgradeResult.success) {
-      setPdfPassword(password || upgradeResult.user?.pdfPassword);
+    try {
+      setPdfPassword(password);
       setStage('success');
 
       // X Pixel — fire conversion event for consultation bookings
@@ -209,18 +205,14 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
         });
       }
 
-      // Opcional: refrescar usuario en local
-      const updatedUser = await kywardDB.getUserWithPassword(user.email);
-      if (updatedUser) onSuccess?.(updatedUser);
-    } else {
-      throw new Error('Upgrade failed after payment');
+      // Backend already upgraded the user via payment webhook — just pass password to parent
+      onSuccess?.(password);
+    } catch (err) {
+      console.error('Post-payment error:', err);
+      setError('Payment confirmed but update failed. Contact support.');
+      setStage('error');
     }
-  } catch (err) {
-    console.error('Upgrade after payment failed:', err);
-    setError('Payment confirmed but upgrade failed. Contact support.');
-    setStage('error');
-  }
-};
+  };
 
   const handleDemoPayment = async () => {
     const result = await simulatePayment(paymentData.paymentId, plan, user.email);

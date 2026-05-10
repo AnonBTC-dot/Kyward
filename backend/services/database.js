@@ -494,8 +494,15 @@ const upgradeSubscription = async (email, newLevel) => {
         updates.email_hack_alerts = true;
         updates.email_daily_tips = true;
         updates.email_wallet_reviews = true;
-        updates.consultation_count = db.raw('consultation_count + 1');
         updates.last_consultation_date = new Date().toISOString();
+
+        // Fetch current count first — Supabase client has no .raw()
+        const { data: current } = await db
+          .from('users')
+          .select('consultation_count')
+          .eq('email', email)
+          .maybeSingle();
+        updates.consultation_count = (current?.consultation_count || 0) + 1;
       } 
       else {
         // Si baja a 'free' o cualquier otro (por si acaso)

@@ -346,6 +346,21 @@ class KywardDatabase {
     };
   }
 
+  async userExists(email) {
+    const result = await this.apiRequest('/auth/check-email', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+    return result.success ? (result.exists ?? false) : false;
+  }
+
+  async resetPassword(email, newPassword) {
+    return this.apiRequest('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ email, newPassword }),
+    });
+  }
+
   // ============================================
   // COMPATIBILITY / LEGACY
   // ============================================

@@ -566,12 +566,12 @@ app.post('/api/assessments', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Monthly assessment limit reached. Upgrade to premium.' });
     }
 
-    const success = await db.saveAssessment(req.user.id, score, responses, timestamp || new Date().toISOString());
+    const result = await db.saveAssessment(req.user.id, score, responses, timestamp || new Date().toISOString());
 
-    if (success) {
+    if (result?.success) {
       res.json({ success: true });
     } else {
-      res.status(500).json({ error: 'Failed to save assessment' });
+      res.status(500).json({ error: result?.message || 'Failed to save assessment' });
     }
   } catch (error) {
     console.error('Save assessment error:', error);
