@@ -16,8 +16,7 @@ const LandingPage = ({ onLogin, onSignup, onStartAssessment, onPrivacyPolicy, on
           </div>
           <div className="nav-buttons" style={styles.navButtons}>
             <LanguageToggle />
-            <button onClick={onLogin} className="nav-button" style={styles.navButtonLogin}>{t.nav.login}</button>
-            <button onClick={onSignup} className="nav-button" style={styles.navButtonSignup}>{t.nav.getStarted}</button>
+            <button onClick={onStartAssessment} className="nav-button" style={styles.navButtonSignup}>{t.nav.getStarted}</button>
           </div>
         </div>
       </nav>

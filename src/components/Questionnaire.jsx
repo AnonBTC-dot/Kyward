@@ -504,21 +504,6 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
               >
                 {loading ? t.questionnaire.calculating : `${t.questionnaire.getScore} ✓`}
               </button>
-              <button
-                onClick={() => { const score = calculateScore(); onComplete({ score, answers }); }}
-                disabled={loading}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#6b7280',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                  textUnderlineOffset: '3px'
-                }}
-              >
-                Skip — view results now
-              </button>
             </div>
           </div>
         )}

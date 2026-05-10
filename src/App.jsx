@@ -151,7 +151,7 @@ const KywardApp = () => {
         );
 
       default:
-        return <LandingPage onLogin={() => setCurrentPage('login')} onSignup={() => setCurrentPage('signup')} />;
+        return <LandingPage onStartAssessment={() => setCurrentPage('questionnaire')} />;
     }
   };
 
