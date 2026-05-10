@@ -200,7 +200,15 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
     if (upgradeResult.success) {
       setPdfPassword(password || upgradeResult.user?.pdfPassword);
       setStage('success');
-      
+
+      // X Pixel — fire conversion event for consultation bookings
+      if ((plan === 'consultation' || plan === 'consultation_additional') && typeof window.twq === 'function') {
+        window.twq('event', 'tw-rccdg-rccdk', {
+          value: plan === 'consultation' ? 99 : 49,
+          currency: 'USD'
+        });
+      }
+
       // Opcional: refrescar usuario en local
       const updatedUser = await kywardDB.getUserWithPassword(user.email);
       if (updatedUser) onSuccess?.(updatedUser);
