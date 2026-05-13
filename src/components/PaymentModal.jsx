@@ -706,7 +706,7 @@ const PaymentModal = ({ plan, user, onSuccess, onClose }) => {
                   dangerouslySetInnerHTML={{ __html: t.payment.consultationBooked }}
                 />
                 <button
-                  onClick={() => window.open('https://calendly.com/leomr20-proton/30min', '_blank')}
+                  onClick={() => window.open('https://calendly.com/leomr20-proton/60min', '_blank')}
                   style={{
                     width: '100%',
                     padding: '16px 24px',
