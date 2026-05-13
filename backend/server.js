@@ -337,6 +337,17 @@ app.post('/api/assessments/anonymous', async (req, res) => {
 
     const { user, token } = authResult;
 
+    // Check assessment limit before saving
+    const limitCheck = await db.canTakeAssessment(email);
+    if (!limitCheck.canTake) {
+      return res.status(403).json({
+        error: 'assessment_limit_reached',
+        reason: limitCheck.reason || 'You have already used your free assessment.',
+        user,
+        token
+      });
+    }
+
     // Save assessment linked to the user account
     await db.saveAssessment(user.id, score, responses);
 

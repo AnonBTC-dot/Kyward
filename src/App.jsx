@@ -134,6 +134,7 @@ const KywardApp = () => {
             setUser={setUser}
             onComplete={handleAssessmentComplete}
             onCancel={() => user ? setCurrentPage('dashboard') : setCurrentPage('landing')}
+            onUpgrade={handleUpgrade}
           />
         );
 

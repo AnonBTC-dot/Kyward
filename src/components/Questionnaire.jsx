@@ -3,7 +3,7 @@ import { styles } from '../styles/Theme';
 import { kywardDB } from '../services/Database';
 import { useLanguage, LanguageToggle } from '../i18n';
 
-const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
+const Questionnaire = ({ user, setUser, onComplete, onCancel, onUpgrade }) => {
   const { t } = useLanguage();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -11,6 +11,7 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
   const [error, setError] = useState('');
   const [showEmailStep, setShowEmailStep] = useState(false);
   const [capturedEmail, setCapturedEmail] = useState('');
+  const [limitReached, setLimitReached] = useState(false);
 
   // Question structure with points
   const questionData = [
@@ -176,7 +177,8 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
       if (user) {
         const can = await kywardDB.canTakeNewAssessment(user.email);
         if (!can) {
-          setError(t.questionnaire.errors.limitReached);
+          setLimitReached(true);
+          setShowEmailStep(true);
           return;
         }
         const result = await kywardDB.saveAssessment({ score, responses: answers });
@@ -199,7 +201,17 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
         });
         const data = await response.json();
         if (!response.ok) {
-          setError(data.error || 'Failed to save assessment');
+          if (data.error === 'assessment_limit_reached') {
+            if (data.token) kywardDB.setToken(data.token);
+            if (data.user) {
+              const normalizedUser = kywardDB.normalizeUser(data.user);
+              kywardDB.setCachedUser(normalizedUser);
+              setUser(normalizedUser);
+            }
+            setLimitReached(true);
+            return;
+          }
+          setError(data.reason || data.error || 'Failed to save assessment');
           return;
         }
         if (data.token) {
@@ -458,52 +470,99 @@ const Questionnaire = ({ user, setUser, onComplete, onCancel }) => {
               textAlign: 'center',
               boxShadow: '0 24px 80px rgba(0,0,0,0.8)'
             }}>
-              <div style={{ fontSize: '36px', marginBottom: '12px' }}>📥</div>
-              <h2 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', margin: '0 0 8px 0' }}>
-                Get your results by email
-              </h2>
-              <p style={{ color: '#9ca3af', fontSize: '14px', margin: '0 0 24px 0', lineHeight: '1.6' }}>
-                We'll send your score and top recommendations — no password, no KYC.
-              </p>
-              <input
-                type="email"
-                value={capturedEmail}
-                onChange={(e) => setCapturedEmail(e.target.value)}
-                placeholder="satoshi@blockmail.com"
-                autoFocus
-                onKeyDown={(e) => e.key === 'Enter' && capturedEmail.trim() && !loading && handleSubmit()}
-                style={{
-                  width: '100%',
-                  padding: '14px 16px',
-                  background: '#1a1a1a',
-                  border: '1px solid #3a3a3a',
-                  borderRadius: '12px',
-                  color: '#fff',
-                  fontSize: '16px',
-                  outline: 'none',
-                  boxSizing: 'border-box',
-                  marginBottom: '12px'
-                }}
-              />
-              <button
-                onClick={handleSubmit}
-                disabled={loading || !capturedEmail.trim()}
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  background: capturedEmail.trim() && !loading ? '#22c55e' : '#1e1e1e',
-                  border: 'none',
-                  borderRadius: '12px',
-                  color: capturedEmail.trim() && !loading ? '#000' : '#4b5563',
-                  fontSize: '15px',
-                  fontWeight: '700',
-                  cursor: capturedEmail.trim() && !loading ? 'pointer' : 'not-allowed',
-                  marginBottom: '14px',
-                  transition: 'background 0.2s, color 0.2s'
-                }}
-              >
-                {loading ? t.questionnaire.calculating : `${t.questionnaire.getScore} ✓`}
-              </button>
+              {limitReached ? (
+                <>
+                  <div style={{ fontSize: '36px', marginBottom: '12px' }}>🔒</div>
+                  <h2 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', margin: '0 0 8px 0' }}>
+                    {t.questionnaire.errors.limitReachedTitle}
+                  </h2>
+                  <p style={{ color: '#9ca3af', fontSize: '14px', margin: '0 0 28px 0', lineHeight: '1.6' }}>
+                    {t.questionnaire.errors.limitReachedDesc}
+                  </p>
+                  <button
+                    onClick={() => onUpgrade ? onUpgrade('consultation') : null}
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      background: '#F7931A',
+                      border: 'none',
+                      borderRadius: '12px',
+                      color: '#000',
+                      fontSize: '15px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      marginBottom: '12px'
+                    }}
+                  >
+                    {t.questionnaire.errors.bookConsultation}
+                  </button>
+                  <button
+                    onClick={onCancel}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      background: 'none',
+                      border: '1px solid #3a3a3a',
+                      borderRadius: '12px',
+                      color: '#9ca3af',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {t.questionnaire.errors.viewResults}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: '36px', marginBottom: '12px' }}>📥</div>
+                  <h2 style={{ color: '#fff', fontSize: '22px', fontWeight: '700', margin: '0 0 8px 0' }}>
+                    Get your results by email
+                  </h2>
+                  <p style={{ color: '#9ca3af', fontSize: '14px', margin: '0 0 24px 0', lineHeight: '1.6' }}>
+                    We'll send your score and top recommendations — no password, no KYC.
+                  </p>
+                  <input
+                    type="email"
+                    value={capturedEmail}
+                    onChange={(e) => setCapturedEmail(e.target.value)}
+                    placeholder="satoshi@blockmail.com"
+                    autoFocus
+                    onKeyDown={(e) => e.key === 'Enter' && capturedEmail.trim() && !loading && handleSubmit()}
+                    style={{
+                      width: '100%',
+                      padding: '14px 16px',
+                      background: '#1a1a1a',
+                      border: '1px solid #3a3a3a',
+                      borderRadius: '12px',
+                      color: '#fff',
+                      fontSize: '16px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                      marginBottom: '12px'
+                    }}
+                  />
+                  <button
+                    onClick={handleSubmit}
+                    disabled={loading || !capturedEmail.trim()}
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      background: capturedEmail.trim() && !loading ? '#22c55e' : '#1e1e1e',
+                      border: 'none',
+                      borderRadius: '12px',
+                      color: capturedEmail.trim() && !loading ? '#000' : '#4b5563',
+                      fontSize: '15px',
+                      fontWeight: '700',
+                      cursor: capturedEmail.trim() && !loading ? 'pointer' : 'not-allowed',
+                      marginBottom: '14px',
+                      transition: 'background 0.2s, color 0.2s'
+                    }}
+                  >
+                    {loading ? t.questionnaire.calculating : `${t.questionnaire.getScore} ✓`}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}

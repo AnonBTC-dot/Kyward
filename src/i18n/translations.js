@@ -496,7 +496,11 @@ export const translations = {
 
       errors: {
         limitReached: 'Free accounts include 1 assessment. Upgrade to take more.',
-        savingError: 'Error saving assessment'
+        savingError: 'Error saving assessment',
+        limitReachedTitle: "You've already taken your free assessment",
+        limitReachedDesc: "We can help you fix your security gaps with a 1:1 consultation. Our expert will review your setup and give you a personalized action plan.",
+        bookConsultation: "Book Consultation — $99",
+        viewResults: "View your results"
       }
     },
 
@@ -1842,7 +1846,11 @@ export const translations = {
 
       errors: {
         limitReached: 'Las cuentas gratuitas incluyen 1 evaluación. Actualiza para hacer más.',
-        savingError: 'Error al guardar la evaluación'
+        savingError: 'Error al guardar la evaluación',
+        limitReachedTitle: "Ya realizaste tu evaluación gratuita",
+        limitReachedDesc: "Podemos ayudarte a mejorar tus gaps de seguridad con una consultoría 1:1. Nuestro experto revisará tu configuración y te dará un plan de acción personalizado.",
+        bookConsultation: "Reservar Consultoría — $99",
+        viewResults: "Ver tus resultados"
       }
     },
 
