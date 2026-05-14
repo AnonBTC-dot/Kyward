@@ -332,7 +332,7 @@ export const translations = {
         consultButton: 'Book Consultation - $99',
         sessionNote: '1-hour session',
         limitReached: 'Assessment limit reached for your current plan.',
-        upgradeForUnlimited: 'Upgrade to Sentinel for unlimited assessments.',
+        upgradeForUnlimited: 'Schedule a consultation with us',
         essentialNote: 'With Essential you get one assessment. Repurchase to take a new one.'
       },
 
@@ -1683,7 +1683,7 @@ export const translations = {
         consultButton: 'Reservar Consulta - $99',
         sessionNote: 'Sesión de 1 hora',
         limitReached: 'Límite de evaluaciones alcanzado en tu plan actual.',
-        upgradeForUnlimited: 'Mejora a Sentinel para evaluaciones ilimitadas.',
+        upgradeForUnlimited: 'Agenda tu consultoría con nosotros',
         essentialNote: 'Con Essential obtienes una sola evaluación. Recompra para hacer una nueva.'
       },
 

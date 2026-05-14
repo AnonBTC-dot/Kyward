@@ -507,16 +507,23 @@ const Dashboard = ({ user, setUser, onStartAssessment, onLogout, onUpgrade, onVi
                 </button>
               </div>
             ) : (
-              <div style={{
-                padding: '20px',
-                background: 'rgba(247,147,26,0.1)',
-                borderRadius: '12px',
-                textAlign: 'center'
-              }}>
-                <p style={{ color: '#F7931A', margin: 0 }}>
-                  {t.dashboard.cta.upgradeForUnlimited || 'Upgrade to Sentinel for unlimited assessments'}
-                </p>
-              </div>
+              <button
+                onClick={() => onUpgrade('consultation')}
+                style={{
+                  width: '100%',
+                  padding: '16px',
+                  background: 'rgba(247,147,26,0.1)',
+                  border: '1px solid rgba(247,147,26,0.4)',
+                  borderRadius: '12px',
+                  color: '#F7931A',
+                  fontWeight: '600',
+                  fontSize: '15px',
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                }}
+              >
+                {t.dashboard.cta.upgradeForUnlimited || 'Schedule a consultation with us'}
+              </button>
             )}
           </div>
 
