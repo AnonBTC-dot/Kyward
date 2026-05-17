@@ -3,48 +3,61 @@ import { styles } from '../styles/Theme';
 import { useLanguage, LanguageToggle } from '../i18n';
 import Footer from './Footer';
 
+const UTM_STATS = [
+  { value: '3–4M', label: 'BTC permanently inaccessible' },
+  { value: '89%', label: 'find at least 1 critical gap' },
+  { value: '5 min', label: 'free · no account' },
+];
+
 const UTM_HERO_MAP = {
   'multisig': {
     heroLine1: 'If Something Happened to You Tomorrow,',
     heroLine2: 'Could Your Family Access Your Bitcoin?',
     heroLine3: '',
     heroSubtitle: "Most Bitcoin holders have spent more time choosing their hardware wallet than answering this question. Free 5-minute assessment — no account needed.",
+    heroCta: 'Check My Inheritance Plan',
   },
   'inheritance': {
     heroLine1: '3–4 Million Bitcoin Permanently Inaccessible.',
     heroLine2: 'Not Stolen. Not Hacked.',
     heroLine3: 'No Inheritance Plan.',
     heroSubtitle: "Find out if your Bitcoin setup survives you — free assessment, 5 minutes, no account required.",
+    heroCta: 'Check My Inheritance Plan',
   },
   'passphrase-trap': {
     heroLine1: 'Your Family Found Your Seed Phrase.',
     heroLine2: 'They Restored the Wallet.',
     heroLine3: 'It Was Empty.',
     heroSubtitle: "A passphrase your family doesn't know about locks your Bitcoin forever. Check your inheritance setup — free, 5 minutes, no account needed.",
+    heroCta: 'Test My Inheritance Setup',
   },
   'sovereignty': {
     heroLine1: 'Your Bitcoin on an Exchange Can Be Frozen.',
     heroLine2: 'Your Hardware Wallet Cannot.',
     heroLine3: '',
     heroSubtitle: "Canada, 2022: same person, same week — Exchange: FROZEN. Hardware wallet: UNTOUCHED. Find out where your Bitcoin stands.",
+    heroCta: 'Check My Security Setup',
   },
   'score': {
     heroLine1: 'Most Bitcoin Holders Score 35–45 / 100.',
     heroLine2: 'Find Out Where You Stand.',
     heroLine3: '',
     heroSubtitle: "The most common gap: backup integrity and recovery verification. Free assessment — 5 minutes, no account required.",
+    heroCta: 'Get My Security Score',
   },
   'family': {
     heroLine1: 'Your Bitcoin Outlives You.',
     heroLine2: 'Can Your Family Find It?',
     heroLine3: '',
     heroSubtitle: "Your Bitcoin is on the blockchain forever. Whether your family can access it is the question. Answer it now, while you can.",
+    heroCta: 'Protect My Family\'s Bitcoin',
   },
   'restore-test': {
     heroLine1: 'You Have a Belief About Your Backup.',
     heroLine2: 'Not a Confirmed Backup.',
     heroLine3: '',
     heroSubtitle: "Until you've verified a successful restore, your seed phrase backup is untested. Free security assessment — 5 minutes, no account required.",
+    heroCta: 'Verify My Backup Now',
   },
 };
 
@@ -66,6 +79,9 @@ const LandingPage = ({ onLogin, onSignup, onStartAssessment, onPrivacyPolicy, on
     heroLine2: utmHero?.heroLine2 ?? t.landing.heroLine2,
     heroLine3: utmHero?.heroLine3 ?? t.landing.heroLine3,
     heroSubtitle: utmHero?.heroSubtitle ?? t.landing.heroSubtitle,
+    heroCta: utmHero?.heroCta ?? t.landing.heroCta,
+    utmStats: utmHero ? UTM_STATS : null,
+    hideSecondaryCta: !!utmHero,
   };
   return (
     <div style={styles.landingContainer}>
@@ -102,14 +118,16 @@ const LandingPage = ({ onLogin, onSignup, onStartAssessment, onPrivacyPolicy, on
           </p>
           <div className="hero-buttons" style={styles.heroButtons}>
             <button onClick={onStartAssessment || onSignup} style={styles.heroCTA}>
-              {t.landing.heroCta}
+              {hero.heroCta}
               <span style={styles.heroCtaArrow}>→</span>
             </button>
-            <button onClick={() => {
-              document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
-            }} style={styles.heroSecondary}>
-              {t.landing.heroSecondaryCta}
-            </button>
+            {!hero.hideSecondaryCta && (
+              <button onClick={() => {
+                document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+              }} style={styles.heroSecondary}>
+                {t.landing.heroSecondaryCta}
+              </button>
+            )}
           </div>
           {t.landing.heroTrustText && (
             <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '16px', letterSpacing: '0.02em' }}>
@@ -117,20 +135,19 @@ const LandingPage = ({ onLogin, onSignup, onStartAssessment, onPrivacyPolicy, on
             </div>
           )}
           <div className="hero-stats" style={styles.heroStats}>
-            <div style={styles.heroStat}>
-              <div style={styles.heroStatNumber}>{t.landing.heroStats.nonCustodialValue}</div>
-              <div style={styles.heroStatLabel}>{t.landing.heroStats.nonCustodial}</div>
-            </div>
-            <div className="hero-stat-divider" style={styles.heroStatDivider} />
-            <div style={styles.heroStat}>
-              <div style={styles.heroStatNumber}>{t.landing.heroStats.dataStoredValue}</div>
-              <div style={styles.heroStatLabel}>{t.landing.heroStats.dataStored}</div>
-            </div>
-            <div className="hero-stat-divider" style={styles.heroStatDivider} />
-            <div style={styles.heroStat}>
-              <div style={styles.heroStatNumber}>{t.landing.heroStats.privacyFirstValue}</div>
-              <div style={styles.heroStatLabel}>{t.landing.heroStats.privacyFirst}</div>
-            </div>
+            {(hero.utmStats ?? [
+              { value: t.landing.heroStats.nonCustodialValue, label: t.landing.heroStats.nonCustodial },
+              { value: t.landing.heroStats.dataStoredValue,   label: t.landing.heroStats.dataStored },
+              { value: t.landing.heroStats.privacyFirstValue, label: t.landing.heroStats.privacyFirst },
+            ]).map((stat, i, arr) => (
+              <React.Fragment key={i}>
+                <div style={styles.heroStat}>
+                  <div style={styles.heroStatNumber}>{stat.value}</div>
+                  <div style={styles.heroStatLabel}>{stat.label}</div>
+                </div>
+                {i < arr.length - 1 && <div className="hero-stat-divider" style={styles.heroStatDivider} />}
+              </React.Fragment>
+            ))}
           </div>
         </div>
 
@@ -154,12 +171,12 @@ const LandingPage = ({ onLogin, onSignup, onStartAssessment, onPrivacyPolicy, on
                     stroke="#F7931A"
                     strokeWidth="8"
                     strokeDasharray="339.292"
-                    strokeDashoffset="84.823"
+                    strokeDashoffset="210.361"
                     strokeLinecap="round"
                     style={{transform: 'rotate(-90deg)', transformOrigin: '60px 60px'}}
                   />
                 </svg>
-                <div style={styles.mockupScore}>75</div>
+                <div style={styles.mockupScore}>38</div>
               </div>
               <div style={styles.mockupRecommendations}>
                 <div style={styles.mockupRecItem}>
