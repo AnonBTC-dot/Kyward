@@ -3,8 +3,70 @@ import { styles } from '../styles/Theme';
 import { useLanguage, LanguageToggle } from '../i18n';
 import Footer from './Footer';
 
+const UTM_HERO_MAP = {
+  'multisig': {
+    heroLine1: 'If Something Happened to You Tomorrow,',
+    heroLine2: 'Could Your Family Access Your Bitcoin?',
+    heroLine3: '',
+    heroSubtitle: "Most Bitcoin holders have spent more time choosing their hardware wallet than answering this question. Free 5-minute assessment — no account needed.",
+  },
+  'inheritance': {
+    heroLine1: '3–4 Million Bitcoin Permanently Inaccessible.',
+    heroLine2: 'Not Stolen. Not Hacked.',
+    heroLine3: 'No Inheritance Plan.',
+    heroSubtitle: "Find out if your Bitcoin setup survives you — free assessment, 5 minutes, no account required.",
+  },
+  'passphrase-trap': {
+    heroLine1: 'Your Family Found Your Seed Phrase.',
+    heroLine2: 'They Restored the Wallet.',
+    heroLine3: 'It Was Empty.',
+    heroSubtitle: "A passphrase your family doesn't know about locks your Bitcoin forever. Check your inheritance setup — free, 5 minutes, no account needed.",
+  },
+  'sovereignty': {
+    heroLine1: 'Your Bitcoin on an Exchange Can Be Frozen.',
+    heroLine2: 'Your Hardware Wallet Cannot.',
+    heroLine3: '',
+    heroSubtitle: "Canada, 2022: same person, same week — Exchange: FROZEN. Hardware wallet: UNTOUCHED. Find out where your Bitcoin stands.",
+  },
+  'score': {
+    heroLine1: 'Most Bitcoin Holders Score 35–45 / 100.',
+    heroLine2: 'Find Out Where You Stand.',
+    heroLine3: '',
+    heroSubtitle: "The most common gap: backup integrity and recovery verification. Free assessment — 5 minutes, no account required.",
+  },
+  'family': {
+    heroLine1: 'Your Bitcoin Outlives You.',
+    heroLine2: 'Can Your Family Find It?',
+    heroLine3: '',
+    heroSubtitle: "Your Bitcoin is on the blockchain forever. Whether your family can access it is the question. Answer it now, while you can.",
+  },
+  'restore-test': {
+    heroLine1: 'You Have a Belief About Your Backup.',
+    heroLine2: 'Not a Confirmed Backup.',
+    heroLine3: '',
+    heroSubtitle: "Until you've verified a successful restore, your seed phrase backup is untested. Free security assessment — 5 minutes, no account required.",
+  },
+};
+
+function getUTMHero() {
+  try {
+    const campaign = new URLSearchParams(window.location.search).get('utm_campaign') || '';
+    for (const key of Object.keys(UTM_HERO_MAP)) {
+      if (campaign.includes(key)) return UTM_HERO_MAP[key];
+    }
+  } catch (_) {}
+  return null;
+}
+
 const LandingPage = ({ onLogin, onSignup, onStartAssessment, onPrivacyPolicy, onTermsOfService }) => {
   const { t } = useLanguage();
+  const utmHero = getUTMHero();
+  const hero = {
+    heroLine1: utmHero?.heroLine1 ?? t.landing.heroLine1,
+    heroLine2: utmHero?.heroLine2 ?? t.landing.heroLine2,
+    heroLine3: utmHero?.heroLine3 ?? t.landing.heroLine3,
+    heroSubtitle: utmHero?.heroSubtitle ?? t.landing.heroSubtitle,
+  };
   return (
     <div style={styles.landingContainer}>
       {/* NAVIGATION */}
@@ -31,12 +93,12 @@ const LandingPage = ({ onLogin, onSignup, onStartAssessment, onPrivacyPolicy, on
         <div className="hero-content" style={styles.heroContent}>
           <div style={styles.heroBadge}>{t.landing.heroBadge}</div>
           <h1 className="hero-title" style={styles.heroTitle}>
-            {t.landing.heroLine1}<br />
-            <span style={styles.heroTitleAccent}>{t.landing.heroLine2}</span><br />
-            {t.landing.heroLine3}
+            {hero.heroLine1}{hero.heroLine1 && <br />}
+            <span style={styles.heroTitleAccent}>{hero.heroLine2}</span>
+            {hero.heroLine3 && <><br />{hero.heroLine3}</>}
           </h1>
           <p className="hero-subtitle" style={styles.heroSubtitle}>
-            {t.landing.heroSubtitle}
+            {hero.heroSubtitle}
           </p>
           <div className="hero-buttons" style={styles.heroButtons}>
             <button onClick={onStartAssessment || onSignup} style={styles.heroCTA}>
